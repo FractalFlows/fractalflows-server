@@ -10,13 +10,15 @@ import { UsersModule } from './modules/users/users.module';
 @Module({
   imports: [
     GraphQLModule.forRoot({
-      typePaths: ['./**/*.graphql'],
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      sortSchema: true,
+      // typePaths: ['./**/*.graphql'],
       definitions: {
         path: join(process.cwd(), 'src/graphql.ts'),
       },
     }),
     TypeOrmModule.forRoot(),
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     UsersModule,
   ],
   providers: [AppService],
