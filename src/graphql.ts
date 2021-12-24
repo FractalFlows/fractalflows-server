@@ -19,11 +19,13 @@ export interface UpdateUserInput {
 export interface IMutation {
     createUser(createUserInput: CreateUserInput): User | Promise<User>;
     removeUser(id: number): User | Promise<User>;
+    signin(): string | Promise<string>;
     updateUser(updateUserInput: UpdateUserInput): User | Promise<User>;
 }
 
 export interface IQuery {
     nonce(): string | Promise<string>;
+    testNonce(): string | Promise<string>;
     user(id: number): User | Promise<User>;
     users(): User[] | Promise<User[]>;
 }

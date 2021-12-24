@@ -10,15 +10,24 @@ import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     GraphQLModule.forRoot({
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
       definitions: {
         path: join(process.cwd(), 'src/graphql.ts'),
       },
+      playground: {
+        settings: {
+          'request.credentials': 'include',
+        },
+      },
+      cors: {
+        origin: process.env.FRONTEND_CORS_ORIGIN ?? 'http://localhost:3001',
+        credentials: true,
+      },
     }),
     TypeOrmModule.forRoot(),
-    ConfigModule.forRoot({ isGlobal: true }),
     UsersModule,
     AuthModule,
   ],

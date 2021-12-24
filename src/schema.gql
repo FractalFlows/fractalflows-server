@@ -10,11 +10,13 @@ input CreateUserInput {
 type Mutation {
   createUser(createUserInput: CreateUserInput!): User!
   removeUser(id: Int!): User!
+  signin: String!
   updateUser(updateUserInput: UpdateUserInput!): User!
 }
 
 type Query {
   nonce: String!
+  testNonce: String!
   user(id: Int!): User!
   users: [User!]!
 }
