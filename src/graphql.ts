@@ -23,13 +23,15 @@ export interface IMutation {
 }
 
 export interface IQuery {
+    nonce(): string | Promise<string>;
     user(id: number): User | Promise<User>;
     users(): User[] | Promise<User[]>;
 }
 
 export interface User {
+    ethAddress: number;
     exampleField: number;
-    id: number;
+    id: string;
 }
 
 type Nullable<T> = T | null;

@@ -14,6 +14,7 @@ type Mutation {
 }
 
 type Query {
+  nonce: String!
   user(id: Int!): User!
   users: [User!]!
 }
@@ -26,6 +27,9 @@ input UpdateUserInput {
 
 type User {
   """Example field (placeholder)"""
+  ethAddress: Int!
+
+  """Example field (placeholder)"""
   exampleField: Int!
-  id: Int!
+  id: String!
 }
