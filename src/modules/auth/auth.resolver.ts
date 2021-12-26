@@ -1,28 +1,30 @@
-import { Context, Resolver, Query, Mutation } from '@nestjs/graphql';
-import session from 'express-session';
+import { Context, Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 
 import { AuthService } from './auth.service';
+import { SignInInput } from './dto/signin.input';
 
 @Resolver()
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
   @Query(() => String, { name: 'nonce' })
-  async getNonce(@Context() context) {
+  getNonce(@Context() context) {
     const nonce = this.authService.getNonce();
     context.req.session.nonce = nonce;
-
     return nonce;
   }
 
   @Query(() => String, { name: 'testNonce' })
   testNonce(@Context() context) {
-    console.log('test nonce', context.req.session.nonce);
+    console.log('test nonce', context.req.session);
     return context.req.session.nonce;
   }
 
-  @Mutation(() => String)
-  signin() {
-    return '123';
+  @Mutation(() => Boolean)
+  async signIn(
+    @Args('signInInput') signInInput: SignInInput,
+    @Context() context,
+  ) {
+    return await this.authService.signIn(signInInput, context.req.session);
   }
 }

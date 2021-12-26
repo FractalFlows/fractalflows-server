@@ -11,6 +11,24 @@ export interface CreateUserInput {
     exampleField: number;
 }
 
+export interface SignInInput {
+    ens: string;
+    siweMessage: SiweMessageInput;
+}
+
+export interface SiweMessageInput {
+    address: string;
+    chainId: string;
+    domain: string;
+    issuedAt: string;
+    nonce: string;
+    signature: string;
+    statement: string;
+    type: string;
+    uri: string;
+    version: string;
+}
+
 export interface UpdateUserInput {
     exampleField?: Nullable<number>;
     id: number;
@@ -19,7 +37,7 @@ export interface UpdateUserInput {
 export interface IMutation {
     createUser(createUserInput: CreateUserInput): User | Promise<User>;
     removeUser(id: number): User | Promise<User>;
-    signin(): string | Promise<string>;
+    signIn(signInInput: SignInInput): boolean | Promise<boolean>;
     updateUser(updateUserInput: UpdateUserInput): User | Promise<User>;
 }
 

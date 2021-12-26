@@ -10,7 +10,7 @@ input CreateUserInput {
 type Mutation {
   createUser(createUserInput: CreateUserInput!): User!
   removeUser(id: Int!): User!
-  signin: String!
+  signIn(signInInput: SignInInput!): Boolean!
   updateUser(updateUserInput: UpdateUserInput!): User!
 }
 
@@ -19,6 +19,45 @@ type Query {
   testNonce: String!
   user(id: Int!): User!
   users: [User!]!
+}
+
+input SignInInput {
+  ens: String!
+
+  """ """
+  siweMessage: SiweMessageInput!
+}
+
+input SiweMessageInput {
+  """ETH address"""
+  address: String!
+
+  """"""
+  chainId: String!
+
+  """Dapp domain"""
+  domain: String!
+
+  """"""
+  issuedAt: String!
+
+  """Signature unique identifier"""
+  nonce: String!
+
+  """Message signature"""
+  signature: String!
+
+  """"""
+  statement: String!
+
+  """Signature type"""
+  type: String!
+
+  """Dapp URI"""
+  uri: String!
+
+  """"""
+  version: String!
 }
 
 input UpdateUserInput {

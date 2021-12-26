@@ -30,6 +30,7 @@
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/typeorm": "^8.0.2",
     "apollo-server-express": "^3.5.0",
+    "ethers": "^5.5.2",
     "express-session": "^1.17.2",
     "graphql": "^15",
     "pg": "^8.7.1",
