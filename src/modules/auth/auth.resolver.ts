@@ -1,6 +1,8 @@
 import { Context, Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
+import { SessionGuard } from './auth.guard';
 import { SignInInput } from './dto/signin.input';
 import { Session } from './dto/signin.output';
 
@@ -15,11 +17,13 @@ export class AuthResolver {
     return nonce;
   }
 
-  @Query(() => Session, { name: 'session', nullable: true })
+  @Query(() => Session, { name: 'session' })
+  @UseGuards(SessionGuard)
   getSession(@Context() context) {
     return {
       siweMessage: context.req.session.siwe,
       ens: context.req.session.ens,
+      avatar: context.req.session.avatar,
     };
   }
 
@@ -32,6 +36,7 @@ export class AuthResolver {
   }
 
   @Mutation(() => Boolean)
+  @UseGuards(SessionGuard)
   async signOut(@Context() context) {
     return await this.authService.signOut(context.req.session);
   }

@@ -45,7 +45,7 @@ export interface IMutation {
 
 export interface IQuery {
     nonce(): string | Promise<string>;
-    session(): Nullable<Session> | Promise<Nullable<Session>>;
+    session(): Session | Promise<Session>;
     user(id: number): User | Promise<User>;
     users(): User[] | Promise<User[]>;
 }

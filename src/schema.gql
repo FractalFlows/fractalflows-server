@@ -17,7 +17,7 @@ type Mutation {
 
 type Query {
   nonce: String!
-  session: Session
+  session: Session!
   user(id: Int!): User!
   users: [User!]!
 }
