@@ -22,8 +22,9 @@ import { AuthModule } from './modules/auth/auth.module';
           'request.credentials': 'include',
         },
       },
+      context: ({ req }) => ({ req }),
       cors: {
-        origin: process.env.FRONTEND_CORS_ORIGIN ?? 'http://localhost:3001',
+        origin: process.env.FRONTEND_ORIGIN ?? 'http://localhost:3001',
         credentials: true,
       },
     }),

@@ -1,4 +1,4 @@
-const getInfuraUrl = (chainId: string) => {
+const getUrl = (chainId: string) => {
   switch (Number.parseInt(chainId)) {
     case 1:
       return 'https://mainnet.infura.io/v3';
@@ -13,6 +13,6 @@ const getInfuraUrl = (chainId: string) => {
   }
 };
 
-export const AuthUtils = {
-  getInfuraUrl,
+export const InfuraUtils = {
+  getUrl,
 };

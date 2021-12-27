@@ -1,7 +1,7 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { ObjectType, Field } from '@nestjs/graphql';
 
-@InputType()
-export class SiweMessageInput {
+@ObjectType()
+export class SiweMessage {
   @Field(() => String, { description: 'ETH address' })
   address: string;
 
@@ -33,14 +33,14 @@ export class SiweMessageInput {
   version: string;
 }
 
-@InputType()
-export class SignInInput {
-  @Field(() => SiweMessageInput, { description: ' ' })
-  siweMessage: SiweMessageInput;
+@ObjectType()
+export class Session {
+  @Field(() => SiweMessage, { description: 'ETH address' })
+  siweMessage: SiweMessage;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String, { description: 'ENS', nullable: true })
   ens?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String, { description: 'Avatar', nullable: true })
   avatar?: string;
 }

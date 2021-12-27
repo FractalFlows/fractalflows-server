@@ -2,6 +2,7 @@ import { Context, Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 
 import { AuthService } from './auth.service';
 import { SignInInput } from './dto/signin.input';
+import { Session } from './dto/signin.output';
 
 @Resolver()
 export class AuthResolver {
@@ -14,10 +15,12 @@ export class AuthResolver {
     return nonce;
   }
 
-  @Query(() => String, { name: 'testNonce' })
-  testNonce(@Context() context) {
-    console.log('test nonce', context.req.session);
-    return context.req.session.nonce;
+  @Query(() => Session, { name: 'session', nullable: true })
+  getSession(@Context() context) {
+    return {
+      siweMessage: context.req.session.siwe,
+      ens: context.req.session.ens,
+    };
   }
 
   @Mutation(() => Boolean)
@@ -26,5 +29,10 @@ export class AuthResolver {
     @Context() context,
   ) {
     return await this.authService.signIn(signInInput, context.req.session);
+  }
+
+  @Mutation(() => Boolean)
+  async signOut(@Context() context) {
+    return await this.authService.signOut(context.req.session);
   }
 }

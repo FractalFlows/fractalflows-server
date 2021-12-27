@@ -11,21 +11,66 @@ type Mutation {
   createUser(createUserInput: CreateUserInput!): User!
   removeUser(id: Int!): User!
   signIn(signInInput: SignInInput!): Boolean!
+  signOut: Boolean!
   updateUser(updateUserInput: UpdateUserInput!): User!
 }
 
 type Query {
   nonce: String!
-  testNonce: String!
+  session: Session
   user(id: Int!): User!
   users: [User!]!
 }
 
+type Session {
+  """Avatar"""
+  avatar: String
+
+  """ENS"""
+  ens: String
+
+  """ETH address"""
+  siweMessage: SiweMessage!
+}
+
 input SignInInput {
-  ens: String!
+  avatar: String
+  ens: String
 
   """ """
   siweMessage: SiweMessageInput!
+}
+
+type SiweMessage {
+  """ETH address"""
+  address: String!
+
+  """"""
+  chainId: String!
+
+  """Dapp domain"""
+  domain: String!
+
+  """"""
+  issuedAt: String!
+
+  """Signature unique identifier"""
+  nonce: String!
+
+  """Message signature"""
+  signature: String!
+
+  """"""
+  statement: String!
+
+  """Signature type"""
+  type: String!
+
+  """Dapp URI"""
+  uri: String!
+
+  """"""
+  version: String!
 }
 
 input SiweMessageInput {

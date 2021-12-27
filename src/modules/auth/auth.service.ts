@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { SiweMessage, generateNonce } from 'siwe';
-import { providers } from 'ethers';
 
 import { SignInInput } from './dto/signin.input';
-import { AuthUtils } from './auth.utils';
+import { InfuraService } from 'src/common/services/infura';
 
 @Injectable()
 export class AuthService {
@@ -17,22 +16,7 @@ export class AuthService {
         signInInput.siweMessage as SiweMessage,
       );
 
-      const infuraProvider = new providers.JsonRpcProvider(
-        {
-          allowGzip: true,
-          url: `${AuthUtils.getInfuraUrl(siweMessage.chainId)}/${
-            process.env.INFURA_PROJECT_ID
-          }`,
-          headers: {
-            Accept: '*/*',
-            Origin: `${process.env.HOST}:${process.env.PORT}`,
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Content-Type': 'application/json',
-          },
-        },
-        Number.parseInt(siweMessage.chainId),
-      );
-
+      const infuraProvider = InfuraService.getProvider(siweMessage.chainId);
       await infuraProvider.ready;
 
       const fields: SiweMessage = await siweMessage.validate(infuraProvider);
@@ -43,6 +27,7 @@ export class AuthService {
 
       session.siwe = fields;
       session.ens = signInInput.ens;
+      session.avatar = signInInput.avatar;
       session.nonce = null;
       session.cookie.expires = new Date(fields.expirationTime);
 
@@ -54,5 +39,10 @@ export class AuthService {
 
       throw new Error(e.message);
     }
+  }
+
+  async signOut(session) {
+    await session.destroy();
+    return true;
   }
 }
