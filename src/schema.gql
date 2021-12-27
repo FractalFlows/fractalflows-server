@@ -1,0 +1,121 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateUserInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+type Mutation {
+  createUser(createUserInput: CreateUserInput!): User!
+  removeUser(id: Int!): User!
+  signIn(signInInput: SignInInput!): Boolean!
+  signOut: Boolean!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+}
+
+type Query {
+  nonce: String!
+  session: Session!
+  user(id: Int!): User!
+  users: [User!]!
+}
+
+type Session {
+  """Avatar"""
+  avatar: String
+
+  """ENS"""
+  ens: String
+
+  """ETH address"""
+  siweMessage: SiweMessage!
+}
+
+input SignInInput {
+  avatar: String
+  ens: String
+
+  """ """
+  siweMessage: SiweMessageInput!
+}
+
+type SiweMessage {
+  """ETH address"""
+  address: String!
+
+  """"""
+  chainId: String!
+
+  """Dapp domain"""
+  domain: String!
+
+  """"""
+  issuedAt: String!
+
+  """Signature unique identifier"""
+  nonce: String!
+
+  """Message signature"""
+  signature: String!
+
+  """"""
+  statement: String!
+
+  """Signature type"""
+  type: String!
+
+  """Dapp URI"""
+  uri: String!
+
+  """"""
+  version: String!
+}
+
+input SiweMessageInput {
+  """ETH address"""
+  address: String!
+
+  """"""
+  chainId: String!
+
+  """Dapp domain"""
+  domain: String!
+
+  """"""
+  issuedAt: String!
+
+  """Signature unique identifier"""
+  nonce: String!
+
+  """Message signature"""
+  signature: String!
+
+  """"""
+  statement: String!
+
+  """Signature type"""
+  type: String!
+
+  """Dapp URI"""
+  uri: String!
+
+  """"""
+  version: String!
+}
+
+input UpdateUserInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+type User {
+  """Example field (placeholder)"""
+  ethAddress: Int!
+
+  """Example field (placeholder)"""
+  exampleField: Int!
+  id: String!
+}
