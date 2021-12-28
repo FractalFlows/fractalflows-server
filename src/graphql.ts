@@ -7,6 +7,10 @@
 
 /* tslint:disable */
 /* eslint-disable */
+export interface CreateClaimInput {
+    exampleField: number;
+}
+
 export interface CreateUserInput {
     exampleField: number;
 }
@@ -30,20 +34,34 @@ export interface SiweMessageInput {
     version: string;
 }
 
+export interface UpdateClaimInput {
+    exampleField?: Nullable<number>;
+    id: number;
+}
+
 export interface UpdateUserInput {
     exampleField?: Nullable<number>;
     id: number;
 }
 
+export interface Claim {
+    exampleField: number;
+}
+
 export interface IMutation {
+    createClaim(createClaimInput: CreateClaimInput): Claim | Promise<Claim>;
     createUser(createUserInput: CreateUserInput): User | Promise<User>;
+    removeClaim(id: number): Claim | Promise<Claim>;
     removeUser(id: number): User | Promise<User>;
     signIn(signInInput: SignInInput): boolean | Promise<boolean>;
     signOut(): boolean | Promise<boolean>;
+    updateClaim(updateClaimInput: UpdateClaimInput): Claim | Promise<Claim>;
     updateUser(updateUserInput: UpdateUserInput): User | Promise<User>;
 }
 
 export interface IQuery {
+    claim(id: number): Claim | Promise<Claim>;
+    claims(): Claim[] | Promise<Claim[]>;
     nonce(): string | Promise<string>;
     session(): Session | Promise<Session>;
     user(id: number): User | Promise<User>;

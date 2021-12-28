@@ -2,20 +2,35 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Claim {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateClaimInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
 input CreateUserInput {
   """Example field (placeholder)"""
   exampleField: Int!
 }
 
 type Mutation {
+  createClaim(createClaimInput: CreateClaimInput!): Claim!
   createUser(createUserInput: CreateUserInput!): User!
+  removeClaim(id: Int!): Claim!
   removeUser(id: Int!): User!
   signIn(signInInput: SignInInput!): Boolean!
   signOut: Boolean!
+  updateClaim(updateClaimInput: UpdateClaimInput!): Claim!
   updateUser(updateUserInput: UpdateUserInput!): User!
 }
 
 type Query {
+  claim(id: Int!): Claim!
+  claims: [Claim!]!
   nonce: String!
   session: Session!
   user(id: Int!): User!
@@ -103,6 +118,12 @@ input SiweMessageInput {
 
   """"""
   version: String!
+}
+
+input UpdateClaimInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
 }
 
 input UpdateUserInput {

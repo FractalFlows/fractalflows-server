@@ -7,6 +7,7 @@ import { join } from 'path';
 import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ClaimsModule } from './modules/claims/claims.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { AuthModule } from './modules/auth/auth.module';
     TypeOrmModule.forRoot(),
     UsersModule,
     AuthModule,
+    ClaimsModule,
   ],
   providers: [AppService],
 })
