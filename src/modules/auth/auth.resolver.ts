@@ -5,10 +5,14 @@ import { AuthService } from './auth.service';
 import { SessionGuard } from './auth.guard';
 import { SignInInput } from './dto/signin.input';
 import { Session } from './dto/signin.output';
+import { UsersService } from '../users/users.service';
 
 @Resolver()
 export class AuthResolver {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @Query(() => String, { name: 'nonce' })
   getNonce(@Context() context) {
@@ -32,7 +36,12 @@ export class AuthResolver {
     @Args('signInInput') signInInput: SignInInput,
     @Context() context,
   ) {
-    return await this.authService.signIn(signInInput, context.req.session);
+    await this.authService.signIn(signInInput, context.req.session);
+    await this.usersService.createIfDoesntExist({
+      ethAddress: signInInput.siweMessage.address,
+    });
+
+    return true;
   }
 
   @Mutation(() => Boolean)

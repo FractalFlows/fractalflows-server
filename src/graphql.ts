@@ -12,7 +12,8 @@ export interface CreateClaimInput {
 }
 
 export interface CreateUserInput {
-    exampleField: number;
+    email?: Nullable<string>;
+    ethAddress?: Nullable<string>;
 }
 
 export interface SignInInput {
@@ -40,7 +41,8 @@ export interface UpdateClaimInput {
 }
 
 export interface UpdateUserInput {
-    exampleField?: Nullable<number>;
+    email?: Nullable<string>;
+    ethAddress?: Nullable<string>;
     id: number;
 }
 
@@ -88,8 +90,8 @@ export interface SiweMessage {
 }
 
 export interface User {
-    ethAddress: number;
-    exampleField: number;
+    email?: Nullable<string>;
+    ethAddress?: Nullable<string>;
     id: string;
 }
 

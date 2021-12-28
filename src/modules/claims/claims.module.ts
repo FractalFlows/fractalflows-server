@@ -3,6 +3,6 @@ import { ClaimsService } from './claims.service';
 import { ClaimsResolver } from './claims.resolver';
 
 @Module({
-  providers: [ClaimsResolver, ClaimsService]
+  providers: [ClaimsResolver, ClaimsService],
 })
 export class ClaimsModule {}

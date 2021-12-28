@@ -13,8 +13,11 @@ input CreateClaimInput {
 }
 
 input CreateUserInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  """Email"""
+  email: String
+
+  """Etherem wallet address"""
+  ethAddress: String
 }
 
 type Mutation {
@@ -127,16 +130,19 @@ input UpdateClaimInput {
 }
 
 input UpdateUserInput {
-  """Example field (placeholder)"""
-  exampleField: Int
+  """Email"""
+  email: String
+
+  """Etherem wallet address"""
+  ethAddress: String
   id: Int!
 }
 
 type User {
-  """Example field (placeholder)"""
-  ethAddress: Int!
+  """Email"""
+  email: String
 
-  """Example field (placeholder)"""
-  exampleField: Int!
+  """Ethereum wallet address"""
+  ethAddress: String
   id: String!
 }
