@@ -47,7 +47,13 @@ export interface UpdateUserInput {
 }
 
 export interface Claim {
-    exampleField: number;
+    createdAt: string;
+    createdBy: User;
+    id: string;
+    slug: string;
+    summary: string;
+    title: string;
+    updatedAt: string;
 }
 
 export interface IMutation {
@@ -90,6 +96,7 @@ export interface SiweMessage {
 }
 
 export interface User {
+    claims?: Nullable<Claim[]>;
     email?: Nullable<string>;
     ethAddress?: Nullable<string>;
     id: string;

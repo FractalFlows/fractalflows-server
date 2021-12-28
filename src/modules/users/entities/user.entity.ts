@@ -1,7 +1,9 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
-@Entity('Users')
+import { Claim } from 'src/modules/claims/entities/claim.entity';
+
+@Entity()
 @ObjectType()
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -18,4 +20,8 @@ export class User {
   @Field(() => String, { description: 'Email', nullable: true })
   @Column({ nullable: true })
   email?: string;
+
+  @Field(() => [Claim], { description: 'User claims', nullable: true })
+  @OneToMany(() => Claim, (claim) => claim.createdBy)
+  claims: Claim[];
 }

@@ -42,6 +42,7 @@
     "rxjs": "^7.2.0",
     "session-file-store": "^1.5.0",
     "siwe": "^0.1.2",
+    "slugify": "^1.6.4",
     "typeorm": "^0.2.41"
   },
   "devDependencies": {
