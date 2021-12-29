@@ -1,5 +1,5 @@
-import { ObjectType, Field } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Field, ObjectType } from '@nestjs/graphql';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Claim } from 'src/modules/claims/entities/claim.entity';
 
@@ -7,7 +7,7 @@ import { Claim } from 'src/modules/claims/entities/claim.entity';
 @ObjectType()
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  @Field((type) => String)
+  @Field(() => String)
   id: string;
 
   @Field(() => String, {

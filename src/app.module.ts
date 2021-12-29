@@ -8,6 +8,9 @@ import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ClaimsModule } from './modules/claims/claims.module';
+import { SourcesModule } from './modules/sources/sources.module';
+import { TagsModule } from './modules/tags/tags.module';
+import { AttributionsModule } from './modules/attributions/attributions.module';
 
 @Module({
   imports: [
@@ -33,6 +36,9 @@ import { ClaimsModule } from './modules/claims/claims.module';
     UsersModule,
     AuthModule,
     ClaimsModule,
+    SourcesModule,
+    TagsModule,
+    AttributionsModule,
   ],
   providers: [AppService],
 })

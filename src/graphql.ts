@@ -7,7 +7,15 @@
 
 /* tslint:disable */
 /* eslint-disable */
+export interface CreateAttributionInput {
+    exampleField: number;
+}
+
 export interface CreateClaimInput {
+    exampleField: number;
+}
+
+export interface CreateSourceInput {
     exampleField: number;
 }
 
@@ -35,7 +43,17 @@ export interface SiweMessageInput {
     version: string;
 }
 
+export interface UpdateAttributionInput {
+    exampleField?: Nullable<number>;
+    id: number;
+}
+
 export interface UpdateClaimInput {
+    exampleField?: Nullable<number>;
+    id: number;
+}
+
+export interface UpdateSourceInput {
     exampleField?: Nullable<number>;
     id: number;
 }
@@ -46,32 +64,53 @@ export interface UpdateUserInput {
     id: number;
 }
 
+export interface Attribution {
+    id: string;
+    identifier: string;
+    origin: string;
+}
+
 export interface Claim {
+    attributions: Attribution[];
     createdAt: string;
     createdBy: User;
     id: string;
     slug: string;
+    sources: Source[];
     summary: string;
+    tags: Tag[];
     title: string;
     updatedAt: string;
 }
 
 export interface IMutation {
+    createAttribution(createAttributionInput: CreateAttributionInput): Attribution | Promise<Attribution>;
     createClaim(createClaimInput: CreateClaimInput): Claim | Promise<Claim>;
+    createSource(createSourceInput: CreateSourceInput): Source | Promise<Source>;
     createUser(createUserInput: CreateUserInput): User | Promise<User>;
+    removeAttribution(id: number): Attribution | Promise<Attribution>;
     removeClaim(id: number): Claim | Promise<Claim>;
+    removeSource(id: number): Source | Promise<Source>;
     removeUser(id: number): User | Promise<User>;
     signIn(signInInput: SignInInput): boolean | Promise<boolean>;
     signOut(): boolean | Promise<boolean>;
+    updateAttribution(updateAttributionInput: UpdateAttributionInput): Attribution | Promise<Attribution>;
     updateClaim(updateClaimInput: UpdateClaimInput): Claim | Promise<Claim>;
+    updateSource(updateSourceInput: UpdateSourceInput): Source | Promise<Source>;
     updateUser(updateUserInput: UpdateUserInput): User | Promise<User>;
 }
 
 export interface IQuery {
+    attribution(id: number): Attribution | Promise<Attribution>;
+    attributions(): Attribution[] | Promise<Attribution[]>;
     claim(id: number): Claim | Promise<Claim>;
     claims(): Claim[] | Promise<Claim[]>;
     nonce(): string | Promise<string>;
     session(): Session | Promise<Session>;
+    source(id: number): Source | Promise<Source>;
+    sources(): Source[] | Promise<Source[]>;
+    tag(id: number): Tag | Promise<Tag>;
+    tags(): Tag[] | Promise<Tag[]>;
     user(id: number): User | Promise<User>;
     users(): User[] | Promise<User[]>;
 }
@@ -93,6 +132,17 @@ export interface SiweMessage {
     type: string;
     uri: string;
     version: string;
+}
+
+export interface Source {
+    id: string;
+    origin: string;
+    url: string;
+}
+
+export interface Tag {
+    id: string;
+    label: string;
 }
 
 export interface User {

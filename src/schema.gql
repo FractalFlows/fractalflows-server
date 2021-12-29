@@ -2,7 +2,20 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Attribution {
+  id: String!
+
+  """Identifier"""
+  identifier: String!
+
+  """Origin"""
+  origin: String!
+}
+
 type Claim {
+  """Attributions"""
+  attributions: [Attribution!]!
+
   """Created at"""
   createdAt: String!
 
@@ -13,8 +26,14 @@ type Claim {
   """Slug"""
   slug: String!
 
+  """Sources"""
+  sources: [Source!]!
+
   """Summary"""
   summary: String!
+
+  """Tags"""
+  tags: [Tag!]!
 
   """Title"""
   title: String!
@@ -23,7 +42,17 @@ type Claim {
   updatedAt: String!
 }
 
+input CreateAttributionInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
 input CreateClaimInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateSourceInput {
   """Example field (placeholder)"""
   exampleField: Int!
 }
@@ -37,21 +66,33 @@ input CreateUserInput {
 }
 
 type Mutation {
+  createAttribution(createAttributionInput: CreateAttributionInput!): Attribution!
   createClaim(createClaimInput: CreateClaimInput!): Claim!
+  createSource(createSourceInput: CreateSourceInput!): Source!
   createUser(createUserInput: CreateUserInput!): User!
+  removeAttribution(id: Int!): Attribution!
   removeClaim(id: Int!): Claim!
+  removeSource(id: Int!): Source!
   removeUser(id: Int!): User!
   signIn(signInInput: SignInInput!): Boolean!
   signOut: Boolean!
+  updateAttribution(updateAttributionInput: UpdateAttributionInput!): Attribution!
   updateClaim(updateClaimInput: UpdateClaimInput!): Claim!
+  updateSource(updateSourceInput: UpdateSourceInput!): Source!
   updateUser(updateUserInput: UpdateUserInput!): User!
 }
 
 type Query {
+  attribution(id: Int!): Attribution!
+  attributions: [Attribution!]!
   claim(id: Int!): Claim!
   claims: [Claim!]!
   nonce: String!
   session: Session!
+  source(id: Int!): Source!
+  sources: [Source!]!
+  tag(id: Int!): Tag!
+  tags: [Tag!]!
   user(id: Int!): User!
   users: [User!]!
 }
@@ -139,7 +180,34 @@ input SiweMessageInput {
   version: String!
 }
 
+type Source {
+  id: String!
+
+  """Origin"""
+  origin: String!
+  url: String!
+}
+
+type Tag {
+  id: String!
+
+  """Label"""
+  label: String!
+}
+
+input UpdateAttributionInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
 input UpdateClaimInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateSourceInput {
   """Example field (placeholder)"""
   exampleField: Int
   id: Int!
