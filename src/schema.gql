@@ -113,7 +113,7 @@ type Mutation {
 type Query {
   attribution(id: Int!): Attribution!
   attributions: [Attribution!]!
-  claim(id: Int!): Claim!
+  claim(slug: String!): Claim!
   claims: [Claim!]!
   nonce: String!
   searchTags(term: String): [Tag!]!

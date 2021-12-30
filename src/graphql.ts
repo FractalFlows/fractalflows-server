@@ -116,7 +116,7 @@ export interface IMutation {
 export interface IQuery {
     attribution(id: number): Attribution | Promise<Attribution>;
     attributions(): Attribution[] | Promise<Attribution[]>;
-    claim(id: number): Claim | Promise<Claim>;
+    claim(slug: string): Claim | Promise<Claim>;
     claims(): Claim[] | Promise<Claim[]>;
     nonce(): string | Promise<string>;
     searchTags(term?: Nullable<string>): Tag[] | Promise<Tag[]>;

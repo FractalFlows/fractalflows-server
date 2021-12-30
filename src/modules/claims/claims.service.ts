@@ -35,8 +35,8 @@ export class ClaimsService {
     return `This action returns all claims`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} claim`;
+  async findOne(slug: string) {
+    return await this.claimsRepository.findOne({ slug });
   }
 
   update(id: number, updateClaimInput: UpdateClaimInput) {

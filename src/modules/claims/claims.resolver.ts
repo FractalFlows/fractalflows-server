@@ -40,8 +40,8 @@ export class ClaimsResolver {
   }
 
   @Query(() => Claim, { name: 'claim' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.claimsService.findOne(id);
+  findOne(@Args('slug') slug: string) {
+    return this.claimsService.findOne(slug);
   }
 
   @Mutation(() => Claim)
