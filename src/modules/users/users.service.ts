@@ -12,8 +12,16 @@ export class UsersService {
     @InjectRepository(User) private usersRepository: Repository<User>,
   ) {}
 
-  create(createUserInput: CreateUserInput) {
-    return 'This action adds a new user';
+  async createIfDoesntExist(createUserInput: CreateUserInput) {
+    const user = await this.usersRepository.findOne({
+      where: createUserInput,
+    });
+
+    if (user) {
+      return user;
+    } else {
+      return await this.usersRepository.save(createUserInput);
+    }
   }
 
   async findAll(): Promise<User[]> {
