@@ -18,6 +18,7 @@ export interface CreateClaimInput {
     summary: string;
     tags?: Nullable<CreateTagInput[]>;
     title: string;
+    userId?: Nullable<string>;
 }
 
 export interface CreateSourceInput {
@@ -61,6 +62,7 @@ export interface UpdateClaimInput {
     summary?: Nullable<string>;
     tags?: Nullable<CreateTagInput[]>;
     title?: Nullable<string>;
+    userId?: Nullable<string>;
 }
 
 export interface UpdateSourceInput {
@@ -117,11 +119,11 @@ export interface IQuery {
     claim(id: number): Claim | Promise<Claim>;
     claims(): Claim[] | Promise<Claim[]>;
     nonce(): string | Promise<string>;
+    searchTags(term?: Nullable<string>): Tag[] | Promise<Tag[]>;
     session(): Session | Promise<Session>;
     source(id: number): Source | Promise<Source>;
     sources(): Source[] | Promise<Source[]>;
     tag(id: number): Tag | Promise<Tag>;
-    tags(): Tag[] | Promise<Tag[]>;
     user(id: number): User | Promise<User>;
     users(): User[] | Promise<User[]>;
 }

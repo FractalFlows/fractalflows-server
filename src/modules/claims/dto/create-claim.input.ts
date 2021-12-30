@@ -23,4 +23,7 @@ export class CreateClaimInput {
     nullable: true,
   })
   attributions: CreateAttributionInput[];
+
+  @Field(() => String, { nullable: true })
+  userId?: string;
 }

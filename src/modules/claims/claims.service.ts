@@ -28,7 +28,6 @@ export class ClaimsService {
       (await this.claimsRepository.findOne({ where: { slug } })) !== undefined
     );
 
-    console.log(createClaimInput);
     return await this.claimsRepository.save({ ...createClaimInput, slug });
   }
 

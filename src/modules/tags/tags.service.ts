@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 
 import { CreateTagInput } from './dto/create-tag.input';
 import { Tag } from './entities/tag.entity';
@@ -13,8 +13,18 @@ export class TagsService {
     return await this.tagsRepository.save(createTagsInput);
   }
 
-  findAll() {
-    return `This action returns all tags`;
+  async search(term?: string) {
+    if (term) {
+      return await this.tagsRepository.find({
+        where: {
+          label: ILike(`%${term}%`),
+        },
+        take: 20,
+        skip: 0,
+      });
+    } else {
+      return await this.tagsRepository.find({ take: 20 });
+    }
   }
 
   findOne(id: number) {

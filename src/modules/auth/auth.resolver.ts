@@ -36,10 +36,27 @@ export class AuthResolver {
     @Args('signInInput') signInInput: SignInInput,
     @Context() context,
   ) {
-    await this.authService.signIn(signInInput, context.req.session);
-    await this.usersService.createIfDoesntExist({
-      ethAddress: signInInput.siweMessage.address,
-    });
+    const { session } = context.req;
+
+    try {
+      const siwe = await this.authService.signIn(signInInput, session.nonce);
+      const user = await this.usersService.createIfDoesntExist({
+        ethAddress: signInInput.siweMessage.address,
+      });
+
+      session.user = user;
+      session.siwe = siwe;
+      session.ens = signInInput.ens;
+      session.avatar = signInInput.avatar;
+      session.nonce = null;
+      session.cookie.expires = new Date(siwe.expirationTime);
+    } catch (e) {
+      session.siwe = null;
+      session.nonce = null;
+      session.ens = null;
+
+      throw new Error(e.message);
+    }
 
     return true;
   }

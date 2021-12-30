@@ -1,4 +1,5 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int, Context } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
 
 import { ClaimsService } from './claims.service';
 import { Claim } from './entities/claim.entity';
@@ -7,7 +8,7 @@ import { UpdateClaimInput } from './dto/update-claim.input';
 import { SourcesService } from '../sources/sources.service';
 import { AttributionsService } from '../attributions/attributions.service';
 import { TagsService } from '../tags/tags.service';
-import { Source } from '../sources/entities/source.entity';
+import { SessionGuard } from '../auth/auth.guard';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -19,9 +20,13 @@ export class ClaimsResolver {
   ) {}
 
   @Mutation(() => Claim)
+  @UseGuards(SessionGuard)
   async createClaim(
     @Args('createClaimInput') createClaimInput: CreateClaimInput,
+    @Context() context,
   ) {
+    createClaimInput.userId = context.req.session.user.id;
+
     await this.sourcesService.createMany(createClaimInput.sources);
     await this.attributionsService.createMany(createClaimInput.attributions);
     await this.tagsService.createMany(createClaimInput.tags);
@@ -40,11 +45,13 @@ export class ClaimsResolver {
   }
 
   @Mutation(() => Claim)
+  @UseGuards(SessionGuard)
   updateClaim(@Args('updateClaimInput') updateClaimInput: UpdateClaimInput) {
     return this.claimsService.update(updateClaimInput.id, updateClaimInput);
   }
 
   @Mutation(() => Claim)
+  @UseGuards(SessionGuard)
   removeClaim(@Args('id', { type: () => Int }) id: number) {
     return this.claimsService.remove(id);
   }

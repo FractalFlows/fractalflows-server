@@ -10,35 +10,19 @@ export class AuthService {
     return generateNonce();
   }
 
-  async signIn(signInInput: SignInInput, session) {
-    try {
-      const siweMessage = new SiweMessage(
-        signInInput.siweMessage as SiweMessage,
-      );
+  async signIn(signInInput: SignInInput, nonce: string) {
+    const siweMessage = new SiweMessage(signInInput.siweMessage as SiweMessage);
 
-      const infuraProvider = InfuraService.getProvider(siweMessage.chainId);
-      await infuraProvider.ready;
+    const infuraProvider = InfuraService.getProvider(siweMessage.chainId);
+    await infuraProvider.ready;
 
-      const fields: SiweMessage = await siweMessage.validate(infuraProvider);
+    const fields: SiweMessage = await siweMessage.validate(infuraProvider);
 
-      if (fields.nonce !== session.nonce) {
-        throw new Error('Invalid nonce');
-      }
-
-      session.siwe = fields;
-      session.ens = signInInput.ens;
-      session.avatar = signInInput.avatar;
-      session.nonce = null;
-      session.cookie.expires = new Date(fields.expirationTime);
-
-      return true;
-    } catch (e) {
-      session.siwe = null;
-      session.nonce = null;
-      session.ens = null;
-
-      throw new Error(e.message);
+    if (fields.nonce !== nonce) {
+      throw new Error('Invalid nonce');
     }
+
+    return fields;
   }
 
   async signOut(session) {

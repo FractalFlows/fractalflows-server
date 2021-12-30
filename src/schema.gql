@@ -73,6 +73,7 @@ input CreateClaimInput {
 
   """Title"""
   title: String!
+  userId: String
 }
 
 input CreateSourceInput {
@@ -115,11 +116,11 @@ type Query {
   claim(id: Int!): Claim!
   claims: [Claim!]!
   nonce: String!
+  searchTags(term: String): [Tag!]!
   session: Session!
   source(id: Int!): Source!
   sources: [Source!]!
   tag(id: Int!): Tag!
-  tags: [Tag!]!
   user(id: Int!): User!
   users: [User!]!
 }
@@ -253,6 +254,7 @@ input UpdateClaimInput {
 
   """Title"""
   title: String
+  userId: String
 }
 
 input UpdateSourceInput {
