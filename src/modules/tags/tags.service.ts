@@ -9,8 +9,8 @@ import { Tag } from './entities/tag.entity';
 export class TagsService {
   constructor(@InjectRepository(Tag) private tagsRepository: Repository<Tag>) {}
 
-  async create(createTagInput: CreateTagInput) {
-    return await this.tagsRepository.save(createTagInput);
+  async createMany(createTagsInput: CreateTagInput[]) {
+    return await this.tagsRepository.save(createTagsInput);
   }
 
   findAll() {

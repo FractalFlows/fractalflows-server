@@ -1,15 +1,12 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 import { Claim } from 'src/modules/claims/entities/claim.entity';
+import { BaseEntity } from 'src/common/entities/base.entity';
 
 @Entity()
 @ObjectType()
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  @Field(() => String)
-  id: string;
-
+export class User extends BaseEntity {
   @Field(() => String, {
     description: 'Ethereum wallet address',
     nullable: true,
@@ -22,6 +19,6 @@ export class User {
   email?: string;
 
   @Field(() => [Claim], { description: 'User claims', nullable: true })
-  @OneToMany(() => Claim, (claim) => claim.createdBy)
+  @OneToMany(() => Claim, (claim) => claim.user)
   claims: Claim[];
 }

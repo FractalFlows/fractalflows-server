@@ -8,11 +8,6 @@ import { UpdateSourceInput } from './dto/update-source.input';
 export class SourcesResolver {
   constructor(private readonly sourcesService: SourcesService) {}
 
-  @Mutation(() => Source)
-  createSource(@Args('createSourceInput') createSourceInput: CreateSourceInput) {
-    return this.sourcesService.create(createSourceInput);
-  }
-
   @Query(() => [Source], { name: 'sources' })
   findAll() {
     return this.sourcesService.findAll();
@@ -24,7 +19,9 @@ export class SourcesResolver {
   }
 
   @Mutation(() => Source)
-  updateSource(@Args('updateSourceInput') updateSourceInput: UpdateSourceInput) {
+  updateSource(
+    @Args('updateSourceInput') updateSourceInput: UpdateSourceInput,
+  ) {
     return this.sourcesService.update(updateSourceInput.id, updateSourceInput);
   }
 

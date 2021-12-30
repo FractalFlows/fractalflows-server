@@ -8,15 +8,26 @@
 /* tslint:disable */
 /* eslint-disable */
 export interface CreateAttributionInput {
-    exampleField: number;
+    identifier: string;
+    origin: string;
 }
 
 export interface CreateClaimInput {
-    exampleField: number;
+    attributions?: Nullable<CreateAttributionInput[]>;
+    sources?: Nullable<CreateSourceInput[]>;
+    summary: string;
+    tags?: Nullable<CreateTagInput[]>;
+    title: string;
 }
 
 export interface CreateSourceInput {
-    exampleField: number;
+    origin: string;
+    url: string;
+}
+
+export interface CreateTagInput {
+    id?: Nullable<string>;
+    label: string;
 }
 
 export interface CreateUserInput {
@@ -43,19 +54,19 @@ export interface SiweMessageInput {
     version: string;
 }
 
-export interface UpdateAttributionInput {
-    exampleField?: Nullable<number>;
-    id: number;
-}
-
 export interface UpdateClaimInput {
-    exampleField?: Nullable<number>;
+    attributions?: Nullable<CreateAttributionInput[]>;
     id: number;
+    sources?: Nullable<CreateSourceInput[]>;
+    summary?: Nullable<string>;
+    tags?: Nullable<CreateTagInput[]>;
+    title?: Nullable<string>;
 }
 
 export interface UpdateSourceInput {
-    exampleField?: Nullable<number>;
     id: number;
+    origin?: Nullable<string>;
+    url?: Nullable<string>;
 }
 
 export interface UpdateUserInput {
@@ -65,28 +76,29 @@ export interface UpdateUserInput {
 }
 
 export interface Attribution {
+    claim: Claim;
+    createdAt: string;
     id: string;
     identifier: string;
     origin: string;
-}
-
-export interface Claim {
-    attributions: Attribution[];
-    createdAt: string;
-    createdBy: User;
-    id: string;
-    slug: string;
-    sources: Source[];
-    summary: string;
-    tags: Tag[];
-    title: string;
     updatedAt: string;
 }
 
+export interface Claim {
+    attributions?: Nullable<Attribution[]>;
+    createdAt: string;
+    id: string;
+    slug: string;
+    sources?: Nullable<Source[]>;
+    summary: string;
+    tags?: Nullable<Tag[]>;
+    title: string;
+    updatedAt: string;
+    user: User;
+}
+
 export interface IMutation {
-    createAttribution(createAttributionInput: CreateAttributionInput): Attribution | Promise<Attribution>;
     createClaim(createClaimInput: CreateClaimInput): Claim | Promise<Claim>;
-    createSource(createSourceInput: CreateSourceInput): Source | Promise<Source>;
     createUser(createUserInput: CreateUserInput): User | Promise<User>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
     removeClaim(id: number): Claim | Promise<Claim>;
@@ -94,7 +106,6 @@ export interface IMutation {
     removeUser(id: number): User | Promise<User>;
     signIn(signInInput: SignInInput): boolean | Promise<boolean>;
     signOut(): boolean | Promise<boolean>;
-    updateAttribution(updateAttributionInput: UpdateAttributionInput): Attribution | Promise<Attribution>;
     updateClaim(updateClaimInput: UpdateClaimInput): Claim | Promise<Claim>;
     updateSource(updateSourceInput: UpdateSourceInput): Source | Promise<Source>;
     updateUser(updateUserInput: UpdateUserInput): User | Promise<User>;
@@ -135,21 +146,28 @@ export interface SiweMessage {
 }
 
 export interface Source {
+    claim: Claim;
+    createdAt: string;
     id: string;
     origin: string;
+    updatedAt: string;
     url: string;
 }
 
 export interface Tag {
+    createdAt: string;
     id: string;
     label: string;
+    updatedAt: string;
 }
 
 export interface User {
     claims?: Nullable<Claim[]>;
+    createdAt: string;
     email?: Nullable<string>;
     ethAddress?: Nullable<string>;
     id: string;
+    updatedAt: string;
 }
 
 type Nullable<T> = T | null;

@@ -8,5 +8,6 @@ import { Source } from './entities/source.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Source])],
   providers: [SourcesResolver, SourcesService],
+  exports: [SourcesService],
 })
 export class SourcesModule {}

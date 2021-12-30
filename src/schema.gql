@@ -3,8 +3,54 @@
 # ------------------------------------------------------
 
 type Attribution {
+  """Claim"""
+  claim: Claim!
+
+  """Created at"""
+  createdAt: String!
   id: String!
 
+  """Claimant identifier"""
+  identifier: String!
+
+  """Origin"""
+  origin: String!
+
+  """Updated at"""
+  updatedAt: String!
+}
+
+type Claim {
+  """Attributions"""
+  attributions: [Attribution!]
+
+  """Created at"""
+  createdAt: String!
+  id: String!
+
+  """Slug"""
+  slug: String!
+
+  """Sources"""
+  sources: [Source!]
+
+  """Summary"""
+  summary: String!
+
+  """Tags"""
+  tags: [Tag!]
+
+  """Title"""
+  title: String!
+
+  """Updated at"""
+  updatedAt: String!
+
+  """Created by"""
+  user: User!
+}
+
+input CreateAttributionInput {
   """Identifier"""
   identifier: String!
 
@@ -12,49 +58,33 @@ type Attribution {
   origin: String!
 }
 
-type Claim {
+input CreateClaimInput {
   """Attributions"""
-  attributions: [Attribution!]!
-
-  """Created at"""
-  createdAt: String!
-
-  """Created by"""
-  createdBy: User!
-  id: String!
-
-  """Slug"""
-  slug: String!
+  attributions: [CreateAttributionInput!]
 
   """Sources"""
-  sources: [Source!]!
+  sources: [CreateSourceInput!]
 
   """Summary"""
   summary: String!
 
   """Tags"""
-  tags: [Tag!]!
+  tags: [CreateTagInput!]
 
   """Title"""
   title: String!
-
-  """Updated at"""
-  updatedAt: String!
-}
-
-input CreateAttributionInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
-}
-
-input CreateClaimInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
 }
 
 input CreateSourceInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  origin: String!
+  url: String!
+}
+
+input CreateTagInput {
+  id: String
+
+  """Label"""
+  label: String!
 }
 
 input CreateUserInput {
@@ -66,9 +96,7 @@ input CreateUserInput {
 }
 
 type Mutation {
-  createAttribution(createAttributionInput: CreateAttributionInput!): Attribution!
   createClaim(createClaimInput: CreateClaimInput!): Claim!
-  createSource(createSourceInput: CreateSourceInput!): Source!
   createUser(createUserInput: CreateUserInput!): User!
   removeAttribution(id: Int!): Attribution!
   removeClaim(id: Int!): Claim!
@@ -76,7 +104,6 @@ type Mutation {
   removeUser(id: Int!): User!
   signIn(signInInput: SignInInput!): Boolean!
   signOut: Boolean!
-  updateAttribution(updateAttributionInput: UpdateAttributionInput!): Attribution!
   updateClaim(updateClaimInput: UpdateClaimInput!): Claim!
   updateSource(updateSourceInput: UpdateSourceInput!): Source!
   updateUser(updateUserInput: UpdateUserInput!): User!
@@ -181,36 +208,57 @@ input SiweMessageInput {
 }
 
 type Source {
+  """Claim"""
+  claim: Claim!
+
+  """Created at"""
+  createdAt: String!
   id: String!
 
   """Origin"""
   origin: String!
+
+  """Updated at"""
+  updatedAt: String!
+
+  """URL"""
   url: String!
 }
 
 type Tag {
+  """Created at"""
+  createdAt: String!
   id: String!
 
   """Label"""
   label: String!
-}
 
-input UpdateAttributionInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+  """Updated at"""
+  updatedAt: String!
 }
 
 input UpdateClaimInput {
-  """Example field (placeholder)"""
-  exampleField: Int
+  """Attributions"""
+  attributions: [CreateAttributionInput!]
   id: Int!
+
+  """Sources"""
+  sources: [CreateSourceInput!]
+
+  """Summary"""
+  summary: String
+
+  """Tags"""
+  tags: [CreateTagInput!]
+
+  """Title"""
+  title: String
 }
 
 input UpdateSourceInput {
-  """Example field (placeholder)"""
-  exampleField: Int
   id: Int!
+  origin: String
+  url: String
 }
 
 input UpdateUserInput {
@@ -226,10 +274,16 @@ type User {
   """User claims"""
   claims: [Claim!]
 
+  """Created at"""
+  createdAt: String!
+
   """Email"""
   email: String
 
   """Ethereum wallet address"""
   ethAddress: String
   id: String!
+
+  """Updated at"""
+  updatedAt: String!
 }

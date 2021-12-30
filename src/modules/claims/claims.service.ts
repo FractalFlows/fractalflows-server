@@ -1,11 +1,35 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import slugify from 'slugify';
+import { Repository } from 'typeorm';
+
 import { CreateClaimInput } from './dto/create-claim.input';
 import { UpdateClaimInput } from './dto/update-claim.input';
+import { Claim } from './entities/claim.entity';
 
 @Injectable()
 export class ClaimsService {
-  create(createClaimInput: CreateClaimInput) {
-    return 'This action adds a new claim';
+  constructor(
+    @InjectRepository(Claim) private claimsRepository: Repository<Claim>,
+  ) {}
+
+  async create(createClaimInput: CreateClaimInput) {
+    let slug;
+    let slugIndex = 0;
+
+    do {
+      slug = `${slugify(createClaimInput.title, {
+        lower: true,
+        strict: true,
+      })}${slugIndex ? `-${slugIndex}` : ''}`;
+
+      slugIndex++;
+    } while (
+      (await this.claimsRepository.findOne({ where: { slug } })) !== undefined
+    );
+
+    console.log(createClaimInput);
+    return await this.claimsRepository.save({ ...createClaimInput, slug });
   }
 
   findAll() {

@@ -1,11 +1,19 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateAttributionInput } from './dto/create-attribution.input';
 import { UpdateAttributionInput } from './dto/update-attribution.input';
+import { Attribution } from './entities/attribution.entity';
 
 @Injectable()
 export class AttributionsService {
-  create(createAttributionInput: CreateAttributionInput) {
-    return 'This action adds a new attribution';
+  constructor(
+    @InjectRepository(Attribution)
+    private attributionsRepository: Repository<Attribution>,
+  ) {}
+
+  async createMany(createAttributionInput: CreateAttributionInput[]) {
+    return await this.attributionsRepository.save(createAttributionInput);
   }
 
   findAll() {

@@ -8,5 +8,6 @@ import { Attribution } from './entities/attribution.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Attribution])],
   providers: [AttributionsResolver, AttributionsService],
+  exports: [AttributionsService],
 })
 export class AttributionsModule {}
