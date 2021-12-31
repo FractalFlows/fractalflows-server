@@ -109,6 +109,7 @@ export interface IMutation {
     signIn(signInInput: SignInInput): boolean | Promise<boolean>;
     signOut(): boolean | Promise<boolean>;
     updateClaim(updateClaimInput: UpdateClaimInput): Claim | Promise<Claim>;
+    updateEmail(email: string): User | Promise<User>;
     updateSource(updateSourceInput: UpdateSourceInput): Source | Promise<Source>;
     updateUser(updateUserInput: UpdateUserInput): User | Promise<User>;
 }
@@ -132,6 +133,7 @@ export interface Session {
     avatar?: Nullable<string>;
     ens?: Nullable<string>;
     siweMessage: SiweMessage;
+    user?: Nullable<User>;
 }
 
 export interface SiweMessage {

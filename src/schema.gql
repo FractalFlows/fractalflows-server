@@ -106,6 +106,7 @@ type Mutation {
   signIn(signInInput: SignInInput!): Boolean!
   signOut: Boolean!
   updateClaim(updateClaimInput: UpdateClaimInput!): Claim!
+  updateEmail(email: String!): User!
   updateSource(updateSourceInput: UpdateSourceInput!): Source!
   updateUser(updateUserInput: UpdateUserInput!): User!
 }
@@ -134,6 +135,9 @@ type Session {
 
   """ETH address"""
   siweMessage: SiweMessage!
+
+  """User"""
+  user: User
 }
 
 input SignInInput {

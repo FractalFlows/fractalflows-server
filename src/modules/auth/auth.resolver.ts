@@ -24,10 +24,13 @@ export class AuthResolver {
   @Query(() => Session, { name: 'session' })
   @UseGuards(SessionGuard)
   getSession(@Context() context) {
+    const { siwe, ens, avatar, user } = context.req.session;
+
     return {
-      siweMessage: context.req.session.siwe,
-      ens: context.req.session.ens,
-      avatar: context.req.session.avatar,
+      siweMessage: siwe,
+      ens,
+      avatar,
+      user,
     };
   }
 

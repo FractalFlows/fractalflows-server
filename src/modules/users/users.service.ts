@@ -28,12 +28,16 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(query) {
+    return await this.usersRepository.findOne(query);
   }
 
   update(id: number, updateUserInput: UpdateUserInput) {
     return `This action updates a #${id} user`;
+  }
+
+  async updateEmail(userId: string, email: string) {
+    return await this.usersRepository.save({ id: userId, email });
   }
 
   remove(id: number) {
