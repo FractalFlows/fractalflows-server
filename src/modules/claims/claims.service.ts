@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
 import { Repository } from 'typeorm';
+import { User } from '../users/entities/user.entity';
 
 import { CreateClaimInput } from './dto/create-claim.input';
 import { UpdateClaimInput } from './dto/update-claim.input';
@@ -13,7 +14,7 @@ export class ClaimsService {
     @InjectRepository(Claim) private claimsRepository: Repository<Claim>,
   ) {}
 
-  async create(createClaimInput: CreateClaimInput) {
+  async create(createClaimInput: CreateClaimInput & { user: User }) {
     let slug;
     let slugIndex = 0;
 
@@ -21,7 +22,7 @@ export class ClaimsService {
       slug = `${slugify(createClaimInput.title, {
         lower: true,
         strict: true,
-      })}${slugIndex ? `-${slugIndex}` : ''}`;
+      })}${slugIndex > 0 ? `-${slugIndex}` : ''}`;
 
       slugIndex++;
     } while (
@@ -31,8 +32,20 @@ export class ClaimsService {
     return await this.claimsRepository.save({ ...createClaimInput, slug });
   }
 
-  findAll() {
-    return `This action returns all claims`;
+  async findAll() {
+    return await this.claimsRepository.find();
+  }
+
+  async find(query) {
+    return await this.claimsRepository.find(query);
+  }
+
+  async findByUserId(userId: string) {
+    return await this.claimsRepository
+      .createQueryBuilder('claim')
+      .leftJoinAndSelect('claim.user', 'user')
+      .where('user.id = :userId', { userId })
+      .getMany();
   }
 
   async findOne(slug: string) {

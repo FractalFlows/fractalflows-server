@@ -9,6 +9,7 @@ import { SourcesService } from '../sources/sources.service';
 import { AttributionsService } from '../attributions/attributions.service';
 import { TagsService } from '../tags/tags.service';
 import { SessionGuard } from '../auth/auth.guard';
+import { UserClaimRelation } from './dto/get-user-claim.input';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -25,13 +26,14 @@ export class ClaimsResolver {
     @Args('createClaimInput') createClaimInput: CreateClaimInput,
     @Context() context,
   ) {
-    createClaimInput.userId = context.req.session.user.id;
-
     await this.sourcesService.createMany(createClaimInput.sources);
     await this.attributionsService.createMany(createClaimInput.attributions);
     await this.tagsService.createMany(createClaimInput.tags);
 
-    return await this.claimsService.create(createClaimInput);
+    return await this.claimsService.create({
+      ...createClaimInput,
+      user: context.req.session.user,
+    });
   }
 
   @Query(() => [Claim], { name: 'claims' })
@@ -42,6 +44,27 @@ export class ClaimsResolver {
   @Query(() => Claim, { name: 'claim' })
   findOne(@Args('slug') slug: string) {
     return this.claimsService.findOne(slug);
+  }
+
+  @Query(() => [Claim], { name: 'userClaims' })
+  @UseGuards(SessionGuard)
+  async findUserClaims(
+    @Args('relation', { type: () => UserClaimRelation })
+    relation: UserClaimRelation,
+    @Context() context,
+  ) {
+    const { session } = context.req;
+
+    switch (relation) {
+      case UserClaimRelation.OWN:
+        return await this.claimsService.findByUserId(session.user.id);
+      case UserClaimRelation.CONTRIBUTED:
+        return await this.claimsService.find({});
+      case UserClaimRelation.FOLLOWING:
+        return await this.claimsService.findByUserId(session.user.id);
+      default:
+        return [];
+    }
   }
 
   @Mutation(() => Claim)

@@ -73,7 +73,6 @@ input CreateClaimInput {
 
   """Title"""
   title: String!
-  userId: String
 }
 
 input CreateSourceInput {
@@ -123,6 +122,7 @@ type Query {
   sources: [Source!]!
   tag(id: Int!): Tag!
   user(id: Int!): User!
+  userClaims(relation: UserClaimRelation!): [Claim!]!
   users: [User!]!
 }
 
@@ -258,7 +258,6 @@ input UpdateClaimInput {
 
   """Title"""
   title: String
-  userId: String
 }
 
 input UpdateSourceInput {
@@ -292,4 +291,10 @@ type User {
 
   """Updated at"""
   updatedAt: String!
+}
+
+enum UserClaimRelation {
+  CONTRIBUTED
+  FOLLOWING
+  OWN
 }

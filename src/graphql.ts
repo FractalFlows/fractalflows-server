@@ -7,6 +7,12 @@
 
 /* tslint:disable */
 /* eslint-disable */
+export enum UserClaimRelation {
+    CONTRIBUTED = "CONTRIBUTED",
+    FOLLOWING = "FOLLOWING",
+    OWN = "OWN"
+}
+
 export interface CreateAttributionInput {
     identifier: string;
     origin: string;
@@ -18,7 +24,6 @@ export interface CreateClaimInput {
     summary: string;
     tags?: Nullable<CreateTagInput[]>;
     title: string;
-    userId?: Nullable<string>;
 }
 
 export interface CreateSourceInput {
@@ -62,7 +67,6 @@ export interface UpdateClaimInput {
     summary?: Nullable<string>;
     tags?: Nullable<CreateTagInput[]>;
     title?: Nullable<string>;
-    userId?: Nullable<string>;
 }
 
 export interface UpdateSourceInput {
@@ -126,6 +130,7 @@ export interface IQuery {
     sources(): Source[] | Promise<Source[]>;
     tag(id: number): Tag | Promise<Tag>;
     user(id: number): User | Promise<User>;
+    userClaims(relation: UserClaimRelation): Claim[] | Promise<Claim[]>;
     users(): User[] | Promise<User[]>;
 }
 
