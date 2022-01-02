@@ -36,12 +36,7 @@ export interface CreateTagInput {
     label: string;
 }
 
-export interface CreateUserInput {
-    email?: Nullable<string>;
-    ethAddress?: Nullable<string>;
-}
-
-export interface SignInInput {
+export interface SignInWithEthereumInput {
     avatar?: Nullable<string>;
     ens?: Nullable<string>;
     siweMessage: SiweMessageInput;
@@ -75,12 +70,6 @@ export interface UpdateSourceInput {
     url?: Nullable<string>;
 }
 
-export interface UpdateUserInput {
-    email?: Nullable<string>;
-    ethAddress?: Nullable<string>;
-    id: number;
-}
-
 export interface Attribution {
     claim: Claim;
     createdAt: string;
@@ -105,17 +94,17 @@ export interface Claim {
 
 export interface IMutation {
     createClaim(createClaimInput: CreateClaimInput): Claim | Promise<Claim>;
-    createUser(createUserInput: CreateUserInput): User | Promise<User>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
     removeClaim(id: number): Claim | Promise<Claim>;
     removeSource(id: number): Source | Promise<Source>;
     removeUser(id: number): User | Promise<User>;
-    signIn(signInInput: SignInInput): boolean | Promise<boolean>;
+    sendMagicLink(email: string): boolean | Promise<boolean>;
+    signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput): User | Promise<User>;
     signOut(): boolean | Promise<boolean>;
     updateClaim(updateClaimInput: UpdateClaimInput): Claim | Promise<Claim>;
     updateEmail(email: string): User | Promise<User>;
     updateSource(updateSourceInput: UpdateSourceInput): Source | Promise<Source>;
-    updateUser(updateUserInput: UpdateUserInput): User | Promise<User>;
+    verifyMagicLink(hash: string): User | Promise<User>;
 }
 
 export interface IQuery {
@@ -137,8 +126,8 @@ export interface IQuery {
 export interface Session {
     avatar?: Nullable<string>;
     ens?: Nullable<string>;
-    siweMessage: SiweMessage;
-    user?: Nullable<User>;
+    siweMessage?: Nullable<SiweMessage>;
+    user: User;
 }
 
 export interface SiweMessage {

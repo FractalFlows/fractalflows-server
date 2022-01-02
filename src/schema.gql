@@ -87,27 +87,19 @@ input CreateTagInput {
   label: String!
 }
 
-input CreateUserInput {
-  """Email"""
-  email: String
-
-  """Etherem wallet address"""
-  ethAddress: String
-}
-
 type Mutation {
   createClaim(createClaimInput: CreateClaimInput!): Claim!
-  createUser(createUserInput: CreateUserInput!): User!
   removeAttribution(id: Int!): Attribution!
   removeClaim(id: Int!): Claim!
   removeSource(id: Int!): Source!
   removeUser(id: Int!): User!
-  signIn(signInInput: SignInInput!): Boolean!
+  sendMagicLink(email: String!): Boolean!
+  signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput!): User!
   signOut: Boolean!
   updateClaim(updateClaimInput: UpdateClaimInput!): Claim!
   updateEmail(email: String!): User!
   updateSource(updateSourceInput: UpdateSourceInput!): Source!
-  updateUser(updateUserInput: UpdateUserInput!): User!
+  verifyMagicLink(hash: String!): User!
 }
 
 type Query {
@@ -134,13 +126,13 @@ type Session {
   ens: String
 
   """ETH address"""
-  siweMessage: SiweMessage!
+  siweMessage: SiweMessage
 
   """User"""
-  user: User
+  user: User!
 }
 
-input SignInInput {
+input SignInWithEthereumInput {
   avatar: String
   ens: String
 
@@ -264,15 +256,6 @@ input UpdateSourceInput {
   id: Int!
   origin: String
   url: String
-}
-
-input UpdateUserInput {
-  """Email"""
-  email: String
-
-  """Etherem wallet address"""
-  ethAddress: String
-  id: Int!
 }
 
 type User {

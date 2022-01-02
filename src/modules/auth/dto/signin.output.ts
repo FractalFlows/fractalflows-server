@@ -36,8 +36,8 @@ export class SiweMessage {
 
 @ObjectType()
 export class Session {
-  @Field(() => SiweMessage, { description: 'ETH address' })
-  siweMessage: SiweMessage;
+  @Field(() => SiweMessage, { description: 'ETH address', nullable: true })
+  siweMessage?: SiweMessage;
 
   @Field(() => String, { description: 'ENS', nullable: true })
   ens?: string;
@@ -45,6 +45,6 @@ export class Session {
   @Field(() => String, { description: 'Avatar', nullable: true })
   avatar?: string;
 
-  @Field(() => User, { description: 'User', nullable: true })
+  @Field(() => User, { description: 'User' })
   user: User;
 }

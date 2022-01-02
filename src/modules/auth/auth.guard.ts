@@ -11,7 +11,7 @@ export class SessionGuard implements CanActivate {
     const { session } = ctx.getContext().req;
 
     try {
-      if (session.siwe) {
+      if (session.user) {
         return true;
       }
     } catch (e) {

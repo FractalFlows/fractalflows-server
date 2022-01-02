@@ -1,22 +1,15 @@
 import { Resolver, Query, Mutation, Args, Int, Context } from '@nestjs/graphql';
 import { Not } from 'typeorm';
-import { ConsoleLogger, UseGuards } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { CreateUserInput } from './dto/create-user.input';
-import { UpdateUserInput } from './dto/update-user.input';
 import { SessionGuard } from '../auth/auth.guard';
 
 @Resolver(() => User)
 export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
-
-  @Mutation(() => User)
-  createUser(@Args('createUserInput') createUserInput: CreateUserInput) {
-    // return this.usersService.create(createUserInput);
-    return true;
-  }
 
   @Query(() => [User], { name: 'users' })
   findAll() {
@@ -30,20 +23,14 @@ export class UsersResolver {
 
   @Mutation(() => User)
   @UseGuards(SessionGuard)
-  updateUser(@Args('updateUserInput') updateUserInput: UpdateUserInput) {
-    return this.usersService.update(updateUserInput.id, updateUserInput);
-  }
-
-  @Mutation(() => User)
-  @UseGuards(SessionGuard)
   async updateEmail(@Args('email') email: string, @Context() context) {
     const userId = context.req.session.user.id;
 
-    const inUse = await this.usersService.findOne({
+    const isEmailAlreadyInUse = await this.usersService.findOne({
       where: { email, id: Not(userId) },
     });
 
-    if (inUse) {
+    if (isEmailAlreadyInUse) {
       throw new Error('Email already in use');
     } else {
       const user = this.usersService.updateEmail(userId, email);

@@ -13,4 +13,10 @@ export class CreateUserInput {
     nullable: true,
   })
   email?: string;
+
+  @Field(() => String, {
+    description: 'Magic link hash',
+    nullable: true,
+  })
+  magicLinkHash?: string;
 }

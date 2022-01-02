@@ -18,6 +18,9 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   email?: string;
 
+  @Column({ nullable: true })
+  magicLinkHash?: string;
+
   @Field(() => [Claim], { description: 'User claims', nullable: true })
   @OneToMany(() => Claim, (claim) => claim.user)
   claims: Claim[];

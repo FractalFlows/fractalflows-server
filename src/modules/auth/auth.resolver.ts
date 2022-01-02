@@ -1,11 +1,13 @@
 import { Context, Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import crypto from 'crypto';
 
 import { AuthService } from './auth.service';
 import { SessionGuard } from './auth.guard';
-import { SignInInput } from './dto/signin.input';
+import { SignInWithEthereumInput } from './dto/signin.input';
 import { Session } from './dto/signin.output';
 import { UsersService } from '../users/users.service';
+import { User } from '../users/entities/user.entity';
 
 @Resolver()
 export class AuthResolver {
@@ -34,25 +36,30 @@ export class AuthResolver {
     };
   }
 
-  @Mutation(() => Boolean)
-  async signIn(
-    @Args('signInInput') signInInput: SignInInput,
+  @Mutation(() => User)
+  async signInWithEthereum(
+    @Args('signInWithEthereumInput')
+    signInWithEthereumInput: SignInWithEthereumInput,
     @Context() context,
   ) {
     const { session } = context.req;
 
     try {
-      const siwe = await this.authService.signIn(signInInput, session.nonce);
+      const siwe = await this.authService.signInWithEthereum(
+        signInWithEthereumInput,
+        session.nonce,
+      );
       const user = await this.usersService.createIfDoesntExist({
-        ethAddress: signInInput.siweMessage.address,
+        ethAddress: signInWithEthereumInput.siweMessage.address,
       });
 
       session.user = user;
       session.siwe = siwe;
-      session.ens = signInInput.ens;
-      session.avatar = signInInput.avatar;
+      session.ens = signInWithEthereumInput.ens;
+      session.avatar = signInWithEthereumInput.avatar;
       session.nonce = null;
-      session.cookie.expires = new Date(siwe.expirationTime);
+
+      return user;
     } catch (e) {
       session.siwe = null;
       session.nonce = null;
@@ -60,8 +67,46 @@ export class AuthResolver {
 
       throw new Error(e.message);
     }
+  }
+
+  @Mutation(() => Boolean)
+  async sendMagicLink(@Args('email') email: string) {
+    const hash = crypto.randomBytes(36).toString('hex');
+
+    await this.authService.sendMagicLink({
+      email,
+      hash,
+    });
+
+    const user = await this.usersService.findOne({
+      where: { email },
+    });
+    await this.usersService.createIfDoesntExist({
+      ...(user ? { id: user.id } : { email }),
+      magicLinkHash: hash,
+    });
 
     return true;
+  }
+
+  @Mutation(() => User)
+  async verifyMagicLink(@Args('hash') hash: string, @Context() context) {
+    const user = await this.usersService.findOne({
+      where: { magicLinkHash: hash },
+    });
+
+    if (user) {
+      context.req.session.user = user;
+
+      this.usersService.save({
+        id: user.id,
+        magicLinkHash: null,
+      });
+
+      return user;
+    } else {
+      throw new Error('Invalid magic link');
+    }
   }
 
   @Mutation(() => Boolean)
