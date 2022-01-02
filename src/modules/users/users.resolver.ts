@@ -25,16 +25,35 @@ export class UsersResolver {
   @UseGuards(SessionGuard)
   async updateEmail(@Args('email') email: string, @Context() context) {
     const userId = context.req.session.user.id;
-
-    const isEmailAlreadyInUse = await this.usersService.findOne({
+    const isEmailAddressAlreadyInUse = await this.usersService.findOne({
       where: { email, id: Not(userId) },
     });
 
-    if (isEmailAlreadyInUse) {
-      throw new Error('Email already in use');
+    if (isEmailAddressAlreadyInUse) {
+      throw new Error('Email address already in use');
     } else {
-      const user = this.usersService.updateEmail(userId, email);
+      const user = this.usersService.save({ id: userId, email });
       context.req.session.user.email = email;
+      return user;
+    }
+  }
+
+  @Mutation(() => User)
+  @UseGuards(SessionGuard)
+  async connectEthereumWallet(
+    @Args('address') address: string,
+    @Context() context,
+  ) {
+    const userId = context.req.session.user.id;
+    const isEthAddressAlreadyInUse = await this.usersService.findOne({
+      where: { ethAddress: address, id: Not(userId) },
+    });
+
+    if (isEthAddressAlreadyInUse) {
+      throw new Error('Ethereum address already in use');
+    } else {
+      const user = this.usersService.save({ id: userId, ethAddress: address });
+      context.req.session.user.ethAddress = address;
       return user;
     }
   }

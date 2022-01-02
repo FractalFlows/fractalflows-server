@@ -100,7 +100,7 @@ export class AuthResolver {
 
       this.usersService.save({
         id: user.id,
-        magicLinkHash: null,
+        magicLinkHash: '',
       });
 
       return user;

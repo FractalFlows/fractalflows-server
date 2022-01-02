@@ -93,6 +93,7 @@ export interface Claim {
 }
 
 export interface IMutation {
+    connectEthereumWallet(address: string): User | Promise<User>;
     createClaim(createClaimInput: CreateClaimInput): Claim | Promise<Claim>;
     generateAPIKey(): string | Promise<string>;
     removeAPIKey(): boolean | Promise<boolean>;

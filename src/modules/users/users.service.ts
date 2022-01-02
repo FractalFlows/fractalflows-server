@@ -35,10 +35,6 @@ export class UsersService {
     return await this.usersRepository.save(query);
   }
 
-  async updateEmail(userId: string, email: string) {
-    return await this.usersRepository.save({ id: userId, email });
-  }
-
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
