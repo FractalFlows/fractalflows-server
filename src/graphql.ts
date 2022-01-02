@@ -94,10 +94,11 @@ export interface Claim {
 
 export interface IMutation {
     createClaim(createClaimInput: CreateClaimInput): Claim | Promise<Claim>;
+    generateAPIKey(): string | Promise<string>;
+    removeAPIKey(): boolean | Promise<boolean>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
     removeClaim(id: number): Claim | Promise<Claim>;
     removeSource(id: number): Source | Promise<Source>;
-    removeUser(id: number): User | Promise<User>;
     sendMagicLink(email: string): boolean | Promise<boolean>;
     signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput): User | Promise<User>;
     signOut(): boolean | Promise<boolean>;
@@ -108,6 +109,7 @@ export interface IMutation {
 }
 
 export interface IQuery {
+    apiKey(): Nullable<string> | Promise<Nullable<string>>;
     attribution(id: number): Attribution | Promise<Attribution>;
     attributions(): Attribution[] | Promise<Attribution[]>;
     claim(slug: string): Claim | Promise<Claim>;
@@ -160,6 +162,7 @@ export interface Tag {
 }
 
 export interface User {
+    apiKey?: Nullable<string>;
     claims?: Nullable<Claim[]>;
     createdAt: string;
     email?: Nullable<string>;

@@ -71,7 +71,7 @@ export class AuthResolver {
 
   @Mutation(() => Boolean)
   async sendMagicLink(@Args('email') email: string) {
-    const hash = crypto.randomBytes(36).toString('hex');
+    const hash = crypto.randomBytes(24).toString('hex');
 
     await this.authService.sendMagicLink({
       email,

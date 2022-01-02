@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
@@ -11,6 +11,7 @@ import { ClaimsModule } from './modules/claims/claims.module';
 import { SourcesModule } from './modules/sources/sources.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { AttributionsModule } from './modules/attributions/attributions.module';
+import { AuthAPIKeyMiddleware } from './modules/auth/auth-api-key.middleware';
 
 @Module({
   imports: [
@@ -42,4 +43,8 @@ import { AttributionsModule } from './modules/attributions/attributions.module';
   ],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthAPIKeyMiddleware).forRoutes('*');
+  }
+}
