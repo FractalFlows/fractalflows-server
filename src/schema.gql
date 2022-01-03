@@ -110,6 +110,12 @@ type Mutation {
   verifyMagicLink(hash: String!): User!
 }
 
+type Profile {
+  avatar: String
+  ethAddress: String
+  username: String!
+}
+
 type Query {
   apiKey: String
   attribution(id: Int!): Attribution!
@@ -117,13 +123,14 @@ type Query {
   claim(slug: String!): Claim!
   claims: [Claim!]!
   nonce: String!
+  profile(username: String!): Profile
   searchTags(term: String): [Tag!]!
   session: Session!
   source(id: Int!): Source!
   sources: [Source!]!
   tag(id: Int!): Tag!
   user(id: Int!): User!
-  userClaims(relation: UserClaimRelation!): [Claim!]!
+  userClaims(relation: UserClaimRelation!, username: String!): [Claim!]!
   users: [User!]!
 }
 

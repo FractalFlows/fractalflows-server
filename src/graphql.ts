@@ -127,6 +127,12 @@ export interface IMutation {
     verifyMagicLink(hash: string): User | Promise<User>;
 }
 
+export interface Profile {
+    avatar?: Nullable<string>;
+    ethAddress?: Nullable<string>;
+    username: string;
+}
+
 export interface IQuery {
     apiKey(): Nullable<string> | Promise<Nullable<string>>;
     attribution(id: number): Attribution | Promise<Attribution>;
@@ -134,13 +140,14 @@ export interface IQuery {
     claim(slug: string): Claim | Promise<Claim>;
     claims(): Claim[] | Promise<Claim[]>;
     nonce(): string | Promise<string>;
+    profile(username: string): Nullable<Profile> | Promise<Nullable<Profile>>;
     searchTags(term?: Nullable<string>): Tag[] | Promise<Tag[]>;
     session(): Session | Promise<Session>;
     source(id: number): Source | Promise<Source>;
     sources(): Source[] | Promise<Source[]>;
     tag(id: number): Tag | Promise<Tag>;
     user(id: number): User | Promise<User>;
-    userClaims(relation: UserClaimRelation): Claim[] | Promise<Claim[]>;
+    userClaims(relation: UserClaimRelation, username: string): Claim[] | Promise<Claim[]>;
     users(): User[] | Promise<User[]>;
 }
 

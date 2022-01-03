@@ -7,6 +7,7 @@ import { Claim } from './entities/claim.entity';
 import { AttributionsModule } from '../attributions/attributions.module';
 import { SourcesModule } from '../sources/sources.module';
 import { TagsModule } from '../tags/tags.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { TagsModule } from '../tags/tags.module';
     AttributionsModule,
     SourcesModule,
     TagsModule,
+    UsersModule,
   ],
   providers: [ClaimsResolver, ClaimsService],
 })

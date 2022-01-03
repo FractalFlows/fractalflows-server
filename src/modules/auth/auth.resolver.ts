@@ -59,7 +59,7 @@ export class AuthResolver {
       if (user) {
         session.user = user;
       } else {
-        await this.usersService.create({
+        const newUser = await this.usersService.create({
           ethAddress: signInWithEthereumInput.siweMessage.address,
           username:
             signInWithEthereumInput.ens ??
@@ -68,12 +68,13 @@ export class AuthResolver {
           avatar: signInWithEthereumInput.avatar,
           avatarSource: AvatarSource.ENS,
         });
+        session.user = newUser;
       }
 
       session.siweMessage = siweMessage;
       session.nonce = null;
 
-      return user;
+      return session.user;
     } catch (e) {
       session.siweMessage = null;
       session.nonce = null;
@@ -103,6 +104,7 @@ export class AuthResolver {
       });
     } else {
       await this.usersService.create({
+        email,
         username: email,
         usernameSource: UsernameSource.CUSTOM,
         avatar: getGravatarURL(email),

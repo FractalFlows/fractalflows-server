@@ -8,6 +8,7 @@ import { AvatarSource, User, UsernameSource } from './entities/user.entity';
 import { SessionGuard } from '../auth/auth.guard';
 import { getGravatarURL } from 'src/common/utils/gravatar';
 import { UpdateProfileInput } from './dto/update-profile.input';
+import { Profile } from './dto/profile.output';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -76,21 +77,18 @@ export class UsersResolver {
       throw new Error('Email address already in use');
     } else {
       const user = await this.usersService.findOne(userId);
-      const validatedUpdateEmailInput = {
+
+      await this.usersService.save({
         id: userId,
         email,
         avatar:
           user.avatarSource === AvatarSource.GRAVATAR
             ? getGravatarURL(email)
             : undefined,
-      };
-      const userWithUpdatedEmail = await this.usersService.save(
-        validatedUpdateEmailInput,
-      );
-      context.req.session.user = {
-        ...context.req.session.user,
-        ...validatedUpdateEmailInput,
-      };
+      });
+
+      const userWithUpdatedEmail = await this.usersService.findOne(userId);
+      context.req.session.user = userWithUpdatedEmail;
 
       return userWithUpdatedEmail;
     }
@@ -113,6 +111,17 @@ export class UsersResolver {
       const user = this.usersService.save({ id: userId, ethAddress: address });
       context.req.session.user.ethAddress = address;
       return user;
+    }
+  }
+
+  @Query(() => Profile, { name: 'profile', nullable: true })
+  async getProfile(@Args('username') username: string) {
+    const user = await this.usersService.findOne({ where: { username } });
+
+    if (user) {
+      return user;
+    } else {
+      throw new Error('User not found');
     }
   }
 
