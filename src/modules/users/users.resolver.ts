@@ -129,7 +129,9 @@ export class UsersResolver {
   @UseGuards(SessionGuard)
   async getAPIKey(@Context() context) {
     const user = await this.usersService.findOne(context.req.session.user.id);
-    return user.apiKey;
+    return `${user.apiKey.substring(0, 6)}...${user.apiKey.substring(
+      user.apiKey.length - 6,
+    )}`;
   }
 
   @Mutation(() => String)
