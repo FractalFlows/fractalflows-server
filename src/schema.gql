@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type APIKey {
+  key: String!
+  secret: String
+}
+
 type Attribution {
   """Claim"""
   claim: Claim!
@@ -18,6 +23,11 @@ type Attribution {
 
   """Updated at"""
   updatedAt: String!
+}
+
+enum AvatarSource {
+  ENS
+  GRAVATAR
 }
 
 type Claim {
@@ -73,7 +83,6 @@ input CreateClaimInput {
 
   """Title"""
   title: String!
-  userId: String
 }
 
 input CreateSourceInput {
@@ -88,55 +97,55 @@ input CreateTagInput {
   label: String!
 }
 
-input CreateUserInput {
-  """Email"""
-  email: String
-
-  """Etherem wallet address"""
-  ethAddress: String
-}
-
 type Mutation {
+  connectEthereumWallet(address: String!): User!
+  createAPIKey: APIKey!
   createClaim(createClaimInput: CreateClaimInput!): Claim!
-  createUser(createUserInput: CreateUserInput!): User!
+  removeAPIKey: Boolean!
   removeAttribution(id: Int!): Attribution!
   removeClaim(id: Int!): Claim!
   removeSource(id: Int!): Source!
-  removeUser(id: Int!): User!
-  signIn(signInInput: SignInInput!): Boolean!
+  sendMagicLink(email: String!): Boolean!
+  signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput!): User!
   signOut: Boolean!
   updateClaim(updateClaimInput: UpdateClaimInput!): Claim!
+  updateEmail(email: String!): User!
+  updateProfile(updateProfileInput: UpdateProfileInput!): User!
   updateSource(updateSourceInput: UpdateSourceInput!): Source!
-  updateUser(updateUserInput: UpdateUserInput!): User!
+  verifyMagicLink(hash: String!): User!
+}
+
+type Profile {
+  avatar: String
+  ethAddress: String
+  username: String!
 }
 
 type Query {
+  apiKey: String
   attribution(id: Int!): Attribution!
   attributions: [Attribution!]!
   claim(slug: String!): Claim!
   claims: [Claim!]!
   nonce: String!
+  profile(username: String!): Profile
   searchTags(term: String): [Tag!]!
   session: Session!
   source(id: Int!): Source!
   sources: [Source!]!
   tag(id: Int!): Tag!
-  user(id: Int!): User!
-  users: [User!]!
+  userClaims(relation: UserClaimRelation!, username: String!): [Claim!]!
 }
 
 type Session {
-  """Avatar"""
-  avatar: String
+  """SIWE Message"""
+  siweMessage: SiweMessage
 
-  """ENS"""
-  ens: String
-
-  """ETH address"""
-  siweMessage: SiweMessage!
+  """User"""
+  user: User!
 }
 
-input SignInInput {
+input SignInWithEthereumInput {
   avatar: String
   ens: String
 
@@ -254,7 +263,13 @@ input UpdateClaimInput {
 
   """Title"""
   title: String
-  userId: String
+}
+
+input UpdateProfileInput {
+  avatar: String
+  avatarSource: AvatarSource!
+  username: String!
+  usernameSource: UsernameSource!
 }
 
 input UpdateSourceInput {
@@ -263,16 +278,19 @@ input UpdateSourceInput {
   url: String
 }
 
-input UpdateUserInput {
-  """Email"""
-  email: String
-
-  """Etherem wallet address"""
-  ethAddress: String
-  id: Int!
-}
-
 type User {
+  """API Key"""
+  apiKey: String
+
+  """API Secret"""
+  apiSecret: String
+
+  """Avatar"""
+  avatar: String
+
+  """Avatar source"""
+  avatarSource: AvatarSource
+
   """User claims"""
   claims: [Claim!]
 
@@ -288,4 +306,21 @@ type User {
 
   """Updated at"""
   updatedAt: String!
+
+  """Username"""
+  username: String
+
+  """Username source"""
+  usernameSource: UsernameSource
+}
+
+enum UserClaimRelation {
+  CONTRIBUTED
+  FOLLOWING
+  OWN
+}
+
+enum UsernameSource {
+  CUSTOM
+  ENS
 }

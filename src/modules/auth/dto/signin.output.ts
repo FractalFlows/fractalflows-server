@@ -1,4 +1,5 @@
 import { ObjectType, Field } from '@nestjs/graphql';
+import { User } from 'src/modules/users/entities/user.entity';
 
 @ObjectType()
 export class SiweMessage {
@@ -35,12 +36,9 @@ export class SiweMessage {
 
 @ObjectType()
 export class Session {
-  @Field(() => SiweMessage, { description: 'ETH address' })
-  siweMessage: SiweMessage;
+  @Field(() => SiweMessage, { description: 'SIWE Message', nullable: true })
+  siweMessage?: SiweMessage;
 
-  @Field(() => String, { description: 'ENS', nullable: true })
-  ens?: string;
-
-  @Field(() => String, { description: 'Avatar', nullable: true })
-  avatar?: string;
+  @Field(() => User, { description: 'User' })
+  user: User;
 }

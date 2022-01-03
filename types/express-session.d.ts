@@ -1,9 +1,10 @@
 import 'express-session';
+import { User } from './modules/users/entities/user.entity';
 
 declare module 'express-session' {
   interface SessionData {
-    siwe: SiweMessage;
-    nonce: string;
-    ens: string;
+    siweMessage?: SiweMessage;
+    user?: User;
+    nonce?: string;
   }
 }

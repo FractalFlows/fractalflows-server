@@ -34,7 +34,7 @@ export class SiweMessageInput {
 }
 
 @InputType()
-export class SignInInput {
+export class SignInWithEthereumInput {
   @Field(() => SiweMessageInput, { description: ' ' })
   siweMessage: SiweMessageInput;
 

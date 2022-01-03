@@ -1,11 +1,19 @@
 import { Context, Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import crypto from 'crypto';
 
 import { AuthService } from './auth.service';
 import { SessionGuard } from './auth.guard';
-import { SignInInput } from './dto/signin.input';
+import { SignInWithEthereumInput } from './dto/signin.input';
 import { Session } from './dto/signin.output';
 import { UsersService } from '../users/users.service';
+import {
+  AvatarSource,
+  User,
+  UsernameSource,
+} from '../users/entities/user.entity';
+import { getGravatarURL } from 'src/common/utils/gravatar';
+import { CurrentUser } from './current-user.decorator';
 
 @Resolver()
 export class AuthResolver {
@@ -23,42 +31,109 @@ export class AuthResolver {
 
   @Query(() => Session, { name: 'session' })
   @UseGuards(SessionGuard)
-  getSession(@Context() context) {
+  getSession(@CurrentUser() user: User, @Context() context) {
+    const { siweMessage } = context.req.session;
+
     return {
-      siweMessage: context.req.session.siwe,
-      ens: context.req.session.ens,
-      avatar: context.req.session.avatar,
+      siweMessage,
+      user,
     };
   }
 
-  @Mutation(() => Boolean)
-  async signIn(
-    @Args('signInInput') signInInput: SignInInput,
+  @Mutation(() => User)
+  async signInWithEthereum(
+    @Args('signInWithEthereumInput')
+    signInWithEthereumInput: SignInWithEthereumInput,
     @Context() context,
   ) {
     const { session } = context.req;
 
     try {
-      const siwe = await this.authService.signIn(signInInput, session.nonce);
-      const user = await this.usersService.createIfDoesntExist({
-        ethAddress: signInInput.siweMessage.address,
+      const siweMessage = await this.authService.signInWithEthereum(
+        signInWithEthereumInput,
+        session.nonce,
+      );
+      const user = await this.usersService.findOne({
+        ethAddress: signInWithEthereumInput.siweMessage.address,
       });
 
-      session.user = user;
-      session.siwe = siwe;
-      session.ens = signInInput.ens;
-      session.avatar = signInInput.avatar;
+      if (user) {
+        session.user = user;
+      } else {
+        const newUser = await this.usersService.create({
+          ethAddress: signInWithEthereumInput.siweMessage.address,
+          username:
+            signInWithEthereumInput.ens ??
+            signInWithEthereumInput.siweMessage.address,
+          usernameSource: UsernameSource.ENS,
+          avatar: signInWithEthereumInput.avatar,
+          avatarSource: AvatarSource.ENS,
+        });
+        session.user = newUser;
+      }
+
+      session.siweMessage = siweMessage;
       session.nonce = null;
-      session.cookie.expires = new Date(siwe.expirationTime);
+
+      return session.user;
     } catch (e) {
-      session.siwe = null;
+      session.siweMessage = null;
       session.nonce = null;
-      session.ens = null;
 
       throw new Error(e.message);
     }
+  }
+
+  @Mutation(() => Boolean)
+  async sendMagicLink(@Args('email') email: string) {
+    const hash = crypto.randomBytes(24).toString('hex');
+
+    await this.authService.sendMagicLink({
+      email,
+      hash,
+    });
+
+    const user = await this.usersService.findOne({
+      where: { email },
+    });
+
+    if (user) {
+      await this.usersService.save({
+        id: user.id,
+        magicLinkHash: hash,
+      });
+    } else {
+      await this.usersService.create({
+        email,
+        username: email,
+        usernameSource: UsernameSource.CUSTOM,
+        avatar: getGravatarURL(email),
+        avatarSource: AvatarSource.GRAVATAR,
+        magicLinkHash: hash,
+      });
+    }
 
     return true;
+  }
+
+  @Mutation(() => User)
+  async verifyMagicLink(@Args('hash') hash: string, @Context() context) {
+    const user = await this.usersService.findOne({
+      where: { magicLinkHash: hash },
+    });
+
+    if (user) {
+      context.req.session.user = user;
+
+      this.usersService.save({
+        id: user.id,
+        magicLinkHash: '',
+      });
+
+      return user;
+    } else {
+      throw new Error('Invalid magic link');
+    }
   }
 
   @Mutation(() => Boolean)

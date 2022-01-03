@@ -9,6 +9,10 @@ import { SourcesService } from '../sources/sources.service';
 import { AttributionsService } from '../attributions/attributions.service';
 import { TagsService } from '../tags/tags.service';
 import { SessionGuard } from '../auth/auth.guard';
+import { UserClaimRelation } from './dto/get-user-claim.input';
+import { UsersService } from '../users/users.service';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { User } from '../users/entities/user.entity';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -17,21 +21,23 @@ export class ClaimsResolver {
     private readonly sourcesService: SourcesService,
     private readonly tagsService: TagsService,
     private readonly attributionsService: AttributionsService,
+    private readonly usersService: UsersService,
   ) {}
 
   @Mutation(() => Claim)
   @UseGuards(SessionGuard)
   async createClaim(
     @Args('createClaimInput') createClaimInput: CreateClaimInput,
-    @Context() context,
+    @CurrentUser() user: User,
   ) {
-    createClaimInput.userId = context.req.session.user.id;
-
     await this.sourcesService.createMany(createClaimInput.sources);
     await this.attributionsService.createMany(createClaimInput.attributions);
     await this.tagsService.createMany(createClaimInput.tags);
 
-    return await this.claimsService.create(createClaimInput);
+    return await this.claimsService.create({
+      ...createClaimInput,
+      user,
+    });
   }
 
   @Query(() => [Claim], { name: 'claims' })
@@ -42,6 +48,26 @@ export class ClaimsResolver {
   @Query(() => Claim, { name: 'claim' })
   findOne(@Args('slug') slug: string) {
     return this.claimsService.findOne(slug);
+  }
+
+  @Query(() => [Claim], { name: 'userClaims' })
+  async findUserClaims(
+    @Args('username') username: string,
+    @Args('relation', { type: () => UserClaimRelation })
+    relation: UserClaimRelation,
+  ) {
+    const user = await this.usersService.findOne({ where: { username } });
+
+    switch (relation) {
+      case UserClaimRelation.OWN:
+        return await this.claimsService.findByUserId(user.id);
+      case UserClaimRelation.CONTRIBUTED:
+        return await this.claimsService.find({});
+      case UserClaimRelation.FOLLOWING:
+        return await this.claimsService.findByUserId(user.id);
+      default:
+        return [];
+    }
   }
 
   @Mutation(() => Claim)

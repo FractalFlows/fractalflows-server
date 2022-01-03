@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { InfuraService } from 'src/common/services/infura';
 import { Repository } from 'typeorm';
 
 import { CreateUserInput } from './dto/create-user.input';
-import { UpdateUserInput } from './dto/update-user.input';
 import { User } from './entities/user.entity';
 
 @Injectable()
@@ -11,6 +11,10 @@ export class UsersService {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
   ) {}
+
+  async create(createUserInput: CreateUserInput) {
+    return await this.usersRepository.save(createUserInput);
+  }
 
   async createIfDoesntExist(createUserInput: CreateUserInput) {
     const user = await this.usersRepository.findOne({
@@ -24,16 +28,28 @@ export class UsersService {
     }
   }
 
+  async getENSName(ethAddress: string): Promise<string> {
+    const infuraProvider = InfuraService.getProvider('1');
+    await infuraProvider.ready;
+    return (await infuraProvider.lookupAddress(ethAddress)) ?? ethAddress;
+  }
+
+  async getENSAvatarURL(ethAddress: string): Promise<string | void> {
+    const infuraProvider = InfuraService.getProvider('1');
+    await infuraProvider.ready;
+    return (await infuraProvider.getAvatar(ethAddress)) ?? '';
+  }
+
   async findAll(): Promise<User[]> {
     return this.usersRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(query): Promise<User> {
+    return await this.usersRepository.findOne(query);
   }
 
-  update(id: number, updateUserInput: UpdateUserInput) {
-    return `This action updates a #${id} user`;
+  async save(query) {
+    return await this.usersRepository.save(query);
   }
 
   remove(id: number) {

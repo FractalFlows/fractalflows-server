@@ -7,6 +7,22 @@
 
 /* tslint:disable */
 /* eslint-disable */
+export enum AvatarSource {
+    ENS = "ENS",
+    GRAVATAR = "GRAVATAR"
+}
+
+export enum UserClaimRelation {
+    CONTRIBUTED = "CONTRIBUTED",
+    FOLLOWING = "FOLLOWING",
+    OWN = "OWN"
+}
+
+export enum UsernameSource {
+    CUSTOM = "CUSTOM",
+    ENS = "ENS"
+}
+
 export interface CreateAttributionInput {
     identifier: string;
     origin: string;
@@ -18,7 +34,6 @@ export interface CreateClaimInput {
     summary: string;
     tags?: Nullable<CreateTagInput[]>;
     title: string;
-    userId?: Nullable<string>;
 }
 
 export interface CreateSourceInput {
@@ -31,12 +46,7 @@ export interface CreateTagInput {
     label: string;
 }
 
-export interface CreateUserInput {
-    email?: Nullable<string>;
-    ethAddress?: Nullable<string>;
-}
-
-export interface SignInInput {
+export interface SignInWithEthereumInput {
     avatar?: Nullable<string>;
     ens?: Nullable<string>;
     siweMessage: SiweMessageInput;
@@ -62,7 +72,13 @@ export interface UpdateClaimInput {
     summary?: Nullable<string>;
     tags?: Nullable<CreateTagInput[]>;
     title?: Nullable<string>;
-    userId?: Nullable<string>;
+}
+
+export interface UpdateProfileInput {
+    avatar?: Nullable<string>;
+    avatarSource: AvatarSource;
+    username: string;
+    usernameSource: UsernameSource;
 }
 
 export interface UpdateSourceInput {
@@ -71,10 +87,9 @@ export interface UpdateSourceInput {
     url?: Nullable<string>;
 }
 
-export interface UpdateUserInput {
-    email?: Nullable<string>;
-    ethAddress?: Nullable<string>;
-    id: number;
+export interface APIKey {
+    key: string;
+    secret?: Nullable<string>;
 }
 
 export interface Attribution {
@@ -100,38 +115,48 @@ export interface Claim {
 }
 
 export interface IMutation {
+    connectEthereumWallet(address: string): User | Promise<User>;
+    createAPIKey(): APIKey | Promise<APIKey>;
     createClaim(createClaimInput: CreateClaimInput): Claim | Promise<Claim>;
-    createUser(createUserInput: CreateUserInput): User | Promise<User>;
+    removeAPIKey(): boolean | Promise<boolean>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
     removeClaim(id: number): Claim | Promise<Claim>;
     removeSource(id: number): Source | Promise<Source>;
-    removeUser(id: number): User | Promise<User>;
-    signIn(signInInput: SignInInput): boolean | Promise<boolean>;
+    sendMagicLink(email: string): boolean | Promise<boolean>;
+    signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput): User | Promise<User>;
     signOut(): boolean | Promise<boolean>;
     updateClaim(updateClaimInput: UpdateClaimInput): Claim | Promise<Claim>;
+    updateEmail(email: string): User | Promise<User>;
+    updateProfile(updateProfileInput: UpdateProfileInput): User | Promise<User>;
     updateSource(updateSourceInput: UpdateSourceInput): Source | Promise<Source>;
-    updateUser(updateUserInput: UpdateUserInput): User | Promise<User>;
+    verifyMagicLink(hash: string): User | Promise<User>;
+}
+
+export interface Profile {
+    avatar?: Nullable<string>;
+    ethAddress?: Nullable<string>;
+    username: string;
 }
 
 export interface IQuery {
+    apiKey(): Nullable<string> | Promise<Nullable<string>>;
     attribution(id: number): Attribution | Promise<Attribution>;
     attributions(): Attribution[] | Promise<Attribution[]>;
     claim(slug: string): Claim | Promise<Claim>;
     claims(): Claim[] | Promise<Claim[]>;
     nonce(): string | Promise<string>;
+    profile(username: string): Nullable<Profile> | Promise<Nullable<Profile>>;
     searchTags(term?: Nullable<string>): Tag[] | Promise<Tag[]>;
     session(): Session | Promise<Session>;
     source(id: number): Source | Promise<Source>;
     sources(): Source[] | Promise<Source[]>;
     tag(id: number): Tag | Promise<Tag>;
-    user(id: number): User | Promise<User>;
-    users(): User[] | Promise<User[]>;
+    userClaims(relation: UserClaimRelation, username: string): Claim[] | Promise<Claim[]>;
 }
 
 export interface Session {
-    avatar?: Nullable<string>;
-    ens?: Nullable<string>;
-    siweMessage: SiweMessage;
+    siweMessage?: Nullable<SiweMessage>;
+    user: User;
 }
 
 export interface SiweMessage {
@@ -164,12 +189,18 @@ export interface Tag {
 }
 
 export interface User {
+    apiKey?: Nullable<string>;
+    apiSecret?: Nullable<string>;
+    avatar?: Nullable<string>;
+    avatarSource?: Nullable<AvatarSource>;
     claims?: Nullable<Claim[]>;
     createdAt: string;
     email?: Nullable<string>;
     ethAddress?: Nullable<string>;
     id: string;
     updatedAt: string;
+    username?: Nullable<string>;
+    usernameSource?: Nullable<UsernameSource>;
 }
 
 type Nullable<T> = T | null;

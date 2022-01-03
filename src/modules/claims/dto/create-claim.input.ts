@@ -3,7 +3,6 @@ import { InputType, Field } from '@nestjs/graphql';
 import { CreateAttributionInput } from 'src/modules/attributions/dto/create-attribution.input';
 import { CreateSourceInput } from 'src/modules/sources/dto/create-source.input';
 import { CreateTagInput } from 'src/modules/tags/dto/create-tag.input';
-
 @InputType()
 export class CreateClaimInput {
   @Field(() => String, { description: 'Title' })
@@ -23,7 +22,4 @@ export class CreateClaimInput {
     nullable: true,
   })
   attributions: CreateAttributionInput[];
-
-  @Field(() => String, { nullable: true })
-  userId?: string;
 }
