@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { InfuraService } from 'src/common/services/infura';
 import { Repository } from 'typeorm';
 
 import { CreateUserInput } from './dto/create-user.input';
@@ -11,6 +12,10 @@ export class UsersService {
     @InjectRepository(User) private usersRepository: Repository<User>,
   ) {}
 
+  async create(createUserInput: CreateUserInput) {
+    return await this.usersRepository.save(createUserInput);
+  }
+
   async createIfDoesntExist(createUserInput: CreateUserInput) {
     const user = await this.usersRepository.findOne({
       where: createUserInput,
@@ -21,6 +26,18 @@ export class UsersService {
     } else {
       return await this.usersRepository.save(createUserInput);
     }
+  }
+
+  async getENSName(ethAddress: string): Promise<string> {
+    const infuraProvider = InfuraService.getProvider('1');
+    await infuraProvider.ready;
+    return (await infuraProvider.lookupAddress(ethAddress)) ?? ethAddress;
+  }
+
+  async getENSAvatarURL(ethAddress: string): Promise<string | void> {
+    const infuraProvider = InfuraService.getProvider('1');
+    await infuraProvider.ready;
+    return (await infuraProvider.getAvatar(ethAddress)) ?? '';
   }
 
   async findAll(): Promise<User[]> {

@@ -4,8 +4,10 @@ import { UseGuards } from '@nestjs/common';
 import crypto from 'crypto';
 
 import { UsersService } from './users.service';
-import { User } from './entities/user.entity';
+import { AvatarSource, User, UsernameSource } from './entities/user.entity';
 import { SessionGuard } from '../auth/auth.guard';
+import { getGravatarURL } from 'src/common/utils/gravatar';
+import { UpdateProfileInput } from './dto/update-profile.input';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -23,6 +25,47 @@ export class UsersResolver {
 
   @Mutation(() => User)
   @UseGuards(SessionGuard)
+  async updateProfile(
+    @Args('updateProfileInput', { type: () => UpdateProfileInput })
+    updateProfileInput: UpdateProfileInput,
+    @Context() context,
+  ) {
+    const userId = context.req.session.user.id;
+    const user = await this.usersService.findOne(userId);
+    const getUsername = async () => {
+      if (updateProfileInput.usernameSource === UsernameSource.CUSTOM) {
+        const isCustomUsernameAlreadyInUse = await this.usersService.findOne({
+          where: { username: updateProfileInput.username, id: Not(userId) },
+        });
+
+        if (isCustomUsernameAlreadyInUse) {
+          throw new Error('Username already in use');
+        } else {
+          return updateProfileInput.username;
+        }
+      } else {
+        return await this.usersService.getENSName(user.ethAddress);
+      }
+    };
+
+    await this.usersService.save({
+      ...updateProfileInput,
+      username: await getUsername(),
+      avatar:
+        updateProfileInput.avatarSource === AvatarSource.GRAVATAR
+          ? getGravatarURL(user.email)
+          : await this.usersService.getENSAvatarURL(user.ethAddress),
+      id: userId,
+    });
+
+    const userWithUpdatedProfile = await this.usersService.findOne(userId);
+    context.req.session.user = userWithUpdatedProfile;
+
+    return userWithUpdatedProfile;
+  }
+
+  @Mutation(() => User)
+  @UseGuards(SessionGuard)
   async updateEmail(@Args('email') email: string, @Context() context) {
     const userId = context.req.session.user.id;
     const isEmailAddressAlreadyInUse = await this.usersService.findOne({
@@ -32,9 +75,24 @@ export class UsersResolver {
     if (isEmailAddressAlreadyInUse) {
       throw new Error('Email address already in use');
     } else {
-      const user = this.usersService.save({ id: userId, email });
-      context.req.session.user.email = email;
-      return user;
+      const user = await this.usersService.findOne(userId);
+      const validatedUpdateEmailInput = {
+        id: userId,
+        email,
+        avatar:
+          user.avatarSource === AvatarSource.GRAVATAR
+            ? getGravatarURL(email)
+            : undefined,
+      };
+      const userWithUpdatedEmail = await this.usersService.save(
+        validatedUpdateEmailInput,
+      );
+      context.req.session.user = {
+        ...context.req.session.user,
+        ...validatedUpdateEmailInput,
+      };
+
+      return userWithUpdatedEmail;
     }
   }
 

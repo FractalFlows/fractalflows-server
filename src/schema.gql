@@ -20,6 +20,11 @@ type Attribution {
   updatedAt: String!
 }
 
+enum AvatarSource {
+  ENS
+  GRAVATAR
+}
+
 type Claim {
   """Attributions"""
   attributions: [Attribution!]
@@ -100,6 +105,7 @@ type Mutation {
   signOut: Boolean!
   updateClaim(updateClaimInput: UpdateClaimInput!): Claim!
   updateEmail(email: String!): User!
+  updateProfile(updateProfileInput: UpdateProfileInput!): User!
   updateSource(updateSourceInput: UpdateSourceInput!): Source!
   verifyMagicLink(hash: String!): User!
 }
@@ -122,13 +128,7 @@ type Query {
 }
 
 type Session {
-  """Avatar"""
-  avatar: String
-
-  """ENS"""
-  ens: String
-
-  """ETH address"""
+  """SIWE Message"""
   siweMessage: SiweMessage
 
   """User"""
@@ -255,6 +255,13 @@ input UpdateClaimInput {
   title: String
 }
 
+input UpdateProfileInput {
+  avatar: String
+  avatarSource: AvatarSource!
+  username: String!
+  usernameSource: UsernameSource!
+}
+
 input UpdateSourceInput {
   id: Int!
   origin: String
@@ -264,6 +271,12 @@ input UpdateSourceInput {
 type User {
   """API Key"""
   apiKey: String
+
+  """Avatar"""
+  avatar: String
+
+  """Avatar source"""
+  avatarSource: AvatarSource
 
   """User claims"""
   claims: [Claim!]
@@ -280,10 +293,21 @@ type User {
 
   """Updated at"""
   updatedAt: String!
+
+  """Username"""
+  username: String
+
+  """Username source"""
+  usernameSource: UsernameSource
 }
 
 enum UserClaimRelation {
   CONTRIBUTED
   FOLLOWING
   OWN
+}
+
+enum UsernameSource {
+  CUSTOM
+  ENS
 }

@@ -36,14 +36,8 @@ export class SiweMessage {
 
 @ObjectType()
 export class Session {
-  @Field(() => SiweMessage, { description: 'ETH address', nullable: true })
+  @Field(() => SiweMessage, { description: 'SIWE Message', nullable: true })
   siweMessage?: SiweMessage;
-
-  @Field(() => String, { description: 'ENS', nullable: true })
-  ens?: string;
-
-  @Field(() => String, { description: 'Avatar', nullable: true })
-  avatar?: string;
 
   @Field(() => User, { description: 'User' })
   user: User;

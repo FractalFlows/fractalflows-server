@@ -7,7 +7,12 @@ import { SessionGuard } from './auth.guard';
 import { SignInWithEthereumInput } from './dto/signin.input';
 import { Session } from './dto/signin.output';
 import { UsersService } from '../users/users.service';
-import { User } from '../users/entities/user.entity';
+import {
+  AvatarSource,
+  User,
+  UsernameSource,
+} from '../users/entities/user.entity';
+import { getGravatarURL } from 'src/common/utils/gravatar';
 
 @Resolver()
 export class AuthResolver {
@@ -26,12 +31,10 @@ export class AuthResolver {
   @Query(() => Session, { name: 'session' })
   @UseGuards(SessionGuard)
   getSession(@Context() context) {
-    const { siwe, ens, avatar, user } = context.req.session;
+    const { siweMessage, user } = context.req.session;
 
     return {
-      siweMessage: siwe,
-      ens,
-      avatar,
+      siweMessage,
       user,
     };
   }
@@ -45,23 +48,34 @@ export class AuthResolver {
     const { session } = context.req;
 
     try {
-      const siwe = await this.authService.signInWithEthereum(
+      const siweMessage = await this.authService.signInWithEthereum(
         signInWithEthereumInput,
         session.nonce,
       );
-      const user = await this.usersService.createIfDoesntExist({
+      const user = await this.usersService.findOne({
         ethAddress: signInWithEthereumInput.siweMessage.address,
       });
 
-      session.user = user;
-      session.siwe = siwe;
-      session.ens = signInWithEthereumInput.ens;
-      session.avatar = signInWithEthereumInput.avatar;
+      if (user) {
+        session.user = user;
+      } else {
+        await this.usersService.create({
+          ethAddress: signInWithEthereumInput.siweMessage.address,
+          username:
+            signInWithEthereumInput.ens ??
+            signInWithEthereumInput.siweMessage.address,
+          usernameSource: UsernameSource.ENS,
+          avatar: signInWithEthereumInput.avatar,
+          avatarSource: AvatarSource.ENS,
+        });
+      }
+
+      session.siweMessage = siweMessage;
       session.nonce = null;
 
       return user;
     } catch (e) {
-      session.siwe = null;
+      session.siweMessage = null;
       session.nonce = null;
       session.ens = null;
 
@@ -81,10 +95,21 @@ export class AuthResolver {
     const user = await this.usersService.findOne({
       where: { email },
     });
-    await this.usersService.createIfDoesntExist({
-      ...(user ? { id: user.id } : { email }),
-      magicLinkHash: hash,
-    });
+
+    if (user) {
+      await this.usersService.save({
+        id: user.id,
+        magicLinkHash: hash,
+      });
+    } else {
+      await this.usersService.create({
+        username: email,
+        usernameSource: UsernameSource.CUSTOM,
+        avatar: getGravatarURL(email),
+        avatarSource: AvatarSource.GRAVATAR,
+        magicLinkHash: hash,
+      });
+    }
 
     return true;
   }

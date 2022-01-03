@@ -7,10 +7,20 @@
 
 /* tslint:disable */
 /* eslint-disable */
+export enum AvatarSource {
+    ENS = "ENS",
+    GRAVATAR = "GRAVATAR"
+}
+
 export enum UserClaimRelation {
     CONTRIBUTED = "CONTRIBUTED",
     FOLLOWING = "FOLLOWING",
     OWN = "OWN"
+}
+
+export enum UsernameSource {
+    CUSTOM = "CUSTOM",
+    ENS = "ENS"
 }
 
 export interface CreateAttributionInput {
@@ -64,6 +74,13 @@ export interface UpdateClaimInput {
     title?: Nullable<string>;
 }
 
+export interface UpdateProfileInput {
+    avatar?: Nullable<string>;
+    avatarSource: AvatarSource;
+    username: string;
+    usernameSource: UsernameSource;
+}
+
 export interface UpdateSourceInput {
     id: number;
     origin?: Nullable<string>;
@@ -105,6 +122,7 @@ export interface IMutation {
     signOut(): boolean | Promise<boolean>;
     updateClaim(updateClaimInput: UpdateClaimInput): Claim | Promise<Claim>;
     updateEmail(email: string): User | Promise<User>;
+    updateProfile(updateProfileInput: UpdateProfileInput): User | Promise<User>;
     updateSource(updateSourceInput: UpdateSourceInput): Source | Promise<Source>;
     verifyMagicLink(hash: string): User | Promise<User>;
 }
@@ -127,8 +145,6 @@ export interface IQuery {
 }
 
 export interface Session {
-    avatar?: Nullable<string>;
-    ens?: Nullable<string>;
     siweMessage?: Nullable<SiweMessage>;
     user: User;
 }
@@ -164,12 +180,16 @@ export interface Tag {
 
 export interface User {
     apiKey?: Nullable<string>;
+    avatar?: Nullable<string>;
+    avatarSource?: Nullable<AvatarSource>;
     claims?: Nullable<Claim[]>;
     createdAt: string;
     email?: Nullable<string>;
     ethAddress?: Nullable<string>;
     id: string;
     updatedAt: string;
+    username?: Nullable<string>;
+    usernameSource?: Nullable<UsernameSource>;
 }
 
 type Nullable<T> = T | null;
