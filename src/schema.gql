@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type APIKey {
+  key: String!
+  secret: String
+}
+
 type Attribution {
   """Claim"""
   claim: Claim!
@@ -94,8 +99,8 @@ input CreateTagInput {
 
 type Mutation {
   connectEthereumWallet(address: String!): User!
+  createAPIKey: APIKey!
   createClaim(createClaimInput: CreateClaimInput!): Claim!
-  generateAPIKey: String!
   removeAPIKey: Boolean!
   removeAttribution(id: Int!): Attribution!
   removeClaim(id: Int!): Claim!
@@ -129,9 +134,7 @@ type Query {
   source(id: Int!): Source!
   sources: [Source!]!
   tag(id: Int!): Tag!
-  user(id: Int!): User!
   userClaims(relation: UserClaimRelation!, username: String!): [Claim!]!
-  users: [User!]!
 }
 
 type Session {
@@ -278,6 +281,9 @@ input UpdateSourceInput {
 type User {
   """API Key"""
   apiKey: String
+
+  """API Secret"""
+  apiSecret: String
 
   """Avatar"""
   avatar: String

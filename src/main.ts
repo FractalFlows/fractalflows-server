@@ -5,13 +5,6 @@ import sessionFileStore from 'session-file-store';
 import path from 'path';
 
 import { AppModule } from './app.module';
-import { User } from './modules/users/entities/user.entity';
-
-declare module 'express-session' {
-  interface SessionData {
-    user: User;
-  }
-}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

@@ -11,6 +11,8 @@ import { TagsService } from '../tags/tags.service';
 import { SessionGuard } from '../auth/auth.guard';
 import { UserClaimRelation } from './dto/get-user-claim.input';
 import { UsersService } from '../users/users.service';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { User } from '../users/entities/user.entity';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -26,7 +28,7 @@ export class ClaimsResolver {
   @UseGuards(SessionGuard)
   async createClaim(
     @Args('createClaimInput') createClaimInput: CreateClaimInput,
-    @Context() context,
+    @CurrentUser() user: User,
   ) {
     await this.sourcesService.createMany(createClaimInput.sources);
     await this.attributionsService.createMany(createClaimInput.attributions);
@@ -34,7 +36,7 @@ export class ClaimsResolver {
 
     return await this.claimsService.create({
       ...createClaimInput,
-      user: context.req.session.user,
+      user,
     });
   }
 

@@ -70,6 +70,10 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   apiKey?: string;
 
+  @Field(() => String, { description: 'API Secret', nullable: true })
+  @Column({ nullable: true })
+  apiSecret?: string;
+
   @Field(() => [Claim], { description: 'User claims', nullable: true })
   @OneToMany(() => Claim, (claim) => claim.user)
   claims: Claim[];

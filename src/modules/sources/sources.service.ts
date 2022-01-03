@@ -12,7 +12,7 @@ export class SourcesService {
   ) {}
 
   async createMany(createSourcesInput: CreateSourceInput[]) {
-    return await this.sourcesRepository.save(createSourcesInput);
+    return await this.sourcesRepository.save(createSourcesInput || []);
   }
 
   findAll() {

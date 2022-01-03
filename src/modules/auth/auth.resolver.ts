@@ -13,6 +13,7 @@ import {
   UsernameSource,
 } from '../users/entities/user.entity';
 import { getGravatarURL } from 'src/common/utils/gravatar';
+import { CurrentUser } from './current-user.decorator';
 
 @Resolver()
 export class AuthResolver {
@@ -30,8 +31,8 @@ export class AuthResolver {
 
   @Query(() => Session, { name: 'session' })
   @UseGuards(SessionGuard)
-  getSession(@Context() context) {
-    const { siweMessage, user } = context.req.session;
+  getSession(@CurrentUser() user: User, @Context() context) {
+    const { siweMessage } = context.req.session;
 
     return {
       siweMessage,
@@ -78,7 +79,6 @@ export class AuthResolver {
     } catch (e) {
       session.siweMessage = null;
       session.nonce = null;
-      session.ens = null;
 
       throw new Error(e.message);
     }

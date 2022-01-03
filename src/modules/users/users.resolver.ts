@@ -9,34 +9,26 @@ import { SessionGuard } from '../auth/auth.guard';
 import { getGravatarURL } from 'src/common/utils/gravatar';
 import { UpdateProfileInput } from './dto/update-profile.input';
 import { Profile } from './dto/profile.output';
+import { hash } from 'src/common/utils/hashing';
+import { APIKey } from './dto/api-key.output';
+import { CurrentUser } from '../auth/current-user.decorator';
 
 @Resolver(() => User)
 export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
-
-  @Query(() => [User], { name: 'users' })
-  findAll() {
-    return this.usersService.findAll();
-  }
-
-  @Query(() => User, { name: 'user' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.usersService.findOne(id);
-  }
 
   @Mutation(() => User)
   @UseGuards(SessionGuard)
   async updateProfile(
     @Args('updateProfileInput', { type: () => UpdateProfileInput })
     updateProfileInput: UpdateProfileInput,
+    @CurrentUser() user,
     @Context() context,
   ) {
-    const userId = context.req.session.user.id;
-    const user = await this.usersService.findOne(userId);
     const getUsername = async () => {
       if (updateProfileInput.usernameSource === UsernameSource.CUSTOM) {
         const isCustomUsernameAlreadyInUse = await this.usersService.findOne({
-          where: { username: updateProfileInput.username, id: Not(userId) },
+          where: { username: updateProfileInput.username, id: Not(user.id) },
         });
 
         if (isCustomUsernameAlreadyInUse) {
@@ -56,30 +48,34 @@ export class UsersResolver {
         updateProfileInput.avatarSource === AvatarSource.GRAVATAR
           ? getGravatarURL(user.email)
           : await this.usersService.getENSAvatarURL(user.ethAddress),
-      id: userId,
+      id: user.id,
     });
 
-    const userWithUpdatedProfile = await this.usersService.findOne(userId);
-    context.req.session.user = userWithUpdatedProfile;
+    const userWithUpdatedProfile = await this.usersService.findOne(user.id);
+
+    if (context.req.session) {
+      context.req.session.user = userWithUpdatedProfile;
+    }
 
     return userWithUpdatedProfile;
   }
 
   @Mutation(() => User)
   @UseGuards(SessionGuard)
-  async updateEmail(@Args('email') email: string, @Context() context) {
-    const userId = context.req.session.user.id;
+  async updateEmail(
+    @Args('email') email: string,
+    @CurrentUser() user: User,
+    @Context() context,
+  ) {
     const isEmailAddressAlreadyInUse = await this.usersService.findOne({
-      where: { email, id: Not(userId) },
+      where: { email, id: Not(user.id) },
     });
 
     if (isEmailAddressAlreadyInUse) {
       throw new Error('Email address already in use');
     } else {
-      const user = await this.usersService.findOne(userId);
-
       await this.usersService.save({
-        id: userId,
+        id: user.id,
         email,
         avatar:
           user.avatarSource === AvatarSource.GRAVATAR
@@ -87,8 +83,11 @@ export class UsersResolver {
             : undefined,
       });
 
-      const userWithUpdatedEmail = await this.usersService.findOne(userId);
-      context.req.session.user = userWithUpdatedEmail;
+      const userWithUpdatedEmail = await this.usersService.findOne(user.id);
+
+      if (context.req.session) {
+        context.req.session.user = userWithUpdatedEmail;
+      }
 
       return userWithUpdatedEmail;
     }
@@ -98,19 +97,24 @@ export class UsersResolver {
   @UseGuards(SessionGuard)
   async connectEthereumWallet(
     @Args('address') address: string,
+    @CurrentUser() user: User,
     @Context() context,
   ) {
-    const userId = context.req.session.user.id;
     const isEthAddressAlreadyInUse = await this.usersService.findOne({
-      where: { ethAddress: address, id: Not(userId) },
+      where: { ethAddress: address, id: Not(user.id) },
     });
 
     if (isEthAddressAlreadyInUse) {
       throw new Error('Ethereum address already in use');
     } else {
-      const user = this.usersService.save({ id: userId, ethAddress: address });
-      context.req.session.user.ethAddress = address;
-      return user;
+      const userWithUpdatedEthereumAddress = this.usersService.save({
+        id: user.id,
+        ethAddress: address,
+      });
+
+      if (context.req.session) context.req.session.user.ethAddress = address;
+
+      return userWithUpdatedEthereumAddress;
     }
   }
 
@@ -127,33 +131,40 @@ export class UsersResolver {
 
   @Query(() => String, { name: 'apiKey', nullable: true })
   @UseGuards(SessionGuard)
-  async getAPIKey(@Context() context) {
-    const user = await this.usersService.findOne(context.req.session.user.id);
-    return `${user.apiKey.substring(0, 6)}...${user.apiKey.substring(
-      user.apiKey.length - 6,
-    )}`;
+  getAPIKey(@CurrentUser() user: User) {
+    return user.apiKey;
   }
 
-  @Mutation(() => String)
+  @Mutation(() => APIKey)
   @UseGuards(SessionGuard)
-  async generateAPIKey(@Context() context) {
-    const apiKey = crypto.randomBytes(24).toString('hex');
+  async createAPIKey(@CurrentUser() user: User, @Context() context) {
+    const key = crypto.randomBytes(24).toString('hex');
+    const secret = crypto.randomBytes(24).toString('hex');
 
     await this.usersService.save({
-      id: context.req.session.user.id,
-      apiKey,
+      id: user.id,
+      apiKey: key,
+      apiSecret: await hash(secret),
     });
 
-    return apiKey;
+    if (context.req.session) context.req.session.user.apiKey = key;
+
+    return {
+      key,
+      secret,
+    };
   }
 
   @Mutation(() => Boolean)
   @UseGuards(SessionGuard)
-  async removeAPIKey(@Context() context) {
+  async removeAPIKey(@CurrentUser() user: User, @Context() context) {
     await this.usersService.save({
-      id: context.req.session.user.id,
+      id: user.id,
       apiKey: null,
+      apiSecret: null,
     });
+
+    if (context.req.session) context.req.session.user.apiKey = null;
 
     return true;
   }

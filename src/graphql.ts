@@ -87,6 +87,11 @@ export interface UpdateSourceInput {
     url?: Nullable<string>;
 }
 
+export interface APIKey {
+    key: string;
+    secret?: Nullable<string>;
+}
+
 export interface Attribution {
     claim: Claim;
     createdAt: string;
@@ -111,8 +116,8 @@ export interface Claim {
 
 export interface IMutation {
     connectEthereumWallet(address: string): User | Promise<User>;
+    createAPIKey(): APIKey | Promise<APIKey>;
     createClaim(createClaimInput: CreateClaimInput): Claim | Promise<Claim>;
-    generateAPIKey(): string | Promise<string>;
     removeAPIKey(): boolean | Promise<boolean>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
     removeClaim(id: number): Claim | Promise<Claim>;
@@ -146,9 +151,7 @@ export interface IQuery {
     source(id: number): Source | Promise<Source>;
     sources(): Source[] | Promise<Source[]>;
     tag(id: number): Tag | Promise<Tag>;
-    user(id: number): User | Promise<User>;
     userClaims(relation: UserClaimRelation, username: string): Claim[] | Promise<Claim[]>;
-    users(): User[] | Promise<User[]>;
 }
 
 export interface Session {
@@ -187,6 +190,7 @@ export interface Tag {
 
 export interface User {
     apiKey?: Nullable<string>;
+    apiSecret?: Nullable<string>;
     avatar?: Nullable<string>;
     avatarSource?: Nullable<AvatarSource>;
     claims?: Nullable<Claim[]>;

@@ -8,10 +8,10 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 export class SessionGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     const ctx = GqlExecutionContext.create(context);
-    const { session } = ctx.getContext().req;
+    const { req } = ctx.getContext();
 
     try {
-      if (session.user) {
+      if (req.session.user || req.user) {
         return true;
       }
     } catch (e) {

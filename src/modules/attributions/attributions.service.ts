@@ -13,7 +13,7 @@ export class AttributionsService {
   ) {}
 
   async createMany(createAttributionInput: CreateAttributionInput[]) {
-    return await this.attributionsRepository.save(createAttributionInput);
+    return await this.attributionsRepository.save(createAttributionInput || []);
   }
 
   findAll() {
