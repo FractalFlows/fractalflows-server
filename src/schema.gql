@@ -108,6 +108,7 @@ type Query {
   claims(limit: Int!, offset: Int!): [Claim!]!
   nonce: String!
   profile(username: String!): Profile
+  relatedClaims(slug: String!): [Claim!]!
   searchTags(term: String): [Tag!]!
   session: Session!
   source(id: Int!): Source!

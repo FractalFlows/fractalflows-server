@@ -36,6 +36,24 @@ export class ClaimsService {
     return await this.claimsRepository.find();
   }
 
+  async findRelated(slug: string) {
+    const claim = await this.claimsRepository.findOne({
+      where: { slug },
+      relations: ['tags'],
+    });
+
+    return await this.claimsRepository
+      .createQueryBuilder('claim')
+      .leftJoinAndSelect('claim.user', 'user')
+      .leftJoinAndSelect('claim.tags', 'tags')
+      .innerJoin('claim.tags', 'tag', 'tag.id IN (:...tagIds)', {
+        tagIds: claim.tags.map(({ id }) => id),
+      })
+      .where('claim.slug != :slug', { slug })
+      .take(3)
+      .getMany();
+  }
+
   async find(query) {
     return await this.claimsRepository.find(query);
   }

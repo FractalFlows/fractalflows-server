@@ -141,6 +141,7 @@ export interface IQuery {
     claims(limit: number, offset: number): Claim[] | Promise<Claim[]>;
     nonce(): string | Promise<string>;
     profile(username: string): Nullable<Profile> | Promise<Nullable<Profile>>;
+    relatedClaims(slug: string): Claim[] | Promise<Claim[]>;
     searchTags(term?: Nullable<string>): Tag[] | Promise<Tag[]>;
     session(): Session | Promise<Session>;
     source(id: number): Source | Promise<Source>;

@@ -13,6 +13,7 @@ import { UserClaimRelation } from './dto/get-user-claim.input';
 import { UsersService } from '../users/users.service';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../users/entities/user.entity';
+import { In, Not } from 'typeorm';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -54,20 +55,27 @@ export class ClaimsResolver {
     @Args('offset', { type: () => Int }) offset = 0,
   ) {
     return await this.claimsService.find({
+      relations: ['user', 'tags'],
       take: limit,
       skip: offset,
     });
   }
 
   @Query(() => [Claim], { name: 'trendingClaims' })
-  async findTrendingClaims(
+  async findTrending(
     @Args('limit', { type: () => Int }) limit = 20,
     @Args('offset', { type: () => Int }) offset = 0,
   ) {
     return await this.claimsService.find({
+      relations: ['user', 'tags'],
       take: limit,
       skip: offset,
     });
+  }
+
+  @Query(() => [Claim], { name: 'relatedClaims' })
+  async findRelated(@Args('slug') slug: string) {
+    return await this.claimsService.findRelated(slug);
   }
 
   @Query(() => [Claim], { name: 'userClaims' })

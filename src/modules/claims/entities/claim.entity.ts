@@ -34,7 +34,7 @@ export class Claim extends BaseEntity {
   sources: Source[];
 
   @Field(() => [Tag], { description: 'Tags', nullable: true })
-  @ManyToMany(() => Tag, { nullable: true })
+  @ManyToMany(() => Tag, (tag) => tag.claims)
   @JoinTable()
   tags: Tag[];
 
