@@ -81,9 +81,9 @@ type Mutation {
   connectEthereumWallet(address: String!): User!
   createAPIKey: APIKey!
   createClaim(createClaimInput: CreateClaimInput!): Claim!
+  deleteClaim(id: String!): Boolean!
   removeAPIKey: Boolean!
   removeAttribution(id: Int!): Attribution!
-  removeClaim(id: Int!): Claim!
   removeSource(id: Int!): Source!
   sendMagicLink(email: String!): Boolean!
   signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput!): User!

@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Int, Context } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 
 import { ClaimsService } from './claims.service';
@@ -103,9 +103,10 @@ export class ClaimsResolver {
     return await this.claimsService.findOne(updateClaimInput.id);
   }
 
-  @Mutation(() => Claim)
+  @Mutation(() => Boolean)
   @UseGuards(SessionGuard)
-  removeClaim(@Args('id', { type: () => Int }) id: number) {
-    return this.claimsService.remove(id);
+  async deleteClaim(@Args('id', { type: () => String }) id: string) {
+    await this.claimsService.softDelete(id);
+    return true;
   }
 }

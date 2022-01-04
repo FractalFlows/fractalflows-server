@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Int, Context } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { Not } from 'typeorm';
 import { UseGuards } from '@nestjs/common';
 import crypto from 'crypto';

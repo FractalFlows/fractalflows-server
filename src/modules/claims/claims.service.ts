@@ -56,7 +56,7 @@ export class ClaimsService {
     return await this.claimsRepository.save({ ...updateClaimInput, id });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} claim`;
+  async softDelete(id: string) {
+    return await this.claimsRepository.softDelete(id);
   }
 }

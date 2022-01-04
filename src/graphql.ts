@@ -114,9 +114,9 @@ export interface IMutation {
     connectEthereumWallet(address: string): User | Promise<User>;
     createAPIKey(): APIKey | Promise<APIKey>;
     createClaim(createClaimInput: CreateClaimInput): Claim | Promise<Claim>;
+    deleteClaim(id: string): boolean | Promise<boolean>;
     removeAPIKey(): boolean | Promise<boolean>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
-    removeClaim(id: number): Claim | Promise<Claim>;
     removeSource(id: number): Source | Promise<Source>;
     sendMagicLink(email: string): boolean | Promise<boolean>;
     signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput): User | Promise<User>;
