@@ -2,15 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
 
-import { CreateTagInput } from './dto/create-tag.input';
+import { SaveTagInput } from './dto/save-tag.input';
 import { Tag } from './entities/tag.entity';
 
 @Injectable()
 export class TagsService {
   constructor(@InjectRepository(Tag) private tagsRepository: Repository<Tag>) {}
 
-  async createMany(createTagsInput: CreateTagInput[]) {
-    return await this.tagsRepository.save(createTagsInput || []);
+  async save(saveTagInput: SaveTagInput[]) {
+    return await this.tagsRepository.save(saveTagInput || []);
   }
 
   async search(term?: string) {

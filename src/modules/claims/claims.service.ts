@@ -52,8 +52,8 @@ export class ClaimsService {
     return await this.claimsRepository.findOne(query);
   }
 
-  update(id: number, updateClaimInput: UpdateClaimInput) {
-    return `This action updates a #${id} claim`;
+  async update(id: string, updateClaimInput: UpdateClaimInput) {
+    return await this.claimsRepository.save({ ...updateClaimInput, id });
   }
 
   remove(id: number) {

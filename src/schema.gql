@@ -60,41 +60,21 @@ type Claim {
   user: User!
 }
 
-input CreateAttributionInput {
-  """Identifier"""
-  identifier: String!
-
-  """Origin"""
-  origin: String!
-}
-
 input CreateClaimInput {
   """Attributions"""
-  attributions: [CreateAttributionInput!]
+  attributions: [SaveAttributionInput!]
 
   """Sources"""
-  sources: [CreateSourceInput!]
+  sources: [SaveSourceInput!]
 
   """Summary"""
   summary: String!
 
   """Tags"""
-  tags: [CreateTagInput!]
+  tags: [SaveTagInput!]
 
   """Title"""
   title: String!
-}
-
-input CreateSourceInput {
-  origin: String!
-  url: String!
-}
-
-input CreateTagInput {
-  id: String
-
-  """Label"""
-  label: String!
 }
 
 type Mutation {
@@ -111,7 +91,6 @@ type Mutation {
   updateClaim(updateClaimInput: UpdateClaimInput!): Claim!
   updateEmail(email: String!): User!
   updateProfile(updateProfileInput: UpdateProfileInput!): User!
-  updateSource(updateSourceInput: UpdateSourceInput!): Source!
   verifyMagicLink(hash: String!): User!
 }
 
@@ -136,6 +115,29 @@ type Query {
   tag(id: Int!): Tag!
   trendingClaims(limit: Int!, offset: Int!): [Claim!]!
   userClaims(relation: UserClaimRelation!, username: String!): [Claim!]!
+}
+
+input SaveAttributionInput {
+  id: String
+
+  """Identifier"""
+  identifier: String!
+
+  """Origin"""
+  origin: String!
+}
+
+input SaveSourceInput {
+  id: String
+  origin: String!
+  url: String!
+}
+
+input SaveTagInput {
+  id: String
+
+  """Label"""
+  label: String!
 }
 
 type Session {
@@ -250,20 +252,20 @@ type Tag {
 
 input UpdateClaimInput {
   """Attributions"""
-  attributions: [CreateAttributionInput!]
-  id: Int!
+  attributions: [SaveAttributionInput!]
+  id: String!
 
   """Sources"""
-  sources: [CreateSourceInput!]
+  sources: [SaveSourceInput!]
 
   """Summary"""
-  summary: String
+  summary: String!
 
   """Tags"""
-  tags: [CreateTagInput!]
+  tags: [SaveTagInput!]
 
   """Title"""
-  title: String
+  title: String!
 }
 
 input UpdateProfileInput {
@@ -271,12 +273,6 @@ input UpdateProfileInput {
   avatarSource: AvatarSource!
   username: String!
   usernameSource: UsernameSource!
-}
-
-input UpdateSourceInput {
-  id: Int!
-  origin: String
-  url: String
 }
 
 type User {

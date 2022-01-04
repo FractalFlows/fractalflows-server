@@ -1,8 +1,9 @@
+import { InputType, Field } from '@nestjs/graphql';
+
 import { CreateClaimInput } from './create-claim.input';
-import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
 
 @InputType()
-export class UpdateClaimInput extends PartialType(CreateClaimInput) {
-  @Field(() => Int)
-  id: number;
+export class UpdateClaimInput extends CreateClaimInput {
+  @Field(() => String)
+  id: string;
 }

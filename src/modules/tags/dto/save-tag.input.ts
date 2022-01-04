@@ -1,7 +1,7 @@
 import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
-export class CreateTagInput {
+export class SaveTagInput {
   @Field(() => String, { nullable: true })
   id?: string;
 

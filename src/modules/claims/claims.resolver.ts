@@ -30,9 +30,9 @@ export class ClaimsResolver {
     @Args('createClaimInput') createClaimInput: CreateClaimInput,
     @CurrentUser() user: User,
   ) {
-    await this.sourcesService.createMany(createClaimInput.sources);
-    await this.attributionsService.createMany(createClaimInput.attributions);
-    await this.tagsService.createMany(createClaimInput.tags);
+    await this.sourcesService.save(createClaimInput.sources);
+    await this.attributionsService.save(createClaimInput.attributions);
+    await this.tagsService.save(createClaimInput.tags);
 
     return await this.claimsService.create({
       ...createClaimInput,
@@ -44,7 +44,7 @@ export class ClaimsResolver {
   async findOne(@Args('slug') slug: string) {
     return await this.claimsService.findOne({
       where: { slug },
-      relations: ['user', 'tags', 'sources'],
+      relations: ['user', 'tags', 'sources', 'attributions'],
     });
   }
 
@@ -92,8 +92,15 @@ export class ClaimsResolver {
 
   @Mutation(() => Claim)
   @UseGuards(SessionGuard)
-  updateClaim(@Args('updateClaimInput') updateClaimInput: UpdateClaimInput) {
-    return this.claimsService.update(updateClaimInput.id, updateClaimInput);
+  async updateClaim(
+    @Args('updateClaimInput') updateClaimInput: UpdateClaimInput,
+  ) {
+    await this.sourcesService.save(updateClaimInput.sources);
+    await this.attributionsService.save(updateClaimInput.attributions);
+    await this.tagsService.save(updateClaimInput.tags);
+    await this.claimsService.update(updateClaimInput.id, updateClaimInput);
+
+    return await this.claimsService.findOne(updateClaimInput.id);
   }
 
   @Mutation(() => Claim)

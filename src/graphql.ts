@@ -23,25 +23,27 @@ export enum UsernameSource {
     ENS = "ENS"
 }
 
-export interface CreateAttributionInput {
+export interface CreateClaimInput {
+    attributions?: Nullable<SaveAttributionInput[]>;
+    sources?: Nullable<SaveSourceInput[]>;
+    summary: string;
+    tags?: Nullable<SaveTagInput[]>;
+    title: string;
+}
+
+export interface SaveAttributionInput {
+    id?: Nullable<string>;
     identifier: string;
     origin: string;
 }
 
-export interface CreateClaimInput {
-    attributions?: Nullable<CreateAttributionInput[]>;
-    sources?: Nullable<CreateSourceInput[]>;
-    summary: string;
-    tags?: Nullable<CreateTagInput[]>;
-    title: string;
-}
-
-export interface CreateSourceInput {
+export interface SaveSourceInput {
+    id?: Nullable<string>;
     origin: string;
     url: string;
 }
 
-export interface CreateTagInput {
+export interface SaveTagInput {
     id?: Nullable<string>;
     label: string;
 }
@@ -66,12 +68,12 @@ export interface SiweMessageInput {
 }
 
 export interface UpdateClaimInput {
-    attributions?: Nullable<CreateAttributionInput[]>;
-    id: number;
-    sources?: Nullable<CreateSourceInput[]>;
-    summary?: Nullable<string>;
-    tags?: Nullable<CreateTagInput[]>;
-    title?: Nullable<string>;
+    attributions?: Nullable<SaveAttributionInput[]>;
+    id: string;
+    sources?: Nullable<SaveSourceInput[]>;
+    summary: string;
+    tags?: Nullable<SaveTagInput[]>;
+    title: string;
 }
 
 export interface UpdateProfileInput {
@@ -79,12 +81,6 @@ export interface UpdateProfileInput {
     avatarSource: AvatarSource;
     username: string;
     usernameSource: UsernameSource;
-}
-
-export interface UpdateSourceInput {
-    id: number;
-    origin?: Nullable<string>;
-    url?: Nullable<string>;
 }
 
 export interface APIKey {
@@ -128,7 +124,6 @@ export interface IMutation {
     updateClaim(updateClaimInput: UpdateClaimInput): Claim | Promise<Claim>;
     updateEmail(email: string): User | Promise<User>;
     updateProfile(updateProfileInput: UpdateProfileInput): User | Promise<User>;
-    updateSource(updateSourceInput: UpdateSourceInput): Source | Promise<Source>;
     verifyMagicLink(hash: string): User | Promise<User>;
 }
 

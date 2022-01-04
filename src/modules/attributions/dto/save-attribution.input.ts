@@ -1,7 +1,10 @@
 import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
-export class CreateAttributionInput {
+export class SaveAttributionInput {
+  @Field(() => String, { nullable: true })
+  id?: string;
+
   @Field(() => String, { description: 'Origin' })
   origin: string;
 
