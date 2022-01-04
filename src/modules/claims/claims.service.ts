@@ -48,8 +48,8 @@ export class ClaimsService {
       .getMany();
   }
 
-  async findOne(slug: string) {
-    return await this.claimsRepository.findOne({ slug });
+  async findOne(query) {
+    return await this.claimsRepository.findOne(query);
   }
 
   update(id: number, updateClaimInput: UpdateClaimInput) {

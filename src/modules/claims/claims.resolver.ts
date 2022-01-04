@@ -40,14 +40,34 @@ export class ClaimsResolver {
     });
   }
 
-  @Query(() => [Claim], { name: 'claims' })
-  findAll() {
-    return this.claimsService.findAll();
+  @Query(() => Claim, { name: 'claim' })
+  async findOne(@Args('slug') slug: string) {
+    return await this.claimsService.findOne({
+      where: { slug },
+      relations: ['user', 'tags', 'sources'],
+    });
   }
 
-  @Query(() => Claim, { name: 'claim' })
-  findOne(@Args('slug') slug: string) {
-    return this.claimsService.findOne(slug);
+  @Query(() => [Claim], { name: 'claims' })
+  async find(
+    @Args('limit', { type: () => Int }) limit = 20,
+    @Args('offset', { type: () => Int }) offset = 0,
+  ) {
+    return await this.claimsService.find({
+      take: limit,
+      skip: offset,
+    });
+  }
+
+  @Query(() => [Claim], { name: 'trendingClaims' })
+  async findTrendingClaims(
+    @Args('limit', { type: () => Int }) limit = 20,
+    @Args('offset', { type: () => Int }) offset = 0,
+  ) {
+    return await this.claimsService.find({
+      take: limit,
+      skip: offset,
+    });
   }
 
   @Query(() => [Claim], { name: 'userClaims' })

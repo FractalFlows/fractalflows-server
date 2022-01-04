@@ -143,7 +143,7 @@ export interface IQuery {
     attribution(id: number): Attribution | Promise<Attribution>;
     attributions(): Attribution[] | Promise<Attribution[]>;
     claim(slug: string): Claim | Promise<Claim>;
-    claims(): Claim[] | Promise<Claim[]>;
+    claims(limit: number, offset: number): Claim[] | Promise<Claim[]>;
     nonce(): string | Promise<string>;
     profile(username: string): Nullable<Profile> | Promise<Nullable<Profile>>;
     searchTags(term?: Nullable<string>): Tag[] | Promise<Tag[]>;
@@ -151,6 +151,7 @@ export interface IQuery {
     source(id: number): Source | Promise<Source>;
     sources(): Source[] | Promise<Source[]>;
     tag(id: number): Tag | Promise<Tag>;
+    trendingClaims(limit: number, offset: number): Claim[] | Promise<Claim[]>;
     userClaims(relation: UserClaimRelation, username: string): Claim[] | Promise<Claim[]>;
 }
 

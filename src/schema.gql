@@ -126,7 +126,7 @@ type Query {
   attribution(id: Int!): Attribution!
   attributions: [Attribution!]!
   claim(slug: String!): Claim!
-  claims: [Claim!]!
+  claims(limit: Int!, offset: Int!): [Claim!]!
   nonce: String!
   profile(username: String!): Profile
   searchTags(term: String): [Tag!]!
@@ -134,6 +134,7 @@ type Query {
   source(id: Int!): Source!
   sources: [Source!]!
   tag(id: Int!): Tag!
+  trendingClaims(limit: Int!, offset: Int!): [Claim!]!
   userClaims(relation: UserClaimRelation!, username: String!): [Claim!]!
 }
 
