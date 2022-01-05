@@ -2,8 +2,9 @@ import { InputType, Field } from '@nestjs/graphql';
 import { SaveAttributionInput } from 'src/modules/attributions/dto/save-attribution.input';
 
 import {
-  KnowledgeBitLocation,
-  KnowledgeBitType,
+  KnowledgeBitLocations,
+  KnowledgeBitSides,
+  KnowledgeBitTypes,
 } from '../entities/knowledge-bit.entity';
 
 @InputType()
@@ -14,14 +15,17 @@ export class CreateKnowledgeBitInput {
   @Field(() => String, { nullable: true })
   summary?: string;
 
-  @Field(() => KnowledgeBitType)
-  type: KnowledgeBitType;
+  @Field(() => KnowledgeBitSides)
+  side: KnowledgeBitSides;
+
+  @Field(() => KnowledgeBitTypes)
+  type: KnowledgeBitTypes;
 
   @Field(() => String, { nullable: true })
   customType?: string;
 
-  @Field(() => KnowledgeBitLocation)
-  location?: KnowledgeBitLocation;
+  @Field(() => KnowledgeBitLocations)
+  location: KnowledgeBitLocations;
 
   @Field(() => String, { nullable: true })
   customLocation?: string;

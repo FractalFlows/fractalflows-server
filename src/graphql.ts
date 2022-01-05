@@ -12,7 +12,7 @@ export enum AvatarSource {
     GRAVATAR = "GRAVATAR"
 }
 
-export enum KnowledgeBitLocation {
+export enum KnowledgeBitLocations {
     ACADEMIA_EDU = "ACADEMIA_EDU",
     ARXIV = "ARXIV",
     BIT_TORRENT = "BIT_TORRENT",
@@ -47,7 +47,12 @@ export enum KnowledgeBitLocation {
     ZENODO = "ZENODO"
 }
 
-export enum KnowledgeBitType {
+export enum KnowledgeBitSides {
+    REFUTING = "REFUTING",
+    SUPPORTING = "SUPPORTING"
+}
+
+export enum KnowledgeBitTypes {
     DATA_SET = "DATA_SET",
     DESCRIPTION_OF_METHODOLOGIES = "DESCRIPTION_OF_METHODOLOGIES",
     DETAILED_ANALYSIS = "DETAILED_ANALYSIS",
@@ -87,10 +92,11 @@ export interface CreateKnowledgeBitInput {
     attributions?: Nullable<SaveAttributionInput[]>;
     customLocation?: Nullable<string>;
     customType?: Nullable<string>;
-    location: KnowledgeBitLocation;
+    location: KnowledgeBitLocations;
     name: string;
+    side: KnowledgeBitSides;
     summary?: Nullable<string>;
-    type: KnowledgeBitType;
+    type: KnowledgeBitTypes;
     url: string;
 }
 
@@ -150,10 +156,11 @@ export interface UpdateKnowledgeBitInput {
     customLocation?: Nullable<string>;
     customType?: Nullable<string>;
     id: number;
-    location?: Nullable<KnowledgeBitLocation>;
+    location?: Nullable<KnowledgeBitLocations>;
     name?: Nullable<string>;
+    side?: Nullable<KnowledgeBitSides>;
     summary?: Nullable<string>;
-    type?: Nullable<KnowledgeBitType>;
+    type?: Nullable<KnowledgeBitTypes>;
     url?: Nullable<string>;
 }
 
@@ -200,10 +207,11 @@ export interface KnowledgeBit {
     customLocation?: Nullable<string>;
     customType?: Nullable<string>;
     id: string;
-    location: KnowledgeBitLocation;
+    location: KnowledgeBitLocations;
     name: string;
+    side: KnowledgeBitSides;
     summary?: Nullable<string>;
-    type: KnowledgeBitType;
+    type: KnowledgeBitTypes;
     updatedAt: string;
     url: string;
     user: User;
@@ -299,6 +307,7 @@ export interface User {
     email?: Nullable<string>;
     ethAddress?: Nullable<string>;
     id: string;
+    knowledgeBits?: Nullable<KnowledgeBit[]>;
     updatedAt: string;
     username?: Nullable<string>;
     usernameSource?: Nullable<UsernameSource>;

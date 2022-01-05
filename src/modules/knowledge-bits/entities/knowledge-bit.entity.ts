@@ -1,20 +1,13 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { registerEnumType } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-} from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
 
 import { BaseEntity } from 'src/common/entities/base.entity';
 import { Attribution } from 'src/modules/attributions/entities/attribution.entity';
 import { Claim } from 'src/modules/claims/entities/claim.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 
-export enum KnowledgeBitType {
+export enum KnowledgeBitTypes {
   PUBLICATION_OR_ARTICLE_OR_REPORT,
   SIMULATION_RESULTS,
   EXPERIMENTAL_RESULTS,
@@ -31,11 +24,11 @@ export enum KnowledgeBitType {
   OTHER,
 }
 
-registerEnumType(KnowledgeBitType, {
-  name: 'KnowledgeBitType',
+registerEnumType(KnowledgeBitTypes, {
+  name: 'KnowledgeBitTypes',
 });
 
-export enum KnowledgeBitLocation {
+export enum KnowledgeBitLocations {
   EMAIL,
   WEBSITE,
   PDF,
@@ -70,8 +63,17 @@ export enum KnowledgeBitLocation {
   OTHER,
 }
 
-registerEnumType(KnowledgeBitLocation, {
-  name: 'KnowledgeBitLocation',
+registerEnumType(KnowledgeBitLocations, {
+  name: 'KnowledgeBitLocations',
+});
+
+export enum KnowledgeBitSides {
+  REFUTING,
+  SUPPORTING,
+}
+
+registerEnumType(KnowledgeBitSides, {
+  name: 'KnowledgeBitSides',
 });
 
 @Entity()
@@ -85,23 +87,31 @@ export class KnowledgeBit extends BaseEntity {
   @Column({ nullable: true })
   summary?: string;
 
-  @Field(() => KnowledgeBitType)
+  @Field(() => KnowledgeBitSides)
   @Column({
     type: 'enum',
-    enum: KnowledgeBitType,
+    enum: KnowledgeBitSides,
+    default: KnowledgeBitSides.REFUTING,
   })
-  type: KnowledgeBitType;
+  side: KnowledgeBitSides;
+
+  @Field(() => KnowledgeBitTypes)
+  @Column({
+    type: 'enum',
+    enum: KnowledgeBitTypes,
+  })
+  type: KnowledgeBitTypes;
 
   @Field(() => String, { nullable: true })
   @Column({ nullable: true })
   customType?: string;
 
-  @Field(() => KnowledgeBitLocation)
+  @Field(() => KnowledgeBitLocations)
   @Column({
     type: 'enum',
-    enum: KnowledgeBitLocation,
+    enum: KnowledgeBitLocations,
   })
-  location?: KnowledgeBitLocation;
+  location?: KnowledgeBitLocations;
 
   @Field(() => String, { nullable: true })
   @Column({ nullable: true })

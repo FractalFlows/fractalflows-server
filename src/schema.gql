@@ -82,10 +82,11 @@ input CreateKnowledgeBitInput {
   attributions: [SaveAttributionInput!]
   customLocation: String
   customType: String
-  location: KnowledgeBitLocation!
+  location: KnowledgeBitLocations!
   name: String!
+  side: KnowledgeBitSides!
   summary: String
-  type: KnowledgeBitType!
+  type: KnowledgeBitTypes!
   url: String!
 }
 
@@ -105,10 +106,11 @@ type KnowledgeBit {
   customLocation: String
   customType: String
   id: String!
-  location: KnowledgeBitLocation!
+  location: KnowledgeBitLocations!
   name: String!
+  side: KnowledgeBitSides!
   summary: String
-  type: KnowledgeBitType!
+  type: KnowledgeBitTypes!
 
   """Updated at"""
   updatedAt: String!
@@ -116,7 +118,7 @@ type KnowledgeBit {
   user: User!
 }
 
-enum KnowledgeBitLocation {
+enum KnowledgeBitLocations {
   ACADEMIA_EDU
   ARXIV
   BIT_TORRENT
@@ -151,7 +153,12 @@ enum KnowledgeBitLocation {
   ZENODO
 }
 
-enum KnowledgeBitType {
+enum KnowledgeBitSides {
+  REFUTING
+  SUPPORTING
+}
+
+enum KnowledgeBitTypes {
   DATA_SET
   DESCRIPTION_OF_METHODOLOGIES
   DETAILED_ANALYSIS
@@ -370,10 +377,11 @@ input UpdateKnowledgeBitInput {
   customLocation: String
   customType: String
   id: Int!
-  location: KnowledgeBitLocation
+  location: KnowledgeBitLocations
   name: String
+  side: KnowledgeBitSides
   summary: String
-  type: KnowledgeBitType
+  type: KnowledgeBitTypes
   url: String
 }
 
@@ -409,6 +417,7 @@ type User {
   """Ethereum wallet address"""
   ethAddress: String
   id: String!
+  knowledgeBits: [KnowledgeBit!]
 
   """Updated at"""
   updatedAt: String!
