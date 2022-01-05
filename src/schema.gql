@@ -77,11 +77,19 @@ input CreateClaimInput {
   title: String!
 }
 
+input InviteFriendsInput {
+  """Friends' emails"""
+  emails: [String!]!
+  message: String
+  slug: String!
+}
+
 type Mutation {
   connectEthereumWallet(address: String!): User!
   createAPIKey: APIKey!
   createClaim(createClaimInput: CreateClaimInput!): Claim!
   deleteClaim(id: String!): Boolean!
+  inviteFriends(inviteFriendsInput: InviteFriendsInput!): Boolean!
   removeAPIKey: Boolean!
   removeAttribution(id: Int!): Attribution!
   removeSource(id: Int!): Source!

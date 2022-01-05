@@ -31,6 +31,12 @@ export interface CreateClaimInput {
     title: string;
 }
 
+export interface InviteFriendsInput {
+    emails: string[];
+    message?: Nullable<string>;
+    slug: string;
+}
+
 export interface SaveAttributionInput {
     id?: Nullable<string>;
     identifier: string;
@@ -115,6 +121,7 @@ export interface IMutation {
     createAPIKey(): APIKey | Promise<APIKey>;
     createClaim(createClaimInput: CreateClaimInput): Claim | Promise<Claim>;
     deleteClaim(id: string): boolean | Promise<boolean>;
+    inviteFriends(inviteFriendsInput: InviteFriendsInput): boolean | Promise<boolean>;
     removeAPIKey(): boolean | Promise<boolean>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
     removeSource(id: number): Source | Promise<Source>;

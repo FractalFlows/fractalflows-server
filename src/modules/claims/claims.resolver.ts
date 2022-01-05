@@ -13,7 +13,7 @@ import { UserClaimRelation } from './dto/get-user-claim.input';
 import { UsersService } from '../users/users.service';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../users/entities/user.entity';
-import { In, Not } from 'typeorm';
+import { InviteFriendsInput } from './dto/invite-friends.input';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -113,8 +113,20 @@ export class ClaimsResolver {
 
   @Mutation(() => Boolean)
   @UseGuards(SessionGuard)
-  async deleteClaim(@Args('id', { type: () => String }) id: string) {
+  async deleteClaim(@Args('id') id: string) {
     await this.claimsService.softDelete(id);
     return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(SessionGuard)
+  async inviteFriends(
+    @Args('inviteFriendsInput') inviteFriendsInput: InviteFriendsInput,
+    @CurrentUser() user: User,
+  ) {
+    return await this.claimsService.inviteFriends({
+      user,
+      inviteFriendsInput,
+    });
   }
 }

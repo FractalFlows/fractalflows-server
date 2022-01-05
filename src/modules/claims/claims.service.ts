@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
+import { sendMail } from 'src/common/services/mail';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 
 import { CreateClaimInput } from './dto/create-claim.input';
+import { InviteFriendsInput } from './dto/invite-friends.input';
 import { UpdateClaimInput } from './dto/update-claim.input';
 import { Claim } from './entities/claim.entity';
 
@@ -76,5 +78,36 @@ export class ClaimsService {
 
   async softDelete(id: string) {
     return await this.claimsRepository.softDelete(id);
+  }
+
+  async inviteFriends({
+    user,
+    inviteFriendsInput: { slug, emails, message },
+  }: {
+    user: User;
+    inviteFriendsInput: InviteFriendsInput;
+  }) {
+    const claim = await this.claimsRepository.findOne({ where: { slug } });
+    const blockquoteMessage = message
+      ? `
+      <blockquote>
+        <strong>${user.username}:</strong> "${message}"
+      </blockquote>
+    `
+      : '';
+
+    await sendMail({
+      to: emails,
+      subject: `${user.username} has invited you to participate in a claim`,
+      html: `
+        Hello,<br /><br />
+
+        <strong>${user.username}</strong> has invited you to participate in the <a href="${process.env.FRONTEND_HOST}/claim/${claim.slug}">${claim.title}</a> claim.
+
+        ${blockquoteMessage}        
+      `,
+    });
+
+    return true;
   }
 }
