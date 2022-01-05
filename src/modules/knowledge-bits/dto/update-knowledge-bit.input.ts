@@ -1,10 +1,9 @@
+import { InputType, Field } from '@nestjs/graphql';
+
 import { CreateKnowledgeBitInput } from './create-knowledge-bit.input';
-import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
 
 @InputType()
-export class UpdateKnowledgeBitInput extends PartialType(
-  CreateKnowledgeBitInput,
-) {
-  @Field(() => Int)
-  id: number;
+export class UpdateKnowledgeBitInput extends CreateKnowledgeBitInput {
+  @Field(() => String)
+  id: string;
 }

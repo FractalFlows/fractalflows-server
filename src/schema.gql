@@ -376,13 +376,13 @@ input UpdateKnowledgeBitInput {
   attributions: [SaveAttributionInput!]
   customLocation: String
   customType: String
-  id: Int!
-  location: KnowledgeBitLocations
-  name: String
-  side: KnowledgeBitSides
+  id: String!
+  location: KnowledgeBitLocations!
+  name: String!
+  side: KnowledgeBitSides!
   summary: String
-  type: KnowledgeBitTypes
-  url: String
+  type: KnowledgeBitTypes!
+  url: String!
 }
 
 input UpdateProfileInput {

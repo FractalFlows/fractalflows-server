@@ -50,14 +50,17 @@ export class KnowledgeBitsResolver {
 
   @Mutation(() => KnowledgeBit)
   @UseGuards(SessionGuard)
-  updateKnowledgeBit(
+  async updateKnowledgeBit(
     @Args('updateKnowledgeBitInput')
     updateKnowledgeBitInput: UpdateKnowledgeBitInput,
   ) {
-    return this.knowledgeBitsService.update(
+    await this.attributionsService.save(updateKnowledgeBitInput.attributions);
+    await this.knowledgeBitsService.update(
       updateKnowledgeBitInput.id,
       updateKnowledgeBitInput,
     );
+
+    return await this.knowledgeBitsService.findOne(updateKnowledgeBitInput.id);
   }
 
   @Mutation(() => KnowledgeBit)

@@ -155,13 +155,13 @@ export interface UpdateKnowledgeBitInput {
     attributions?: Nullable<SaveAttributionInput[]>;
     customLocation?: Nullable<string>;
     customType?: Nullable<string>;
-    id: number;
-    location?: Nullable<KnowledgeBitLocations>;
-    name?: Nullable<string>;
-    side?: Nullable<KnowledgeBitSides>;
+    id: string;
+    location: KnowledgeBitLocations;
+    name: string;
+    side: KnowledgeBitSides;
     summary?: Nullable<string>;
-    type?: Nullable<KnowledgeBitTypes>;
-    url?: Nullable<string>;
+    type: KnowledgeBitTypes;
+    url: string;
 }
 
 export interface UpdateProfileInput {

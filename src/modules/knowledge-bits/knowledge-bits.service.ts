@@ -28,12 +28,15 @@ export class KnowledgeBitsService {
     return `This action returns all knowledgeBit`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} knowledgeBit`;
+  async findOne(query) {
+    return await this.knowledgeBitRepository.findOne(query);
   }
 
-  update(id: number, updateKnowledgeBitInput: UpdateKnowledgeBitInput) {
-    return `This action updates a #${id} knowledgeBit`;
+  async update(id: string, updateKnowledgeBitInput: UpdateKnowledgeBitInput) {
+    return await this.knowledgeBitRepository.save({
+      ...updateKnowledgeBitInput,
+      id,
+    });
   }
 
   remove(id: number) {

@@ -52,6 +52,7 @@ export class ClaimsResolver {
         'attributions',
         'knowledgeBits',
         'knowledgeBits.user',
+        'knowledgeBits.attributions',
       ],
     });
   }

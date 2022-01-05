@@ -91,7 +91,6 @@ export class KnowledgeBit extends BaseEntity {
   @Column({
     type: 'enum',
     enum: KnowledgeBitSides,
-    default: KnowledgeBitSides.REFUTING,
   })
   side: KnowledgeBitSides;
 
