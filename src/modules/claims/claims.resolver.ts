@@ -32,7 +32,7 @@ export class ClaimsResolver {
     @CurrentUser() user: User,
   ) {
     await this.sourcesService.save(createClaimInput.sources);
-    await this.attributionsService.save(createClaimInput.attributions);
+    await this.attributionsService.upsert(createClaimInput.attributions);
     await this.tagsService.save(createClaimInput.tags);
 
     return await this.claimsService.create({

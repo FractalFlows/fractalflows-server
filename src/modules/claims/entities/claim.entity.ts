@@ -12,6 +12,7 @@ import { User } from 'src/modules/users/entities/user.entity';
 import { Tag } from 'src/modules/tags/entities/tag.entity';
 import { Source } from 'src/modules/sources/entities/source.entity';
 import { Attribution } from 'src/modules/attributions/entities/attribution.entity';
+import { KnowledgeBit } from 'src/modules/knowledge-bits/entities/knowledge-bit.entity';
 import { BaseEntity } from 'src/common/entities/base.entity';
 
 @Entity()
@@ -39,8 +40,13 @@ export class Claim extends BaseEntity {
   tags: Tag[];
 
   @Field(() => [Attribution], { description: 'Attributions', nullable: true })
-  @OneToMany(() => Attribution, (attribution) => attribution.claim)
+  @ManyToMany(() => Attribution, (attribution) => attribution.claims)
+  @JoinTable()
   attributions: Attribution[];
+
+  @Field(() => [KnowledgeBit], { nullable: true })
+  @OneToMany(() => KnowledgeBit, (knowledgeBit) => knowledgeBit.claim)
+  knowledgeBits: KnowledgeBit[];
 
   @Field(() => User, { description: 'Created by' })
   @ManyToOne(() => User, (user) => user.claims)

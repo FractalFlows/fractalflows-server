@@ -16,6 +16,13 @@ export class AttributionsService {
     return await this.attributionsRepository.save(saveAttributionInput || []);
   }
 
+  async upsert(saveAttributionInput: SaveAttributionInput[]) {
+    return await this.attributionsRepository.upsert(
+      saveAttributionInput || [],
+      ['identifier'],
+    );
+  }
+
   findAll() {
     return `This action returns all attributions`;
   }

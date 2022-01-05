@@ -18,5 +18,6 @@ import { UsersModule } from '../users/users.module';
     UsersModule,
   ],
   providers: [ClaimsResolver, ClaimsService],
+  exports: [ClaimsService],
 })
 export class ClaimsModule {}

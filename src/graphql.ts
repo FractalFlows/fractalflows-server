@@ -12,6 +12,58 @@ export enum AvatarSource {
     GRAVATAR = "GRAVATAR"
 }
 
+export enum KnowledgeBitLocation {
+    ACADEMIA_EDU = "ACADEMIA_EDU",
+    ARXIV = "ARXIV",
+    BIT_TORRENT = "BIT_TORRENT",
+    BLOG = "BLOG",
+    BOX = "BOX",
+    DAT = "DAT",
+    DATABASE = "DATABASE",
+    DROPBOX = "DROPBOX",
+    EMAIL = "EMAIL",
+    ETHEREUM_SWARM = "ETHEREUM_SWARM",
+    FIGSHARE = "FIGSHARE",
+    GIT = "GIT",
+    GOOGLE_DRIVE = "GOOGLE_DRIVE",
+    HAL_ARCHIVES = "HAL_ARCHIVES",
+    IPFS = "IPFS",
+    JUPYTER = "JUPYTER",
+    KAGGLE = "KAGGLE",
+    ONEDRIVE = "ONEDRIVE",
+    OPENAIRE = "OPENAIRE",
+    OTHER = "OTHER",
+    PDF = "PDF",
+    PUBPEER = "PUBPEER",
+    RE3DATA = "RE3DATA",
+    RESEARCH_GATE = "RESEARCH_GATE",
+    RESEARCH_ID = "RESEARCH_ID",
+    SCIENTIFIC_PUBLISHER = "SCIENTIFIC_PUBLISHER",
+    SLIDESHARE = "SLIDESHARE",
+    STACK_OVERFLOW = "STACK_OVERFLOW",
+    WEBSITE = "WEBSITE",
+    WIKIPEDIA = "WIKIPEDIA",
+    YOUTUBE = "YOUTUBE",
+    ZENODO = "ZENODO"
+}
+
+export enum KnowledgeBitType {
+    DATA_SET = "DATA_SET",
+    DESCRIPTION_OF_METHODOLOGIES = "DESCRIPTION_OF_METHODOLOGIES",
+    DETAILED_ANALYSIS = "DETAILED_ANALYSIS",
+    DETAILED_MATHEMATICAL_FORMULATION = "DETAILED_MATHEMATICAL_FORMULATION",
+    EXPERIMENTAL_RESULTS = "EXPERIMENTAL_RESULTS",
+    OTHER = "OTHER",
+    PUBLICATION_OR_ARTICLE_OR_REPORT = "PUBLICATION_OR_ARTICLE_OR_REPORT",
+    REPRODUCTION_OF_RESULTS = "REPRODUCTION_OF_RESULTS",
+    REVIEWS = "REVIEWS",
+    SCRIPTS = "SCRIPTS",
+    SIMULATION_RESULTS = "SIMULATION_RESULTS",
+    SOURCE_CODE = "SOURCE_CODE",
+    STATEMENT_OF_ASSUMPTIONS = "STATEMENT_OF_ASSUMPTIONS",
+    STATEMENT_OF_HYPOTHESIS = "STATEMENT_OF_HYPOTHESIS"
+}
+
 export enum UserClaimRelation {
     CONTRIBUTED = "CONTRIBUTED",
     FOLLOWING = "FOLLOWING",
@@ -29,6 +81,17 @@ export interface CreateClaimInput {
     summary: string;
     tags?: Nullable<SaveTagInput[]>;
     title: string;
+}
+
+export interface CreateKnowledgeBitInput {
+    attributions?: Nullable<SaveAttributionInput[]>;
+    customLocation?: Nullable<string>;
+    customType?: Nullable<string>;
+    location: KnowledgeBitLocation;
+    name: string;
+    summary?: Nullable<string>;
+    type: KnowledgeBitType;
+    url: string;
 }
 
 export interface InviteFriendsInput {
@@ -82,6 +145,18 @@ export interface UpdateClaimInput {
     title: string;
 }
 
+export interface UpdateKnowledgeBitInput {
+    attributions?: Nullable<SaveAttributionInput[]>;
+    customLocation?: Nullable<string>;
+    customType?: Nullable<string>;
+    id: number;
+    location?: Nullable<KnowledgeBitLocation>;
+    name?: Nullable<string>;
+    summary?: Nullable<string>;
+    type?: Nullable<KnowledgeBitType>;
+    url?: Nullable<string>;
+}
+
 export interface UpdateProfileInput {
     avatar?: Nullable<string>;
     avatarSource: AvatarSource;
@@ -95,10 +170,11 @@ export interface APIKey {
 }
 
 export interface Attribution {
-    claim: Claim;
+    claims: Claim[];
     createdAt: string;
     id: string;
     identifier: string;
+    knowledgeBits: KnowledgeBit[];
     origin: string;
     updatedAt: string;
 }
@@ -107,6 +183,7 @@ export interface Claim {
     attributions?: Nullable<Attribution[]>;
     createdAt: string;
     id: string;
+    knowledgeBits?: Nullable<KnowledgeBit[]>;
     slug: string;
     sources?: Nullable<Source[]>;
     summary: string;
@@ -116,20 +193,39 @@ export interface Claim {
     user: User;
 }
 
+export interface KnowledgeBit {
+    attributions?: Nullable<Attribution[]>;
+    claim: Claim;
+    createdAt: string;
+    customLocation?: Nullable<string>;
+    customType?: Nullable<string>;
+    id: string;
+    location: KnowledgeBitLocation;
+    name: string;
+    summary?: Nullable<string>;
+    type: KnowledgeBitType;
+    updatedAt: string;
+    url: string;
+    user: User;
+}
+
 export interface IMutation {
     connectEthereumWallet(address: string): User | Promise<User>;
     createAPIKey(): APIKey | Promise<APIKey>;
     createClaim(createClaimInput: CreateClaimInput): Claim | Promise<Claim>;
+    createKnowledgeBit(claimSlug: string, createKnowledgeBitInput: CreateKnowledgeBitInput): KnowledgeBit | Promise<KnowledgeBit>;
     deleteClaim(id: string): boolean | Promise<boolean>;
     inviteFriends(inviteFriendsInput: InviteFriendsInput): boolean | Promise<boolean>;
     removeAPIKey(): boolean | Promise<boolean>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
+    removeKnowledgeBit(id: number): KnowledgeBit | Promise<KnowledgeBit>;
     removeSource(id: number): Source | Promise<Source>;
     sendMagicLink(email: string): boolean | Promise<boolean>;
     signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput): User | Promise<User>;
     signOut(): boolean | Promise<boolean>;
     updateClaim(updateClaimInput: UpdateClaimInput): Claim | Promise<Claim>;
     updateEmail(email: string): User | Promise<User>;
+    updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput): KnowledgeBit | Promise<KnowledgeBit>;
     updateProfile(updateProfileInput: UpdateProfileInput): User | Promise<User>;
     verifyMagicLink(hash: string): User | Promise<User>;
 }
@@ -146,6 +242,7 @@ export interface IQuery {
     attributions(): Attribution[] | Promise<Attribution[]>;
     claim(slug: string): Claim | Promise<Claim>;
     claims(limit: number, offset: number): Claim[] | Promise<Claim[]>;
+    knowledgeBit(id: number): KnowledgeBit | Promise<KnowledgeBit>;
     nonce(): string | Promise<string>;
     profile(username: string): Nullable<Profile> | Promise<Nullable<Profile>>;
     relatedClaims(slug: string): Claim[] | Promise<Claim[]>;

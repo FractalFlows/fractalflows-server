@@ -8,8 +8,7 @@ type APIKey {
 }
 
 type Attribution {
-  """Claim"""
-  claim: Claim!
+  claims: [Claim!]!
 
   """Created at"""
   createdAt: String!
@@ -17,6 +16,7 @@ type Attribution {
 
   """Claimant identifier"""
   identifier: String!
+  knowledgeBits: [KnowledgeBit!]!
 
   """Origin"""
   origin: String!
@@ -37,6 +37,7 @@ type Claim {
   """Created at"""
   createdAt: String!
   id: String!
+  knowledgeBits: [KnowledgeBit!]
 
   """Slug"""
   slug: String!
@@ -77,6 +78,17 @@ input CreateClaimInput {
   title: String!
 }
 
+input CreateKnowledgeBitInput {
+  attributions: [SaveAttributionInput!]
+  customLocation: String
+  customType: String
+  location: KnowledgeBitLocation!
+  name: String!
+  summary: String
+  type: KnowledgeBitType!
+  url: String!
+}
+
 input InviteFriendsInput {
   """Friends' emails"""
   emails: [String!]!
@@ -84,20 +96,95 @@ input InviteFriendsInput {
   slug: String!
 }
 
+type KnowledgeBit {
+  attributions: [Attribution!]
+  claim: Claim!
+
+  """Created at"""
+  createdAt: String!
+  customLocation: String
+  customType: String
+  id: String!
+  location: KnowledgeBitLocation!
+  name: String!
+  summary: String
+  type: KnowledgeBitType!
+
+  """Updated at"""
+  updatedAt: String!
+  url: String!
+  user: User!
+}
+
+enum KnowledgeBitLocation {
+  ACADEMIA_EDU
+  ARXIV
+  BIT_TORRENT
+  BLOG
+  BOX
+  DAT
+  DATABASE
+  DROPBOX
+  EMAIL
+  ETHEREUM_SWARM
+  FIGSHARE
+  GIT
+  GOOGLE_DRIVE
+  HAL_ARCHIVES
+  IPFS
+  JUPYTER
+  KAGGLE
+  ONEDRIVE
+  OPENAIRE
+  OTHER
+  PDF
+  PUBPEER
+  RE3DATA
+  RESEARCH_GATE
+  RESEARCH_ID
+  SCIENTIFIC_PUBLISHER
+  SLIDESHARE
+  STACK_OVERFLOW
+  WEBSITE
+  WIKIPEDIA
+  YOUTUBE
+  ZENODO
+}
+
+enum KnowledgeBitType {
+  DATA_SET
+  DESCRIPTION_OF_METHODOLOGIES
+  DETAILED_ANALYSIS
+  DETAILED_MATHEMATICAL_FORMULATION
+  EXPERIMENTAL_RESULTS
+  OTHER
+  PUBLICATION_OR_ARTICLE_OR_REPORT
+  REPRODUCTION_OF_RESULTS
+  REVIEWS
+  SCRIPTS
+  SIMULATION_RESULTS
+  SOURCE_CODE
+  STATEMENT_OF_ASSUMPTIONS
+  STATEMENT_OF_HYPOTHESIS
+}
+
 type Mutation {
   connectEthereumWallet(address: String!): User!
   createAPIKey: APIKey!
   createClaim(createClaimInput: CreateClaimInput!): Claim!
+  createKnowledgeBit(claimSlug: String!, createKnowledgeBitInput: CreateKnowledgeBitInput!): KnowledgeBit!
   deleteClaim(id: String!): Boolean!
   inviteFriends(inviteFriendsInput: InviteFriendsInput!): Boolean!
   removeAPIKey: Boolean!
   removeAttribution(id: Int!): Attribution!
+  removeKnowledgeBit(id: Int!): KnowledgeBit!
   removeSource(id: Int!): Source!
   sendMagicLink(email: String!): Boolean!
   signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput!): User!
   signOut: Boolean!
   updateClaim(updateClaimInput: UpdateClaimInput!): Claim!
   updateEmail(email: String!): User!
+  updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput!): KnowledgeBit!
   updateProfile(updateProfileInput: UpdateProfileInput!): User!
   verifyMagicLink(hash: String!): User!
 }
@@ -114,6 +201,7 @@ type Query {
   attributions: [Attribution!]!
   claim(slug: String!): Claim!
   claims(limit: Int!, offset: Int!): [Claim!]!
+  knowledgeBit(id: Int!): KnowledgeBit!
   nonce: String!
   profile(username: String!): Profile
   relatedClaims(slug: String!): [Claim!]!
@@ -275,6 +363,18 @@ input UpdateClaimInput {
 
   """Title"""
   title: String!
+}
+
+input UpdateKnowledgeBitInput {
+  attributions: [SaveAttributionInput!]
+  customLocation: String
+  customType: String
+  id: Int!
+  location: KnowledgeBitLocation
+  name: String
+  summary: String
+  type: KnowledgeBitType
+  url: String
 }
 
 input UpdateProfileInput {

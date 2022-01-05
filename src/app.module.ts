@@ -12,6 +12,7 @@ import { SourcesModule } from './modules/sources/sources.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { AttributionsModule } from './modules/attributions/attributions.module';
 import { AuthAPIKeyMiddleware } from './modules/auth/auth-api-key.middleware';
+import { KnowledgeBitsModule } from './modules/knowledge-bits/knowledge-bits.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { AuthAPIKeyMiddleware } from './modules/auth/auth-api-key.middleware';
     SourcesModule,
     TagsModule,
     AttributionsModule,
+    KnowledgeBitsModule,
   ],
   providers: [AppService],
 })
