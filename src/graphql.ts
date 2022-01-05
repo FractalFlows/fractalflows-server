@@ -223,10 +223,10 @@ export interface IMutation {
     createClaim(createClaimInput: CreateClaimInput): Claim | Promise<Claim>;
     createKnowledgeBit(claimSlug: string, createKnowledgeBitInput: CreateKnowledgeBitInput): KnowledgeBit | Promise<KnowledgeBit>;
     deleteClaim(id: string): boolean | Promise<boolean>;
+    deleteKnowledgeBit(id: string): boolean | Promise<boolean>;
     inviteFriends(inviteFriendsInput: InviteFriendsInput): boolean | Promise<boolean>;
     removeAPIKey(): boolean | Promise<boolean>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
-    removeKnowledgeBit(id: number): KnowledgeBit | Promise<KnowledgeBit>;
     removeSource(id: number): Source | Promise<Source>;
     sendMagicLink(email: string): boolean | Promise<boolean>;
     signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput): User | Promise<User>;

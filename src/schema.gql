@@ -181,10 +181,10 @@ type Mutation {
   createClaim(createClaimInput: CreateClaimInput!): Claim!
   createKnowledgeBit(claimSlug: String!, createKnowledgeBitInput: CreateKnowledgeBitInput!): KnowledgeBit!
   deleteClaim(id: String!): Boolean!
+  deleteKnowledgeBit(id: String!): Boolean!
   inviteFriends(inviteFriendsInput: InviteFriendsInput!): Boolean!
   removeAPIKey: Boolean!
   removeAttribution(id: Int!): Attribution!
-  removeKnowledgeBit(id: Int!): KnowledgeBit!
   removeSource(id: Int!): Source!
   sendMagicLink(email: String!): Boolean!
   signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput!): User!

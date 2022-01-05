@@ -39,7 +39,7 @@ export class KnowledgeBitsService {
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} knowledgeBit`;
+  async softDelete(id: string) {
+    return await this.knowledgeBitRepository.softDelete(id);
   }
 }

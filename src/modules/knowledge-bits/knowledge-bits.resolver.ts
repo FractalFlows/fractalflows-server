@@ -63,8 +63,10 @@ export class KnowledgeBitsResolver {
     return await this.knowledgeBitsService.findOne(updateKnowledgeBitInput.id);
   }
 
-  @Mutation(() => KnowledgeBit)
-  removeKnowledgeBit(@Args('id', { type: () => Int }) id: number) {
-    return this.knowledgeBitsService.remove(id);
+  @Mutation(() => Boolean)
+  @UseGuards(SessionGuard)
+  async deleteKnowledgeBit(@Args('id') id: string) {
+    await this.knowledgeBitsService.softDelete(id);
+    return true;
   }
 }
