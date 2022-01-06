@@ -69,6 +69,11 @@ export enum KnowledgeBitTypes {
     STATEMENT_OF_HYPOTHESIS = "STATEMENT_OF_HYPOTHESIS"
 }
 
+export enum KnowledgeBitVoteTypes {
+    DOWNVOTE = "DOWNVOTE",
+    UPVOTE = "UPVOTE"
+}
+
 export enum UserClaimRelation {
     CONTRIBUTED = "CONTRIBUTED",
     FOLLOWING = "FOLLOWING",
@@ -206,6 +211,7 @@ export interface KnowledgeBit {
     createdAt: string;
     customLocation?: Nullable<string>;
     customType?: Nullable<string>;
+    downvotesCount?: Nullable<number>;
     id: string;
     location: KnowledgeBitLocations;
     name: string;
@@ -213,7 +219,18 @@ export interface KnowledgeBit {
     summary?: Nullable<string>;
     type: KnowledgeBitTypes;
     updatedAt: string;
+    upvotesCount?: Nullable<number>;
     url: string;
+    user: User;
+    votes?: Nullable<KnowledgeBitVote[]>;
+}
+
+export interface KnowledgeBitVote {
+    createdAt: string;
+    id: string;
+    knowledgeBit: KnowledgeBit;
+    type: KnowledgeBitVoteTypes;
+    updatedAt: string;
     user: User;
 }
 
@@ -228,6 +245,7 @@ export interface IMutation {
     removeAPIKey(): boolean | Promise<boolean>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
     removeSource(id: number): Source | Promise<Source>;
+    saveKnowledgeBitVote(knowledgeBitId: string, type: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
     sendMagicLink(email: string): boolean | Promise<boolean>;
     signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput): User | Promise<User>;
     signOut(): boolean | Promise<boolean>;
@@ -250,7 +268,8 @@ export interface IQuery {
     attributions(): Attribution[] | Promise<Attribution[]>;
     claim(slug: string): Claim | Promise<Claim>;
     claims(limit: number, offset: number): Claim[] | Promise<Claim[]>;
-    knowledgeBit(id: number): KnowledgeBit | Promise<KnowledgeBit>;
+    knowledgeBit(id: string): KnowledgeBit | Promise<KnowledgeBit>;
+    knowledgeBits(claimSlug: string): KnowledgeBit[] | Promise<KnowledgeBit[]>;
     nonce(): string | Promise<string>;
     profile(username: string): Nullable<Profile> | Promise<Nullable<Profile>>;
     relatedClaims(slug: string): Claim[] | Promise<Claim[]>;
@@ -261,6 +280,7 @@ export interface IQuery {
     tag(id: number): Tag | Promise<Tag>;
     trendingClaims(limit: number, offset: number): Claim[] | Promise<Claim[]>;
     userClaims(relation: UserClaimRelation, username: string): Claim[] | Promise<Claim[]>;
+    userKnowledgeBitsVotes(claimSlug: string): KnowledgeBitVote[] | Promise<KnowledgeBitVote[]>;
 }
 
 export interface Session {
@@ -307,6 +327,7 @@ export interface User {
     email?: Nullable<string>;
     ethAddress?: Nullable<string>;
     id: string;
+    knowledgeBitVotes?: Nullable<KnowledgeBitVote[]>;
     knowledgeBits?: Nullable<KnowledgeBit[]>;
     updatedAt: string;
     username?: Nullable<string>;

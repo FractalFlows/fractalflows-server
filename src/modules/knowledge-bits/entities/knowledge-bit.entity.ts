@@ -1,11 +1,19 @@
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { registerEnumType } from '@nestjs/graphql';
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 
 import { BaseEntity } from 'src/common/entities/base.entity';
 import { Attribution } from 'src/modules/attributions/entities/attribution.entity';
 import { Claim } from 'src/modules/claims/entities/claim.entity';
 import { User } from 'src/modules/users/entities/user.entity';
+import { KnowledgeBitVote } from 'src/modules/knowledge-bit-votes/entities/knowledge-bit-vote.entity';
 
 export enum KnowledgeBitTypes {
   PUBLICATION_OR_ARTICLE_OR_REPORT,
@@ -128,6 +136,16 @@ export class KnowledgeBit extends BaseEntity {
   @Field(() => Claim)
   @ManyToOne(() => Claim, (claim) => claim.knowledgeBits)
   claim: Claim;
+
+  @Field(() => [KnowledgeBitVote], { nullable: true })
+  @OneToMany(() => KnowledgeBitVote, (vote) => vote.knowledgeBit)
+  votes: KnowledgeBitVote[];
+
+  @Field(() => Int, { nullable: true })
+  upvotesCount?: number;
+
+  @Field(() => Int, { nullable: true })
+  downvotesCount: number;
 
   @Field(() => User)
   @ManyToOne(() => User, (user) => user.claims)

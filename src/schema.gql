@@ -105,6 +105,7 @@ type KnowledgeBit {
   createdAt: String!
   customLocation: String
   customType: String
+  downvotesCount: Int
   id: String!
   location: KnowledgeBitLocations!
   name: String!
@@ -114,8 +115,10 @@ type KnowledgeBit {
 
   """Updated at"""
   updatedAt: String!
+  upvotesCount: Int
   url: String!
   user: User!
+  votes: [KnowledgeBitVote!]
 }
 
 enum KnowledgeBitLocations {
@@ -175,6 +178,23 @@ enum KnowledgeBitTypes {
   STATEMENT_OF_HYPOTHESIS
 }
 
+type KnowledgeBitVote {
+  """Created at"""
+  createdAt: String!
+  id: String!
+  knowledgeBit: KnowledgeBit!
+  type: KnowledgeBitVoteTypes!
+
+  """Updated at"""
+  updatedAt: String!
+  user: User!
+}
+
+enum KnowledgeBitVoteTypes {
+  DOWNVOTE
+  UPVOTE
+}
+
 type Mutation {
   connectEthereumWallet(address: String!): User!
   createAPIKey: APIKey!
@@ -186,6 +206,7 @@ type Mutation {
   removeAPIKey: Boolean!
   removeAttribution(id: Int!): Attribution!
   removeSource(id: Int!): Source!
+  saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
   sendMagicLink(email: String!): Boolean!
   signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput!): User!
   signOut: Boolean!
@@ -208,7 +229,8 @@ type Query {
   attributions: [Attribution!]!
   claim(slug: String!): Claim!
   claims(limit: Int!, offset: Int!): [Claim!]!
-  knowledgeBit(id: Int!): KnowledgeBit!
+  knowledgeBit(id: String!): KnowledgeBit!
+  knowledgeBits(claimSlug: String!): [KnowledgeBit!]!
   nonce: String!
   profile(username: String!): Profile
   relatedClaims(slug: String!): [Claim!]!
@@ -219,6 +241,7 @@ type Query {
   tag(id: Int!): Tag!
   trendingClaims(limit: Int!, offset: Int!): [Claim!]!
   userClaims(relation: UserClaimRelation!, username: String!): [Claim!]!
+  userKnowledgeBitsVotes(claimSlug: String!): [KnowledgeBitVote!]!
 }
 
 input SaveAttributionInput {
@@ -417,6 +440,7 @@ type User {
   """Ethereum wallet address"""
   ethAddress: String
   id: String!
+  knowledgeBitVotes: [KnowledgeBitVote!]
   knowledgeBits: [KnowledgeBit!]
 
   """Updated at"""

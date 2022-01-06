@@ -13,6 +13,7 @@ import { TagsModule } from './modules/tags/tags.module';
 import { AttributionsModule } from './modules/attributions/attributions.module';
 import { AuthAPIKeyMiddleware } from './modules/auth/auth-api-key.middleware';
 import { KnowledgeBitsModule } from './modules/knowledge-bits/knowledge-bits.module';
+import { KnowledgeBitVotesModule } from './modules/knowledge-bit-votes/knowledge-bit-votes.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { KnowledgeBitsModule } from './modules/knowledge-bits/knowledge-bits.mod
     TagsModule,
     AttributionsModule,
     KnowledgeBitsModule,
+    KnowledgeBitVotesModule,
   ],
   providers: [AppService],
 })

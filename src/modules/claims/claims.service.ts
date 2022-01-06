@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
-import { sendMail } from 'src/common/services/mail';
 import { Repository } from 'typeorm';
-import { User } from '../users/entities/user.entity';
 
+import { sendMail } from 'src/common/services/mail';
+import { User } from '../users/entities/user.entity';
 import { CreateClaimInput } from './dto/create-claim.input';
 import { InviteFriendsInput } from './dto/invite-friends.input';
 import { UpdateClaimInput } from './dto/update-claim.input';
@@ -44,16 +44,20 @@ export class ClaimsService {
       relations: ['tags'],
     });
 
-    return await this.claimsRepository
-      .createQueryBuilder('claim')
-      .leftJoinAndSelect('claim.user', 'user')
-      .leftJoinAndSelect('claim.tags', 'tags')
-      .innerJoin('claim.tags', 'tag', 'tag.id IN (:...tagIds)', {
-        tagIds: claim.tags.map(({ id }) => id),
-      })
-      .where('claim.slug != :slug', { slug })
-      .take(3)
-      .getMany();
+    if (claim.tags.length > 0) {
+      return await this.claimsRepository
+        .createQueryBuilder('claim')
+        .leftJoinAndSelect('claim.user', 'user')
+        .leftJoinAndSelect('claim.tags', 'tags')
+        .innerJoin('claim.tags', 'tag', 'tag.id IN (:...tagIds)', {
+          tagIds: claim.tags.map(({ id }) => id),
+        })
+        .where('claim.slug != :slug', { slug })
+        .take(3)
+        .getMany();
+    } else {
+      return Promise.resolve([]);
+    }
   }
 
   async find(query) {

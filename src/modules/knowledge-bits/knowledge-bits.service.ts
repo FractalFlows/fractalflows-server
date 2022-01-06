@@ -7,6 +7,7 @@ import { UpdateKnowledgeBitInput } from './dto/update-knowledge-bit.input';
 import { KnowledgeBit } from './entities/knowledge-bit.entity';
 import { Claim } from '../claims/entities/claim.entity';
 import { User } from '../users/entities/user.entity';
+import { KnowledgeBitVoteTypes } from '../knowledge-bit-votes/entities/knowledge-bit-vote.entity';
 
 @Injectable()
 export class KnowledgeBitsService {
@@ -24,8 +25,8 @@ export class KnowledgeBitsService {
     return await this.knowledgeBitRepository.save(createKnowledgeBitInput);
   }
 
-  findAll() {
-    return `This action returns all knowledgeBit`;
+  async find(query) {
+    return await this.knowledgeBitRepository.find(query);
   }
 
   async findOne(query) {
@@ -41,5 +42,37 @@ export class KnowledgeBitsService {
 
   async softDelete(id: string) {
     return await this.knowledgeBitRepository.softDelete(id);
+  }
+
+  async incrementVote({
+    id,
+    voteType,
+  }: {
+    id: string;
+    voteType: KnowledgeBitVoteTypes;
+  }) {
+    return await this.knowledgeBitRepository.increment(
+      { id },
+      voteType === KnowledgeBitVoteTypes.UPVOTE
+        ? 'upvotesCount'
+        : 'downvotesCount',
+      1,
+    );
+  }
+
+  async decrementVote({
+    id,
+    voteType,
+  }: {
+    id: string;
+    voteType: KnowledgeBitVoteTypes;
+  }) {
+    return await this.knowledgeBitRepository.decrement(
+      { id },
+      voteType === KnowledgeBitVoteTypes.UPVOTE
+        ? 'upvotesCount'
+        : 'downvotesCount',
+      1,
+    );
   }
 }

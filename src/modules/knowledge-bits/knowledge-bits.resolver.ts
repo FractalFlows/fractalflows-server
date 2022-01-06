@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 
 import { KnowledgeBitsService } from './knowledge-bits.service';
 import { KnowledgeBit } from './entities/knowledge-bit.entity';
@@ -10,11 +10,18 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { UseGuards } from '@nestjs/common';
 import { SessionGuard } from '../auth/auth.guard';
+import { KnowledgeBitVotesService } from '../knowledge-bit-votes/knowledge-bit-votes.service';
+import {
+  KnowledgeBitVote,
+  KnowledgeBitVoteTypes,
+} from '../knowledge-bit-votes/entities/knowledge-bit-vote.entity';
+import { In } from 'typeorm';
 
 @Resolver(() => KnowledgeBit)
 export class KnowledgeBitsResolver {
   constructor(
     private readonly knowledgeBitsService: KnowledgeBitsService,
+    private readonly knowledgeBitVotesService: KnowledgeBitVotesService,
     private readonly attributionsService: AttributionsService,
     private readonly claimsService: ClaimsService,
   ) {}
@@ -38,14 +45,50 @@ export class KnowledgeBitsResolver {
     });
   }
 
-  @Query(() => [KnowledgeBit], { name: 'knowledgeBit' })
-  findAll() {
-    return this.knowledgeBitsService.findAll();
+  @Query(() => KnowledgeBit, { name: 'knowledgeBit' })
+  async find(@Args('id') id: string) {
+    const knowledgeBit = await this.knowledgeBitsService.findOne({
+      where: { id },
+      relations: ['user', 'attributions'],
+    });
+
+    return {
+      ...knowledgeBit,
+      upvotesCount: await this.knowledgeBitVotesService.countVotes({
+        knowledgeBitId: knowledgeBit.id,
+        type: KnowledgeBitVoteTypes.UPVOTE,
+      }),
+      downvotesCount: await this.knowledgeBitVotesService.countVotes({
+        knowledgeBitId: knowledgeBit.id,
+        type: KnowledgeBitVoteTypes.DOWNVOTE,
+      }),
+    };
   }
 
-  @Query(() => KnowledgeBit, { name: 'knowledgeBit' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.knowledgeBitsService.findOne(id);
+  @Query(() => [KnowledgeBit], { name: 'knowledgeBits' })
+  async findAll(@Args('claimSlug') claimSlug: string) {
+    const claim = await this.claimsService.findOne({
+      where: { slug: claimSlug },
+      relations: [
+        'knowledgeBits',
+        'knowledgeBits.user',
+        'knowledgeBits.attributions',
+      ],
+    });
+
+    return await Promise.all(
+      claim.knowledgeBits?.map(async (knowledgeBit) => ({
+        ...knowledgeBit,
+        upvotesCount: await this.knowledgeBitVotesService.countVotes({
+          knowledgeBitId: knowledgeBit.id,
+          type: KnowledgeBitVoteTypes.UPVOTE,
+        }),
+        downvotesCount: await this.knowledgeBitVotesService.countVotes({
+          knowledgeBitId: knowledgeBit.id,
+          type: KnowledgeBitVoteTypes.DOWNVOTE,
+        }),
+      })) || [],
+    );
   }
 
   @Mutation(() => KnowledgeBit)
