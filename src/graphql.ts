@@ -90,6 +90,14 @@ export enum UsernameSource {
     ENS = "ENS"
 }
 
+export interface ArgumentInput {
+    id: string;
+}
+
+export interface ClaimInput {
+    id: string;
+}
+
 export interface CreateArgumentCommentInput {
     exampleField: number;
 }
@@ -134,6 +142,12 @@ export interface SaveAttributionInput {
     id?: Nullable<string>;
     identifier: string;
     origin: string;
+}
+
+export interface SaveOpinionInput {
+    acceptance: number;
+    arguments: ArgumentInput[];
+    claim: ClaimInput;
 }
 
 export interface SaveSourceInput {
@@ -218,7 +232,7 @@ export interface Argument {
     createdAt: string;
     evidences: KnowledgeBit[];
     id: string;
-    referrers?: Nullable<User[]>;
+    opinions?: Nullable<Opinion[]>;
     side: ArgumentSides;
     summary: string;
     updatedAt: string;
@@ -248,6 +262,7 @@ export interface Claim {
     createdAt: string;
     id: string;
     knowledgeBits?: Nullable<KnowledgeBit[]>;
+    opinions?: Nullable<Opinion[]>;
     slug: string;
     sources?: Nullable<Source[]>;
     summary: string;
@@ -300,8 +315,10 @@ export interface IMutation {
     removeArgument(id: number): Argument | Promise<Argument>;
     removeArgumentComment(id: number): ArgumentComment | Promise<ArgumentComment>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
+    removeOpinion(id: number): Opinion | Promise<Opinion>;
     removeSource(id: number): Source | Promise<Source>;
     saveKnowledgeBitVote(knowledgeBitId: string, type: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
+    saveOpinion(saveOpinionInput: SaveOpinionInput): Opinion | Promise<Opinion>;
     sendMagicLink(email: string): boolean | Promise<boolean>;
     signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput): User | Promise<User>;
     signOut(): boolean | Promise<boolean>;
@@ -312,6 +329,16 @@ export interface IMutation {
     updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput): KnowledgeBit | Promise<KnowledgeBit>;
     updateProfile(updateProfileInput: UpdateProfileInput): User | Promise<User>;
     verifyMagicLink(hash: string): User | Promise<User>;
+}
+
+export interface Opinion {
+    acceptance: number;
+    arguments?: Nullable<Argument[]>;
+    claim: Claim;
+    createdAt: string;
+    id: string;
+    updatedAt: string;
+    user: User;
 }
 
 export interface Profile {
@@ -325,7 +352,7 @@ export interface IQuery {
     argument(id: number): Argument | Promise<Argument>;
     argumentComment(id: number): ArgumentComment | Promise<ArgumentComment>;
     argumentComments(): ArgumentComment[] | Promise<ArgumentComment[]>;
-    arguments(): Argument[] | Promise<Argument[]>;
+    arguments(claimSlug: string): Argument[] | Promise<Argument[]>;
     attribution(id: number): Attribution | Promise<Attribution>;
     attributions(): Attribution[] | Promise<Attribution[]>;
     claim(slug: string): Claim | Promise<Claim>;
@@ -333,6 +360,7 @@ export interface IQuery {
     knowledgeBit(id: string): KnowledgeBit | Promise<KnowledgeBit>;
     knowledgeBits(claimSlug: string): KnowledgeBit[] | Promise<KnowledgeBit[]>;
     nonce(): string | Promise<string>;
+    opinion(id: string): Opinion | Promise<Opinion>;
     profile(username: string): Nullable<Profile> | Promise<Nullable<Profile>>;
     relatedClaims(slug: string): Claim[] | Promise<Claim[]>;
     searchTags(term?: Nullable<string>): Tag[] | Promise<Tag[]>;

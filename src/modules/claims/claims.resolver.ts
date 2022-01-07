@@ -45,7 +45,15 @@ export class ClaimsResolver {
   async findOne(@Args('slug') slug: string) {
     return await this.claimsService.findOne({
       where: { slug },
-      relations: ['user', 'tags', 'sources', 'attributions'],
+      relations: [
+        'user',
+        'tags',
+        'sources',
+        'attributions',
+        'arguments',
+        'opinions',
+        'opinions.user',
+      ],
     });
   }
 

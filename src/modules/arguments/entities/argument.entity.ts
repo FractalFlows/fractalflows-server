@@ -13,6 +13,7 @@ import { ArgumentComment } from 'src/modules/argument-comments/entities/argument
 import { KnowledgeBit } from 'src/modules/knowledge-bits/entities/knowledge-bit.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 import { Claim } from 'src/modules/claims/entities/claim.entity';
+import { Opinion } from 'src/modules/opinions/entities/opinion.entity';
 
 export enum ArgumentSides {
   CON,
@@ -42,11 +43,6 @@ export class Argument extends BaseEntity {
   })
   side: ArgumentSides;
 
-  @Field(() => [User], { nullable: true })
-  @ManyToMany(() => User)
-  @JoinTable()
-  referrers?: User[];
-
   @Field(() => [ArgumentComment], { nullable: true })
   @OneToMany(
     () => ArgumentComment,
@@ -61,4 +57,8 @@ export class Argument extends BaseEntity {
   @Field(() => Claim)
   @ManyToOne(() => Claim, (claim) => claim.arguments)
   claim: Claim;
+
+  @Field(() => [Opinion], { nullable: true })
+  @ManyToMany(() => Opinion, (opinion) => opinion.arguments)
+  opinions: Opinion[];
 }

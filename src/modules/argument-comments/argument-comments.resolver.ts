@@ -6,10 +6,15 @@ import { UpdateArgumentCommentInput } from './dto/update-argument-comment.input'
 
 @Resolver(() => ArgumentComment)
 export class ArgumentCommentsResolver {
-  constructor(private readonly argumentCommentsService: ArgumentCommentsService) {}
+  constructor(
+    private readonly argumentCommentsService: ArgumentCommentsService,
+  ) {}
 
   @Mutation(() => ArgumentComment)
-  createArgumentComment(@Args('createArgumentCommentInput') createArgumentCommentInput: CreateArgumentCommentInput) {
+  createArgumentComment(
+    @Args('createArgumentCommentInput')
+    createArgumentCommentInput: CreateArgumentCommentInput,
+  ) {
     return this.argumentCommentsService.create(createArgumentCommentInput);
   }
 
@@ -24,8 +29,14 @@ export class ArgumentCommentsResolver {
   }
 
   @Mutation(() => ArgumentComment)
-  updateArgumentComment(@Args('updateArgumentCommentInput') updateArgumentCommentInput: UpdateArgumentCommentInput) {
-    return this.argumentCommentsService.update(updateArgumentCommentInput.id, updateArgumentCommentInput);
+  updateArgumentComment(
+    @Args('updateArgumentCommentInput')
+    updateArgumentCommentInput: UpdateArgumentCommentInput,
+  ) {
+    return this.argumentCommentsService.update(
+      updateArgumentCommentInput.id,
+      updateArgumentCommentInput,
+    );
   }
 
   @Mutation(() => ArgumentComment)

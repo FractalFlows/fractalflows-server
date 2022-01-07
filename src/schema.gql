@@ -15,7 +15,7 @@ type Argument {
   createdAt: String!
   evidences: [KnowledgeBit!]!
   id: String!
-  referrers: [User!]
+  opinions: [Opinion!]
   side: ArgumentSides!
   summary: String!
 
@@ -33,6 +33,10 @@ type ArgumentComment {
 
   """Updated at"""
   updatedAt: String!
+}
+
+input ArgumentInput {
+  id: String!
 }
 
 enum ArgumentSides {
@@ -73,6 +77,7 @@ type Claim {
   createdAt: String!
   id: String!
   knowledgeBits: [KnowledgeBit!]
+  opinions: [Opinion!]
 
   """Slug"""
   slug: String!
@@ -94,6 +99,10 @@ type Claim {
 
   """Created by"""
   user: User!
+}
+
+input ClaimInput {
+  id: String!
 }
 
 input CreateArgumentCommentInput {
@@ -259,8 +268,10 @@ type Mutation {
   removeArgument(id: Int!): Argument!
   removeArgumentComment(id: Int!): ArgumentComment!
   removeAttribution(id: Int!): Attribution!
+  removeOpinion(id: Int!): Opinion!
   removeSource(id: Int!): Source!
   saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
+  saveOpinion(saveOpinionInput: SaveOpinionInput!): Opinion!
   sendMagicLink(email: String!): Boolean!
   signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput!): User!
   signOut: Boolean!
@@ -271,6 +282,20 @@ type Mutation {
   updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput!): KnowledgeBit!
   updateProfile(updateProfileInput: UpdateProfileInput!): User!
   verifyMagicLink(hash: String!): User!
+}
+
+type Opinion {
+  acceptance: Float!
+  arguments: [Argument!]
+  claim: Claim!
+
+  """Created at"""
+  createdAt: String!
+  id: String!
+
+  """Updated at"""
+  updatedAt: String!
+  user: User!
 }
 
 type Profile {
@@ -284,7 +309,7 @@ type Query {
   argument(id: Int!): Argument!
   argumentComment(id: Int!): ArgumentComment!
   argumentComments: [ArgumentComment!]!
-  arguments: [Argument!]!
+  arguments(claimSlug: String!): [Argument!]!
   attribution(id: Int!): Attribution!
   attributions: [Attribution!]!
   claim(slug: String!): Claim!
@@ -292,6 +317,7 @@ type Query {
   knowledgeBit(id: String!): KnowledgeBit!
   knowledgeBits(claimSlug: String!): [KnowledgeBit!]!
   nonce: String!
+  opinion(id: String!): Opinion!
   profile(username: String!): Profile
   relatedClaims(slug: String!): [Claim!]!
   searchTags(term: String): [Tag!]!
@@ -312,6 +338,12 @@ input SaveAttributionInput {
 
   """Origin"""
   origin: String!
+}
+
+input SaveOpinionInput {
+  acceptance: Float!
+  arguments: [ArgumentInput!]!
+  claim: ClaimInput!
 }
 
 input SaveSourceInput {

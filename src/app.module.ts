@@ -16,6 +16,7 @@ import { KnowledgeBitsModule } from './modules/knowledge-bits/knowledge-bits.mod
 import { KnowledgeBitVotesModule } from './modules/knowledge-bit-votes/knowledge-bit-votes.module';
 import { ArgumentsModule } from './modules/arguments/arguments.module';
 import { ArgumentCommentsModule } from './modules/argument-comments/argument-comments.module';
+import { OpinionsModule } from './modules/opinions/opinions.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ArgumentCommentsModule } from './modules/argument-comments/argument-com
     KnowledgeBitVotesModule,
     ArgumentsModule,
     ArgumentCommentsModule,
+    OpinionsModule,
   ],
   providers: [AppService],
 })

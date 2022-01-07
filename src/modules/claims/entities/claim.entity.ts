@@ -15,6 +15,7 @@ import { Attribution } from 'src/modules/attributions/entities/attribution.entit
 import { KnowledgeBit } from 'src/modules/knowledge-bits/entities/knowledge-bit.entity';
 import { BaseEntity } from 'src/common/entities/base.entity';
 import { Argument } from 'src/modules/arguments/entities/argument.entity';
+import { Opinion } from 'src/modules/opinions/entities/opinion.entity';
 
 @Entity()
 @ObjectType()
@@ -52,6 +53,10 @@ export class Claim extends BaseEntity {
   @Field(() => [Argument], { nullable: true })
   @OneToMany(() => Argument, (argument) => argument.claim)
   arguments: Argument[];
+
+  @Field(() => [Opinion], { nullable: true })
+  @OneToMany(() => Opinion, (opinion) => opinion.claim)
+  opinions: Opinion[];
 
   @Field(() => User, { description: 'Created by' })
   @ManyToOne(() => User, (user) => user.claims)

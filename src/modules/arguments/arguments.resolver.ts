@@ -35,8 +35,12 @@ export class ArgumentsResolver {
   }
 
   @Query(() => [Argument], { name: 'arguments' })
-  findAll() {
-    return this.argumentsService.findAll();
+  async findAll(@Args('claimSlug') claimSlug: string) {
+    const claim = await this.claimsService.findOne({
+      where: { slug: claimSlug },
+      relations: ['arguments', 'arguments.opinions'],
+    });
+    return claim.arguments;
   }
 
   @Query(() => Argument, { name: 'argument' })
