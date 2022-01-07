@@ -7,6 +7,39 @@ type APIKey {
   secret: String
 }
 
+type Argument {
+  claim: Claim!
+  comments: [ArgumentComment!]
+
+  """Created at"""
+  createdAt: String!
+  evidences: [KnowledgeBit!]!
+  id: String!
+  referrers: [User!]
+  side: ArgumentSides!
+  summary: String!
+
+  """Updated at"""
+  updatedAt: String!
+  user: User!
+}
+
+type ArgumentComment {
+  argument: Argument!
+
+  """Created at"""
+  createdAt: String!
+  id: String!
+
+  """Updated at"""
+  updatedAt: String!
+}
+
+enum ArgumentSides {
+  CON
+  PRO
+}
+
 type Attribution {
   claims: [Claim!]!
 
@@ -31,6 +64,8 @@ enum AvatarSource {
 }
 
 type Claim {
+  arguments: [Argument!]
+
   """Attributions"""
   attributions: [Attribution!]
 
@@ -61,6 +96,17 @@ type Claim {
   user: User!
 }
 
+input CreateArgumentCommentInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateArgumentInput {
+  evidences: [EvidenceInput!]!
+  side: ArgumentSides!
+  summary: String!
+}
+
 input CreateClaimInput {
   """Attributions"""
   attributions: [SaveAttributionInput!]
@@ -88,6 +134,10 @@ input CreateKnowledgeBitInput {
   summary: String
   type: KnowledgeBitTypes!
   url: String!
+}
+
+input EvidenceInput {
+  id: String!
 }
 
 input InviteFriendsInput {
@@ -198,18 +248,24 @@ enum KnowledgeBitVoteTypes {
 type Mutation {
   connectEthereumWallet(address: String!): User!
   createAPIKey: APIKey!
+  createArgument(claimSlug: String!, createArgumentInput: CreateArgumentInput!): Argument!
+  createArgumentComment(createArgumentCommentInput: CreateArgumentCommentInput!): ArgumentComment!
   createClaim(createClaimInput: CreateClaimInput!): Claim!
   createKnowledgeBit(claimSlug: String!, createKnowledgeBitInput: CreateKnowledgeBitInput!): KnowledgeBit!
   deleteClaim(id: String!): Boolean!
   deleteKnowledgeBit(id: String!): Boolean!
   inviteFriends(inviteFriendsInput: InviteFriendsInput!): Boolean!
   removeAPIKey: Boolean!
+  removeArgument(id: Int!): Argument!
+  removeArgumentComment(id: Int!): ArgumentComment!
   removeAttribution(id: Int!): Attribution!
   removeSource(id: Int!): Source!
   saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
   sendMagicLink(email: String!): Boolean!
   signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput!): User!
   signOut: Boolean!
+  updateArgument(updateArgumentInput: UpdateArgumentInput!): Argument!
+  updateArgumentComment(updateArgumentCommentInput: UpdateArgumentCommentInput!): ArgumentComment!
   updateClaim(updateClaimInput: UpdateClaimInput!): Claim!
   updateEmail(email: String!): User!
   updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput!): KnowledgeBit!
@@ -225,6 +281,10 @@ type Profile {
 
 type Query {
   apiKey: String
+  argument(id: Int!): Argument!
+  argumentComment(id: Int!): ArgumentComment!
+  argumentComments: [ArgumentComment!]!
+  arguments: [Argument!]!
   attribution(id: Int!): Attribution!
   attributions: [Attribution!]!
   claim(slug: String!): Claim!
@@ -375,6 +435,19 @@ type Tag {
 
   """Updated at"""
   updatedAt: String!
+}
+
+input UpdateArgumentCommentInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateArgumentInput {
+  evidences: [EvidenceInput!]
+  id: Int!
+  side: ArgumentSides
+  summary: String
 }
 
 input UpdateClaimInput {

@@ -7,6 +7,11 @@
 
 /* tslint:disable */
 /* eslint-disable */
+export enum ArgumentSides {
+    CON = "CON",
+    PRO = "PRO"
+}
+
 export enum AvatarSource {
     ENS = "ENS",
     GRAVATAR = "GRAVATAR"
@@ -85,6 +90,16 @@ export enum UsernameSource {
     ENS = "ENS"
 }
 
+export interface CreateArgumentCommentInput {
+    exampleField: number;
+}
+
+export interface CreateArgumentInput {
+    evidences: EvidenceInput[];
+    side: ArgumentSides;
+    summary: string;
+}
+
 export interface CreateClaimInput {
     attributions?: Nullable<SaveAttributionInput[]>;
     sources?: Nullable<SaveSourceInput[]>;
@@ -103,6 +118,10 @@ export interface CreateKnowledgeBitInput {
     summary?: Nullable<string>;
     type: KnowledgeBitTypes;
     url: string;
+}
+
+export interface EvidenceInput {
+    id: string;
 }
 
 export interface InviteFriendsInput {
@@ -147,6 +166,18 @@ export interface SiweMessageInput {
     version: string;
 }
 
+export interface UpdateArgumentCommentInput {
+    exampleField?: Nullable<number>;
+    id: number;
+}
+
+export interface UpdateArgumentInput {
+    evidences?: Nullable<EvidenceInput[]>;
+    id: number;
+    side?: Nullable<ArgumentSides>;
+    summary?: Nullable<string>;
+}
+
 export interface UpdateClaimInput {
     attributions?: Nullable<SaveAttributionInput[]>;
     id: string;
@@ -181,6 +212,26 @@ export interface APIKey {
     secret?: Nullable<string>;
 }
 
+export interface Argument {
+    claim: Claim;
+    comments?: Nullable<ArgumentComment[]>;
+    createdAt: string;
+    evidences: KnowledgeBit[];
+    id: string;
+    referrers?: Nullable<User[]>;
+    side: ArgumentSides;
+    summary: string;
+    updatedAt: string;
+    user: User;
+}
+
+export interface ArgumentComment {
+    argument: Argument;
+    createdAt: string;
+    id: string;
+    updatedAt: string;
+}
+
 export interface Attribution {
     claims: Claim[];
     createdAt: string;
@@ -192,6 +243,7 @@ export interface Attribution {
 }
 
 export interface Claim {
+    arguments?: Nullable<Argument[]>;
     attributions?: Nullable<Attribution[]>;
     createdAt: string;
     id: string;
@@ -237,18 +289,24 @@ export interface KnowledgeBitVote {
 export interface IMutation {
     connectEthereumWallet(address: string): User | Promise<User>;
     createAPIKey(): APIKey | Promise<APIKey>;
+    createArgument(claimSlug: string, createArgumentInput: CreateArgumentInput): Argument | Promise<Argument>;
+    createArgumentComment(createArgumentCommentInput: CreateArgumentCommentInput): ArgumentComment | Promise<ArgumentComment>;
     createClaim(createClaimInput: CreateClaimInput): Claim | Promise<Claim>;
     createKnowledgeBit(claimSlug: string, createKnowledgeBitInput: CreateKnowledgeBitInput): KnowledgeBit | Promise<KnowledgeBit>;
     deleteClaim(id: string): boolean | Promise<boolean>;
     deleteKnowledgeBit(id: string): boolean | Promise<boolean>;
     inviteFriends(inviteFriendsInput: InviteFriendsInput): boolean | Promise<boolean>;
     removeAPIKey(): boolean | Promise<boolean>;
+    removeArgument(id: number): Argument | Promise<Argument>;
+    removeArgumentComment(id: number): ArgumentComment | Promise<ArgumentComment>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
     removeSource(id: number): Source | Promise<Source>;
     saveKnowledgeBitVote(knowledgeBitId: string, type: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
     sendMagicLink(email: string): boolean | Promise<boolean>;
     signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput): User | Promise<User>;
     signOut(): boolean | Promise<boolean>;
+    updateArgument(updateArgumentInput: UpdateArgumentInput): Argument | Promise<Argument>;
+    updateArgumentComment(updateArgumentCommentInput: UpdateArgumentCommentInput): ArgumentComment | Promise<ArgumentComment>;
     updateClaim(updateClaimInput: UpdateClaimInput): Claim | Promise<Claim>;
     updateEmail(email: string): User | Promise<User>;
     updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput): KnowledgeBit | Promise<KnowledgeBit>;
@@ -264,6 +322,10 @@ export interface Profile {
 
 export interface IQuery {
     apiKey(): Nullable<string> | Promise<Nullable<string>>;
+    argument(id: number): Argument | Promise<Argument>;
+    argumentComment(id: number): ArgumentComment | Promise<ArgumentComment>;
+    argumentComments(): ArgumentComment[] | Promise<ArgumentComment[]>;
+    arguments(): Argument[] | Promise<Argument[]>;
     attribution(id: number): Attribution | Promise<Attribution>;
     attributions(): Attribution[] | Promise<Attribution[]>;
     claim(slug: string): Claim | Promise<Claim>;

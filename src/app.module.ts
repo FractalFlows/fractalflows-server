@@ -14,6 +14,8 @@ import { AttributionsModule } from './modules/attributions/attributions.module';
 import { AuthAPIKeyMiddleware } from './modules/auth/auth-api-key.middleware';
 import { KnowledgeBitsModule } from './modules/knowledge-bits/knowledge-bits.module';
 import { KnowledgeBitVotesModule } from './modules/knowledge-bit-votes/knowledge-bit-votes.module';
+import { ArgumentsModule } from './modules/arguments/arguments.module';
+import { ArgumentCommentsModule } from './modules/argument-comments/argument-comments.module';
 
 @Module({
   imports: [
@@ -44,6 +46,8 @@ import { KnowledgeBitVotesModule } from './modules/knowledge-bit-votes/knowledge
     AttributionsModule,
     KnowledgeBitsModule,
     KnowledgeBitVotesModule,
+    ArgumentsModule,
+    ArgumentCommentsModule,
   ],
   providers: [AppService],
 })

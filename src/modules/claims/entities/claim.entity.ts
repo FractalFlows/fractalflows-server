@@ -14,6 +14,7 @@ import { Source } from 'src/modules/sources/entities/source.entity';
 import { Attribution } from 'src/modules/attributions/entities/attribution.entity';
 import { KnowledgeBit } from 'src/modules/knowledge-bits/entities/knowledge-bit.entity';
 import { BaseEntity } from 'src/common/entities/base.entity';
+import { Argument } from 'src/modules/arguments/entities/argument.entity';
 
 @Entity()
 @ObjectType()
@@ -47,6 +48,10 @@ export class Claim extends BaseEntity {
   @Field(() => [KnowledgeBit], { nullable: true })
   @OneToMany(() => KnowledgeBit, (knowledgeBit) => knowledgeBit.claim)
   knowledgeBits: KnowledgeBit[];
+
+  @Field(() => [Argument], { nullable: true })
+  @OneToMany(() => Argument, (argument) => argument.claim)
+  arguments: Argument[];
 
   @Field(() => User, { description: 'Created by' })
   @ManyToOne(() => User, (user) => user.claims)

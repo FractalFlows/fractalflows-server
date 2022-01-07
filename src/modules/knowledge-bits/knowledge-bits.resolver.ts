@@ -1,7 +1,10 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 
 import { KnowledgeBitsService } from './knowledge-bits.service';
-import { KnowledgeBit } from './entities/knowledge-bit.entity';
+import {
+  KnowledgeBit,
+  KnowledgeBitSides,
+} from './entities/knowledge-bit.entity';
 import { CreateKnowledgeBitInput } from './dto/create-knowledge-bit.input';
 import { UpdateKnowledgeBitInput } from './dto/update-knowledge-bit.input';
 import { AttributionsService } from '../attributions/attributions.service';
@@ -11,11 +14,7 @@ import { User } from '../users/entities/user.entity';
 import { UseGuards } from '@nestjs/common';
 import { SessionGuard } from '../auth/auth.guard';
 import { KnowledgeBitVotesService } from '../knowledge-bit-votes/knowledge-bit-votes.service';
-import {
-  KnowledgeBitVote,
-  KnowledgeBitVoteTypes,
-} from '../knowledge-bit-votes/entities/knowledge-bit-vote.entity';
-import { In } from 'typeorm';
+import { KnowledgeBitVoteTypes } from '../knowledge-bit-votes/entities/knowledge-bit-vote.entity';
 
 @Resolver(() => KnowledgeBit)
 export class KnowledgeBitsResolver {
@@ -90,6 +89,20 @@ export class KnowledgeBitsResolver {
       })) || [],
     );
   }
+
+  // @Query(() => [KnowledgeBit], { name: 'searchKnowledgeBits' })
+  // async search(
+  //   @Args('claimSlug') claimSlug: string,
+  //   @Args('side', { type: () => KnowledgeBitSides }) side: KnowledgeBitSides,
+  //   @Args('term', { nullabe: true})
+  // ) {
+  //   const claim = await this.claimsService.findOne({
+  //     where: { slug: claimSlug },
+  //     relations: [],
+  //   });
+
+  //   return this.knowledgeBitsService.search(term);
+  // }
 
   @Mutation(() => KnowledgeBit)
   @UseGuards(SessionGuard)
