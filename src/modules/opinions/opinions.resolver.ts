@@ -23,12 +23,14 @@ export class OpinionsResolver {
     saveOpinionInput: SaveOpinionInput,
     @CurrentUser() user: User,
   ) {
-    const x = await this.opinionsService.save({
+    const opinion = await this.opinionsService.save({
       ...saveOpinionInput,
       user,
     });
-    console.log(x);
-    return x;
+    return await this.opinionsService.findOne({
+      where: { id: opinion.id },
+      relations: ['arguments', 'arguments.comments', 'claim', 'user'],
+    });
   }
 
   @Query(() => Opinion, { name: 'opinion' })
@@ -40,8 +42,29 @@ export class OpinionsResolver {
         'arguments',
         'arguments.evidences',
         'arguments.comments',
+        'arguments.opinions',
+        'arguments.opinions.user',
       ],
     });
+  }
+
+  @Query(() => Opinion, { name: 'userOpinion', nullable: true })
+  async findUserOpinion(
+    @Args('claimSlug') claimSlug: string,
+    @CurrentUser() user: User,
+  ) {
+    if (user) {
+      const claim = await this.claimsService.findOne({
+        where: { slug: claimSlug },
+      });
+      const opinion = await this.opinionsService.findOne({
+        where: { claim, user },
+        relations: ['arguments', 'arguments.comments', 'claim', 'user'],
+      });
+      return opinion;
+    } else {
+      return Promise.resolve();
+    }
   }
 
   @Mutation(() => Opinion)

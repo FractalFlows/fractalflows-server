@@ -51,6 +51,8 @@ export class ClaimsResolver {
         'sources',
         'attributions',
         'arguments',
+        'arguments.opinions',
+        'arguments.opinions.user',
         'opinions',
         'opinions.user',
       ],

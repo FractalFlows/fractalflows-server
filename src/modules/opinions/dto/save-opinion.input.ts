@@ -15,6 +15,9 @@ class ClaimInput {
 
 @InputType()
 export class SaveOpinionInput {
+  @Field(() => String, { nullable: true })
+  id: string;
+
   @Field(() => Float)
   acceptance: number;
 

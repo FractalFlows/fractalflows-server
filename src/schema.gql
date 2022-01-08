@@ -328,6 +328,7 @@ type Query {
   trendingClaims(limit: Int!, offset: Int!): [Claim!]!
   userClaims(relation: UserClaimRelation!, username: String!): [Claim!]!
   userKnowledgeBitsVotes(claimSlug: String!): [KnowledgeBitVote!]!
+  userOpinion(claimSlug: String!): Opinion
 }
 
 input SaveAttributionInput {
@@ -344,6 +345,7 @@ input SaveOpinionInput {
   acceptance: Float!
   arguments: [ArgumentInput!]!
   claim: ClaimInput!
+  id: String
 }
 
 input SaveSourceInput {

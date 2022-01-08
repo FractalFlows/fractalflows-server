@@ -148,6 +148,7 @@ export interface SaveOpinionInput {
     acceptance: number;
     arguments: ArgumentInput[];
     claim: ClaimInput;
+    id?: Nullable<string>;
 }
 
 export interface SaveSourceInput {
@@ -371,6 +372,7 @@ export interface IQuery {
     trendingClaims(limit: number, offset: number): Claim[] | Promise<Claim[]>;
     userClaims(relation: UserClaimRelation, username: string): Claim[] | Promise<Claim[]>;
     userKnowledgeBitsVotes(claimSlug: string): KnowledgeBitVote[] | Promise<KnowledgeBitVote[]>;
+    userOpinion(claimSlug: string): Nullable<Opinion> | Promise<Nullable<Opinion>>;
 }
 
 export interface Session {
