@@ -34,6 +34,21 @@ export class ArgumentsResolver {
     });
   }
 
+  @Query(() => Argument, { name: 'argument' })
+  async findOne(@Args('id') id: string) {
+    const argument = await this.argumentsService.findOne({
+      where: { id },
+      relations: [
+        'user',
+        'evidences',
+        'comments',
+        'comments.user',
+        'comments.argument',
+      ],
+    });
+    return argument;
+  }
+
   @Query(() => [Argument], { name: 'arguments' })
   async findAll(@Args('claimSlug') claimSlug: string) {
     const claim = await this.claimsService.findOne({
@@ -41,11 +56,6 @@ export class ArgumentsResolver {
       relations: ['arguments', 'arguments.opinions'],
     });
     return claim.arguments;
-  }
-
-  @Query(() => Argument, { name: 'argument' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.argumentsService.findOne(id);
   }
 
   @Mutation(() => Argument)

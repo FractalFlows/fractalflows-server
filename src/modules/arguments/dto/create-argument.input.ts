@@ -1,21 +1,15 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { KnowledgeBit } from 'src/modules/knowledge-bits/entities/knowledge-bit.entity';
+import { IDInput } from 'src/common/dto/id.input';
 
 import { ArgumentSides } from '../entities/argument.entity';
-
-@InputType()
-class EvidenceInput {
-  @Field(() => String)
-  id: string;
-}
 
 @InputType()
 export class CreateArgumentInput {
   @Field(() => String)
   summary: string;
 
-  @Field(() => [EvidenceInput])
-  evidences: EvidenceInput[];
+  @Field(() => [IDInput], { nullable: true })
+  evidences: IDInput[];
 
   @Field(() => ArgumentSides)
   side: ArgumentSides;

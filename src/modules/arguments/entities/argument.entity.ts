@@ -31,10 +31,10 @@ export class Argument extends BaseEntity {
   @Column()
   summary: string;
 
-  @Field(() => [KnowledgeBit])
+  @Field(() => [KnowledgeBit], { nullable: true })
   @ManyToMany(() => KnowledgeBit)
   @JoinTable()
-  evidences: KnowledgeBit[];
+  evidences?: KnowledgeBit[];
 
   @Field(() => ArgumentSides)
   @Column({

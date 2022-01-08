@@ -90,20 +90,17 @@ export enum UsernameSource {
     ENS = "ENS"
 }
 
-export interface ArgumentInput {
-    id: string;
-}
-
 export interface ClaimInput {
     id: string;
 }
 
 export interface CreateArgumentCommentInput {
-    exampleField: number;
+    argument: IDInput;
+    content: string;
 }
 
 export interface CreateArgumentInput {
-    evidences: EvidenceInput[];
+    evidences?: Nullable<IDInput[]>;
     side: ArgumentSides;
     summary: string;
 }
@@ -128,7 +125,7 @@ export interface CreateKnowledgeBitInput {
     url: string;
 }
 
-export interface EvidenceInput {
+export interface IDInput {
     id: string;
 }
 
@@ -146,7 +143,7 @@ export interface SaveAttributionInput {
 
 export interface SaveOpinionInput {
     acceptance: number;
-    arguments: ArgumentInput[];
+    arguments: IDInput[];
     claim: ClaimInput;
     id?: Nullable<string>;
 }
@@ -182,12 +179,13 @@ export interface SiweMessageInput {
 }
 
 export interface UpdateArgumentCommentInput {
-    exampleField?: Nullable<number>;
-    id: number;
+    argument: IDInput;
+    content: string;
+    id: string;
 }
 
 export interface UpdateArgumentInput {
-    evidences?: Nullable<EvidenceInput[]>;
+    evidences?: Nullable<IDInput[]>;
     id: number;
     side?: Nullable<ArgumentSides>;
     summary?: Nullable<string>;
@@ -231,7 +229,7 @@ export interface Argument {
     claim: Claim;
     comments?: Nullable<ArgumentComment[]>;
     createdAt: string;
-    evidences: KnowledgeBit[];
+    evidences?: Nullable<KnowledgeBit[]>;
     id: string;
     opinions?: Nullable<Opinion[]>;
     side: ArgumentSides;
@@ -242,9 +240,11 @@ export interface Argument {
 
 export interface ArgumentComment {
     argument: Argument;
+    content: string;
     createdAt: string;
     id: string;
     updatedAt: string;
+    user: User;
 }
 
 export interface Attribution {
@@ -309,12 +309,12 @@ export interface IMutation {
     createArgumentComment(createArgumentCommentInput: CreateArgumentCommentInput): ArgumentComment | Promise<ArgumentComment>;
     createClaim(createClaimInput: CreateClaimInput): Claim | Promise<Claim>;
     createKnowledgeBit(claimSlug: string, createKnowledgeBitInput: CreateKnowledgeBitInput): KnowledgeBit | Promise<KnowledgeBit>;
+    deleteArgumentComment(id: string): boolean | Promise<boolean>;
     deleteClaim(id: string): boolean | Promise<boolean>;
     deleteKnowledgeBit(id: string): boolean | Promise<boolean>;
     inviteFriends(inviteFriendsInput: InviteFriendsInput): boolean | Promise<boolean>;
     removeAPIKey(): boolean | Promise<boolean>;
     removeArgument(id: number): Argument | Promise<Argument>;
-    removeArgumentComment(id: number): ArgumentComment | Promise<ArgumentComment>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
     removeOpinion(id: number): Opinion | Promise<Opinion>;
     removeSource(id: number): Source | Promise<Source>;
@@ -350,9 +350,7 @@ export interface Profile {
 
 export interface IQuery {
     apiKey(): Nullable<string> | Promise<Nullable<string>>;
-    argument(id: number): Argument | Promise<Argument>;
-    argumentComment(id: number): ArgumentComment | Promise<ArgumentComment>;
-    argumentComments(): ArgumentComment[] | Promise<ArgumentComment[]>;
+    argument(id: string): Argument | Promise<Argument>;
     arguments(claimSlug: string): Argument[] | Promise<Argument[]>;
     attribution(id: number): Attribution | Promise<Attribution>;
     attributions(): Attribution[] | Promise<Attribution[]>;

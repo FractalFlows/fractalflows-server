@@ -1,26 +1,32 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../users/entities/user.entity';
 import { CreateArgumentCommentInput } from './dto/create-argument-comment.input';
 import { UpdateArgumentCommentInput } from './dto/update-argument-comment.input';
+import { ArgumentComment } from './entities/argument-comment.entity';
 
 @Injectable()
 export class ArgumentCommentsService {
-  create(createArgumentCommentInput: CreateArgumentCommentInput) {
-    return 'This action adds a new argumentComment';
+  constructor(
+    @InjectRepository(ArgumentComment)
+    private argumentCommentsRepository: Repository<ArgumentComment>,
+  ) {}
+
+  async save(
+    saveArgumentCommentInput: CreateArgumentCommentInput & {
+      id?: string;
+      user?: User;
+    },
+  ) {
+    return await this.argumentCommentsRepository.save(saveArgumentCommentInput);
   }
 
-  findAll() {
-    return `This action returns all argumentComments`;
+  async findOne(query) {
+    return await this.argumentCommentsRepository.findOne(query);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} argumentComment`;
-  }
-
-  update(id: number, updateArgumentCommentInput: UpdateArgumentCommentInput) {
-    return `This action updates a #${id} argumentComment`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} argumentComment`;
+  async softDelete(id: string) {
+    return await this.argumentCommentsRepository.softDelete(id);
   }
 }

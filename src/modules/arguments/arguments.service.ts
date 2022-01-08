@@ -25,8 +25,8 @@ export class ArgumentsService {
     return `This action returns all arguments`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} argument`;
+  async findOne(query) {
+    return await this.argumentRepository.findOne(query);
   }
 
   update(id: number, updateArgumentInput: UpdateArgumentInput) {

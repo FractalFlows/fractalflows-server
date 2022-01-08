@@ -1,11 +1,5 @@
 import { InputType, Field, Float } from '@nestjs/graphql';
-import { Claim } from 'src/modules/claims/entities/claim.entity';
-
-@InputType()
-class ArgumentInput {
-  @Field(() => String)
-  id: string;
-}
+import { IDInput } from 'src/common/dto/id.input';
 
 @InputType()
 class ClaimInput {
@@ -21,8 +15,8 @@ export class SaveOpinionInput {
   @Field(() => Float)
   acceptance: number;
 
-  @Field(() => [ArgumentInput])
-  arguments: ArgumentInput[];
+  @Field(() => [IDInput])
+  arguments: IDInput[];
 
   @Field(() => ClaimInput)
   claim: ClaimInput;

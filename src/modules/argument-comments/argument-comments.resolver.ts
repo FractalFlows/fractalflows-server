@@ -1,8 +1,13 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
+
 import { ArgumentCommentsService } from './argument-comments.service';
 import { ArgumentComment } from './entities/argument-comment.entity';
 import { CreateArgumentCommentInput } from './dto/create-argument-comment.input';
 import { UpdateArgumentCommentInput } from './dto/update-argument-comment.input';
+import { SessionGuard } from '../auth/auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { User } from '../users/entities/user.entity';
 
 @Resolver(() => ArgumentComment)
 export class ArgumentCommentsResolver {
@@ -11,36 +16,40 @@ export class ArgumentCommentsResolver {
   ) {}
 
   @Mutation(() => ArgumentComment)
-  createArgumentComment(
-    @Args('createArgumentCommentInput')
+  @UseGuards(SessionGuard)
+  async createArgumentComment(
+    @Args('createArgumentCommentInput', {
+      type: () => CreateArgumentCommentInput,
+    })
     createArgumentCommentInput: CreateArgumentCommentInput,
+    @CurrentUser() user: User,
   ) {
-    return this.argumentCommentsService.create(createArgumentCommentInput);
-  }
-
-  @Query(() => [ArgumentComment], { name: 'argumentComments' })
-  findAll() {
-    return this.argumentCommentsService.findAll();
-  }
-
-  @Query(() => ArgumentComment, { name: 'argumentComment' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.argumentCommentsService.findOne(id);
+    const argumentComment = this.argumentCommentsService.save({
+      ...createArgumentCommentInput,
+      user,
+    });
+    return argumentComment;
   }
 
   @Mutation(() => ArgumentComment)
-  updateArgumentComment(
+  @UseGuards(SessionGuard)
+  async updateArgumentComment(
     @Args('updateArgumentCommentInput')
     updateArgumentCommentInput: UpdateArgumentCommentInput,
   ) {
-    return this.argumentCommentsService.update(
-      updateArgumentCommentInput.id,
+    const argumentComment = await this.argumentCommentsService.save(
       updateArgumentCommentInput,
     );
+    return await this.argumentCommentsService.findOne({
+      where: { id: argumentComment.id },
+      relations: ['argument', 'user'],
+    });
   }
 
-  @Mutation(() => ArgumentComment)
-  removeArgumentComment(@Args('id', { type: () => Int }) id: number) {
-    return this.argumentCommentsService.remove(id);
+  @Mutation(() => Boolean)
+  @UseGuards(SessionGuard)
+  async deleteArgumentComment(@Args('id') id: string) {
+    await this.argumentCommentsService.softDelete(id);
+    return true;
   }
 }

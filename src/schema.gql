@@ -13,7 +13,7 @@ type Argument {
 
   """Created at"""
   createdAt: String!
-  evidences: [KnowledgeBit!]!
+  evidences: [KnowledgeBit!]
   id: String!
   opinions: [Opinion!]
   side: ArgumentSides!
@@ -26,6 +26,7 @@ type Argument {
 
 type ArgumentComment {
   argument: Argument!
+  content: String!
 
   """Created at"""
   createdAt: String!
@@ -33,10 +34,7 @@ type ArgumentComment {
 
   """Updated at"""
   updatedAt: String!
-}
-
-input ArgumentInput {
-  id: String!
+  user: User!
 }
 
 enum ArgumentSides {
@@ -106,12 +104,12 @@ input ClaimInput {
 }
 
 input CreateArgumentCommentInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  argument: IDInput!
+  content: String!
 }
 
 input CreateArgumentInput {
-  evidences: [EvidenceInput!]!
+  evidences: [IDInput!]
   side: ArgumentSides!
   summary: String!
 }
@@ -145,7 +143,7 @@ input CreateKnowledgeBitInput {
   url: String!
 }
 
-input EvidenceInput {
+input IDInput {
   id: String!
 }
 
@@ -261,12 +259,12 @@ type Mutation {
   createArgumentComment(createArgumentCommentInput: CreateArgumentCommentInput!): ArgumentComment!
   createClaim(createClaimInput: CreateClaimInput!): Claim!
   createKnowledgeBit(claimSlug: String!, createKnowledgeBitInput: CreateKnowledgeBitInput!): KnowledgeBit!
+  deleteArgumentComment(id: String!): Boolean!
   deleteClaim(id: String!): Boolean!
   deleteKnowledgeBit(id: String!): Boolean!
   inviteFriends(inviteFriendsInput: InviteFriendsInput!): Boolean!
   removeAPIKey: Boolean!
   removeArgument(id: Int!): Argument!
-  removeArgumentComment(id: Int!): ArgumentComment!
   removeAttribution(id: Int!): Attribution!
   removeOpinion(id: Int!): Opinion!
   removeSource(id: Int!): Source!
@@ -306,9 +304,7 @@ type Profile {
 
 type Query {
   apiKey: String
-  argument(id: Int!): Argument!
-  argumentComment(id: Int!): ArgumentComment!
-  argumentComments: [ArgumentComment!]!
+  argument(id: String!): Argument!
   arguments(claimSlug: String!): [Argument!]!
   attribution(id: Int!): Attribution!
   attributions: [Attribution!]!
@@ -343,7 +339,7 @@ input SaveAttributionInput {
 
 input SaveOpinionInput {
   acceptance: Float!
-  arguments: [ArgumentInput!]!
+  arguments: [IDInput!]!
   claim: ClaimInput!
   id: String
 }
@@ -472,13 +468,13 @@ type Tag {
 }
 
 input UpdateArgumentCommentInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+  argument: IDInput!
+  content: String!
+  id: String!
 }
 
 input UpdateArgumentInput {
-  evidences: [EvidenceInput!]
+  evidences: [IDInput!]
   id: Int!
   side: ArgumentSides
   summary: String
