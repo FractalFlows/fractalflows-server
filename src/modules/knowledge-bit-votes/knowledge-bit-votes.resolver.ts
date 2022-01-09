@@ -54,19 +54,30 @@ export class KnowledgeBitVotesResolver {
     return true;
   }
 
-  @Query(() => [KnowledgeBitVote], { name: 'userKnowledgeBitsVotes' })
-  async getUserKnowledgeBitsVotes(@Args('claimSlug') claimSlug: string) {
-    const claim = await this.claimsService.findOne({
-      where: { slug: claimSlug },
-      relations: ['knowledgeBits'],
-    });
-    const knowledgeBitsIds = claim.knowledgeBits.map(({ id }) => id);
+  @Query(() => [KnowledgeBitVote], {
+    name: 'userKnowledgeBitVotes',
+    nullable: true,
+  })
+  async getUserKnowledgeBitVotes(
+    @Args('claimSlug') claimSlug: string,
+    @CurrentUser() user: User,
+  ) {
+    if (user) {
+      const claim = await this.claimsService.findOne({
+        where: { slug: claimSlug },
+        relations: ['knowledgeBits'],
+      });
+      const knowledgeBitsIds = claim.knowledgeBits.map(({ id }) => id);
 
-    return await this.knowledgeBitVotesService.find({
-      where: {
-        knowledgeBit: In(knowledgeBitsIds),
-      },
-      relations: ['knowledgeBit'],
-    });
+      return await this.knowledgeBitVotesService.find({
+        where: {
+          knowledgeBit: In(knowledgeBitsIds),
+          user,
+        },
+        relations: ['knowledgeBit'],
+      });
+    } else {
+      return Promise.resolve();
+    }
   }
 }

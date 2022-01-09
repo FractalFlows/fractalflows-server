@@ -34,18 +34,19 @@ export class KnowledgeBitsResolver {
     @CurrentUser() user: User,
   ) {
     await this.attributionsService.upsert(createKnowledgeBitInput.attributions);
-
-    return await this.knowledgeBitsService.create({
+    const createKnowledgeBit = await this.knowledgeBitsService.create({
       ...createKnowledgeBitInput,
       claim: await this.claimsService.findOne({
         where: { slug: claimSlug },
       }),
       user,
     });
+
+    return await this.findOne(createKnowledgeBit.id);
   }
 
   @Query(() => KnowledgeBit, { name: 'knowledgeBit' })
-  async find(@Args('id') id: string) {
+  async findOne(@Args('id') id: string) {
     const knowledgeBit = await this.knowledgeBitsService.findOne({
       where: { id },
       relations: ['user', 'attributions'],
@@ -116,7 +117,7 @@ export class KnowledgeBitsResolver {
       updateKnowledgeBitInput,
     );
 
-    return await this.knowledgeBitsService.findOne(updateKnowledgeBitInput.id);
+    return await this.findOne(updateKnowledgeBitInput.id);
   }
 
   @Mutation(() => Boolean)

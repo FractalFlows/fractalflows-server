@@ -369,7 +369,7 @@ export interface IQuery {
     tag(id: number): Tag | Promise<Tag>;
     trendingClaims(limit: number, offset: number): Claim[] | Promise<Claim[]>;
     userClaims(relation: UserClaimRelation, username: string): Claim[] | Promise<Claim[]>;
-    userKnowledgeBitsVotes(claimSlug: string): KnowledgeBitVote[] | Promise<KnowledgeBitVote[]>;
+    userKnowledgeBitVotes(claimSlug: string): Nullable<KnowledgeBitVote[]> | Promise<Nullable<KnowledgeBitVote[]>>;
     userOpinion(claimSlug: string): Nullable<Opinion> | Promise<Nullable<Opinion>>;
 }
 

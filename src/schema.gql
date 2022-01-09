@@ -323,7 +323,7 @@ type Query {
   tag(id: Int!): Tag!
   trendingClaims(limit: Int!, offset: Int!): [Claim!]!
   userClaims(relation: UserClaimRelation!, username: String!): [Claim!]!
-  userKnowledgeBitsVotes(claimSlug: String!): [KnowledgeBitVote!]!
+  userKnowledgeBitVotes(claimSlug: String!): [KnowledgeBitVote!]
   userOpinion(claimSlug: String!): Opinion
 }
 
