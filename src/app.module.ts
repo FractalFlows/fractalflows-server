@@ -3,6 +3,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { join } from 'path';
+import fs from 'fs';
 
 import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
@@ -38,7 +39,24 @@ import { OpinionsModule } from './modules/opinions/opinions.module';
         credentials: true,
       },
     }),
-    TypeOrmModule.forRoot(),
+
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.POSTGRES_HOST,
+      port: Number(process.env.POSTGRES_PORT),
+      username: process.env.POSTGRES_USERNAME,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DATABASE,
+      entities: [process.env.POSTGRES_ENTITIES],
+      synchronize: Boolean(process.env.POSTGRES_SYNCHRONIZE),
+      logging: Boolean(process.env.POSTGRES_LOGGING),
+      ssl: {
+        rejectUnauthorized: true,
+        ca: fs
+          .readFileSync(join(process.cwd(), 'certs/ca-certificate.crt'))
+          .toString(),
+      },
+    }),
     UsersModule,
     AuthModule,
     ClaimsModule,

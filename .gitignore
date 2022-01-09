@@ -1,6 +1,9 @@
 # env
 .env
 
+# certs
+/certs
+
 # db
 /db
 
