@@ -1,8 +1,9 @@
 import { InputType, Field } from '@nestjs/graphql';
 
-import { CreateAttributionInput } from 'src/modules/attributions/dto/create-attribution.input';
-import { CreateSourceInput } from 'src/modules/sources/dto/create-source.input';
-import { CreateTagInput } from 'src/modules/tags/dto/create-tag.input';
+import { SaveAttributionInput } from 'src/modules/attributions/dto/save-attribution.input';
+import { SaveSourceInput } from 'src/modules/sources/dto/save-source.input';
+import { SaveTagInput } from 'src/modules/tags/dto/save-tag.input';
+
 @InputType()
 export class CreateClaimInput {
   @Field(() => String, { description: 'Title' })
@@ -11,15 +12,15 @@ export class CreateClaimInput {
   @Field(() => String, { description: 'Summary' })
   summary: string;
 
-  @Field(() => [CreateSourceInput], { description: 'Sources', nullable: true })
-  sources: CreateSourceInput[];
+  @Field(() => [SaveSourceInput], { description: 'Sources', nullable: true })
+  sources: SaveSourceInput[];
 
-  @Field(() => [CreateTagInput], { description: 'Tags', nullable: true })
-  tags: CreateTagInput[];
+  @Field(() => [SaveTagInput], { description: 'Tags', nullable: true })
+  tags: SaveTagInput[];
 
-  @Field(() => [CreateAttributionInput], {
+  @Field(() => [SaveAttributionInput], {
     description: 'Attributions',
     nullable: true,
   })
-  attributions: CreateAttributionInput[];
+  attributions: SaveAttributionInput[];
 }

@@ -1,7 +1,10 @@
 import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
-export class CreateSourceInput {
+export class SaveSourceInput {
+  @Field(() => String, { nullable: true })
+  id?: string;
+
   @Field(() => String)
   origin: string;
 

@@ -7,9 +7,76 @@
 
 /* tslint:disable */
 /* eslint-disable */
+export enum ArgumentSides {
+    CON = "CON",
+    PRO = "PRO"
+}
+
 export enum AvatarSource {
     ENS = "ENS",
     GRAVATAR = "GRAVATAR"
+}
+
+export enum KnowledgeBitLocations {
+    ACADEMIA_EDU = "ACADEMIA_EDU",
+    ARXIV = "ARXIV",
+    BIT_TORRENT = "BIT_TORRENT",
+    BLOG = "BLOG",
+    BOX = "BOX",
+    DAT = "DAT",
+    DATABASE = "DATABASE",
+    DROPBOX = "DROPBOX",
+    EMAIL = "EMAIL",
+    ETHEREUM_SWARM = "ETHEREUM_SWARM",
+    FIGSHARE = "FIGSHARE",
+    GIT = "GIT",
+    GOOGLE_DRIVE = "GOOGLE_DRIVE",
+    HAL_ARCHIVES = "HAL_ARCHIVES",
+    IPFS = "IPFS",
+    JUPYTER = "JUPYTER",
+    KAGGLE = "KAGGLE",
+    ONEDRIVE = "ONEDRIVE",
+    OPENAIRE = "OPENAIRE",
+    OTHER = "OTHER",
+    PDF = "PDF",
+    PUBPEER = "PUBPEER",
+    RE3DATA = "RE3DATA",
+    RESEARCH_GATE = "RESEARCH_GATE",
+    RESEARCH_ID = "RESEARCH_ID",
+    SCIENTIFIC_PUBLISHER = "SCIENTIFIC_PUBLISHER",
+    SLIDESHARE = "SLIDESHARE",
+    STACK_OVERFLOW = "STACK_OVERFLOW",
+    WEBSITE = "WEBSITE",
+    WIKIPEDIA = "WIKIPEDIA",
+    YOUTUBE = "YOUTUBE",
+    ZENODO = "ZENODO"
+}
+
+export enum KnowledgeBitSides {
+    REFUTING = "REFUTING",
+    SUPPORTING = "SUPPORTING"
+}
+
+export enum KnowledgeBitTypes {
+    DATA_SET = "DATA_SET",
+    DESCRIPTION_OF_METHODOLOGIES = "DESCRIPTION_OF_METHODOLOGIES",
+    DETAILED_ANALYSIS = "DETAILED_ANALYSIS",
+    DETAILED_MATHEMATICAL_FORMULATION = "DETAILED_MATHEMATICAL_FORMULATION",
+    EXPERIMENTAL_RESULTS = "EXPERIMENTAL_RESULTS",
+    OTHER = "OTHER",
+    PUBLICATION_OR_ARTICLE_OR_REPORT = "PUBLICATION_OR_ARTICLE_OR_REPORT",
+    REPRODUCTION_OF_RESULTS = "REPRODUCTION_OF_RESULTS",
+    REVIEWS = "REVIEWS",
+    SCRIPTS = "SCRIPTS",
+    SIMULATION_RESULTS = "SIMULATION_RESULTS",
+    SOURCE_CODE = "SOURCE_CODE",
+    STATEMENT_OF_ASSUMPTIONS = "STATEMENT_OF_ASSUMPTIONS",
+    STATEMENT_OF_HYPOTHESIS = "STATEMENT_OF_HYPOTHESIS"
+}
+
+export enum KnowledgeBitVoteTypes {
+    DOWNVOTE = "DOWNVOTE",
+    UPVOTE = "UPVOTE"
 }
 
 export enum UserClaimRelation {
@@ -23,25 +90,71 @@ export enum UsernameSource {
     ENS = "ENS"
 }
 
-export interface CreateAttributionInput {
+export interface ClaimInput {
+    id: string;
+}
+
+export interface CreateArgumentCommentInput {
+    argument: IDInput;
+    content: string;
+}
+
+export interface CreateArgumentInput {
+    evidences?: Nullable<IDInput[]>;
+    side: ArgumentSides;
+    summary: string;
+}
+
+export interface CreateClaimInput {
+    attributions?: Nullable<SaveAttributionInput[]>;
+    sources?: Nullable<SaveSourceInput[]>;
+    summary: string;
+    tags?: Nullable<SaveTagInput[]>;
+    title: string;
+}
+
+export interface CreateKnowledgeBitInput {
+    attributions?: Nullable<SaveAttributionInput[]>;
+    customLocation?: Nullable<string>;
+    customType?: Nullable<string>;
+    location: KnowledgeBitLocations;
+    name: string;
+    side: KnowledgeBitSides;
+    summary?: Nullable<string>;
+    type: KnowledgeBitTypes;
+    url: string;
+}
+
+export interface IDInput {
+    id: string;
+}
+
+export interface InviteFriendsInput {
+    emails: string[];
+    message?: Nullable<string>;
+    slug: string;
+}
+
+export interface SaveAttributionInput {
+    id?: Nullable<string>;
     identifier: string;
     origin: string;
 }
 
-export interface CreateClaimInput {
-    attributions?: Nullable<CreateAttributionInput[]>;
-    sources?: Nullable<CreateSourceInput[]>;
-    summary: string;
-    tags?: Nullable<CreateTagInput[]>;
-    title: string;
+export interface SaveOpinionInput {
+    acceptance: number;
+    arguments: IDInput[];
+    claim: ClaimInput;
+    id?: Nullable<string>;
 }
 
-export interface CreateSourceInput {
+export interface SaveSourceInput {
+    id?: Nullable<string>;
     origin: string;
     url: string;
 }
 
-export interface CreateTagInput {
+export interface SaveTagInput {
     id?: Nullable<string>;
     label: string;
 }
@@ -65,13 +178,39 @@ export interface SiweMessageInput {
     version: string;
 }
 
-export interface UpdateClaimInput {
-    attributions?: Nullable<CreateAttributionInput[]>;
+export interface UpdateArgumentCommentInput {
+    argument: IDInput;
+    content: string;
+    id: string;
+}
+
+export interface UpdateArgumentInput {
+    evidences?: Nullable<IDInput[]>;
     id: number;
-    sources?: Nullable<CreateSourceInput[]>;
+    side?: Nullable<ArgumentSides>;
     summary?: Nullable<string>;
-    tags?: Nullable<CreateTagInput[]>;
-    title?: Nullable<string>;
+}
+
+export interface UpdateClaimInput {
+    attributions?: Nullable<SaveAttributionInput[]>;
+    id: string;
+    sources?: Nullable<SaveSourceInput[]>;
+    summary: string;
+    tags?: Nullable<SaveTagInput[]>;
+    title: string;
+}
+
+export interface UpdateKnowledgeBitInput {
+    attributions?: Nullable<SaveAttributionInput[]>;
+    customLocation?: Nullable<string>;
+    customType?: Nullable<string>;
+    id: string;
+    location: KnowledgeBitLocations;
+    name: string;
+    side: KnowledgeBitSides;
+    summary?: Nullable<string>;
+    type: KnowledgeBitTypes;
+    url: string;
 }
 
 export interface UpdateProfileInput {
@@ -81,30 +220,50 @@ export interface UpdateProfileInput {
     usernameSource: UsernameSource;
 }
 
-export interface UpdateSourceInput {
-    id: number;
-    origin?: Nullable<string>;
-    url?: Nullable<string>;
-}
-
 export interface APIKey {
     key: string;
     secret?: Nullable<string>;
 }
 
-export interface Attribution {
+export interface Argument {
     claim: Claim;
+    comments?: Nullable<ArgumentComment[]>;
+    createdAt: string;
+    evidences?: Nullable<KnowledgeBit[]>;
+    id: string;
+    opinions?: Nullable<Opinion[]>;
+    side: ArgumentSides;
+    summary: string;
+    updatedAt: string;
+    user: User;
+}
+
+export interface ArgumentComment {
+    argument: Argument;
+    content: string;
+    createdAt: string;
+    id: string;
+    updatedAt: string;
+    user: User;
+}
+
+export interface Attribution {
+    claims: Claim[];
     createdAt: string;
     id: string;
     identifier: string;
+    knowledgeBits: KnowledgeBit[];
     origin: string;
     updatedAt: string;
 }
 
 export interface Claim {
+    arguments?: Nullable<Argument[]>;
     attributions?: Nullable<Attribution[]>;
     createdAt: string;
     id: string;
+    knowledgeBits?: Nullable<KnowledgeBit[]>;
+    opinions?: Nullable<Opinion[]>;
     slug: string;
     sources?: Nullable<Source[]>;
     summary: string;
@@ -114,22 +273,73 @@ export interface Claim {
     user: User;
 }
 
+export interface KnowledgeBit {
+    attributions?: Nullable<Attribution[]>;
+    claim: Claim;
+    createdAt: string;
+    customLocation?: Nullable<string>;
+    customType?: Nullable<string>;
+    downvotesCount?: Nullable<number>;
+    id: string;
+    location: KnowledgeBitLocations;
+    name: string;
+    side: KnowledgeBitSides;
+    summary?: Nullable<string>;
+    type: KnowledgeBitTypes;
+    updatedAt: string;
+    upvotesCount?: Nullable<number>;
+    url: string;
+    user: User;
+    votes?: Nullable<KnowledgeBitVote[]>;
+}
+
+export interface KnowledgeBitVote {
+    createdAt: string;
+    id: string;
+    knowledgeBit: KnowledgeBit;
+    type: KnowledgeBitVoteTypes;
+    updatedAt: string;
+    user: User;
+}
+
 export interface IMutation {
     connectEthereumWallet(address: string): User | Promise<User>;
     createAPIKey(): APIKey | Promise<APIKey>;
+    createArgument(claimSlug: string, createArgumentInput: CreateArgumentInput): Argument | Promise<Argument>;
+    createArgumentComment(createArgumentCommentInput: CreateArgumentCommentInput): ArgumentComment | Promise<ArgumentComment>;
     createClaim(createClaimInput: CreateClaimInput): Claim | Promise<Claim>;
+    createKnowledgeBit(claimSlug: string, createKnowledgeBitInput: CreateKnowledgeBitInput): KnowledgeBit | Promise<KnowledgeBit>;
+    deleteArgumentComment(id: string): boolean | Promise<boolean>;
+    deleteClaim(id: string): boolean | Promise<boolean>;
+    deleteKnowledgeBit(id: string): boolean | Promise<boolean>;
+    inviteFriends(inviteFriendsInput: InviteFriendsInput): boolean | Promise<boolean>;
     removeAPIKey(): boolean | Promise<boolean>;
+    removeArgument(id: number): Argument | Promise<Argument>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
-    removeClaim(id: number): Claim | Promise<Claim>;
+    removeOpinion(id: number): Opinion | Promise<Opinion>;
     removeSource(id: number): Source | Promise<Source>;
+    saveKnowledgeBitVote(knowledgeBitId: string, type: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
+    saveOpinion(saveOpinionInput: SaveOpinionInput): Opinion | Promise<Opinion>;
     sendMagicLink(email: string): boolean | Promise<boolean>;
     signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput): User | Promise<User>;
     signOut(): boolean | Promise<boolean>;
+    updateArgument(updateArgumentInput: UpdateArgumentInput): Argument | Promise<Argument>;
+    updateArgumentComment(updateArgumentCommentInput: UpdateArgumentCommentInput): ArgumentComment | Promise<ArgumentComment>;
     updateClaim(updateClaimInput: UpdateClaimInput): Claim | Promise<Claim>;
     updateEmail(email: string): User | Promise<User>;
+    updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput): KnowledgeBit | Promise<KnowledgeBit>;
     updateProfile(updateProfileInput: UpdateProfileInput): User | Promise<User>;
-    updateSource(updateSourceInput: UpdateSourceInput): Source | Promise<Source>;
     verifyMagicLink(hash: string): User | Promise<User>;
+}
+
+export interface Opinion {
+    acceptance: number;
+    arguments?: Nullable<Argument[]>;
+    claim: Claim;
+    createdAt: string;
+    id: string;
+    updatedAt: string;
+    user: User;
 }
 
 export interface Profile {
@@ -140,18 +350,27 @@ export interface Profile {
 
 export interface IQuery {
     apiKey(): Nullable<string> | Promise<Nullable<string>>;
+    argument(id: string): Argument | Promise<Argument>;
+    arguments(claimSlug: string): Argument[] | Promise<Argument[]>;
     attribution(id: number): Attribution | Promise<Attribution>;
     attributions(): Attribution[] | Promise<Attribution[]>;
     claim(slug: string): Claim | Promise<Claim>;
-    claims(): Claim[] | Promise<Claim[]>;
+    claims(limit: number, offset: number): Claim[] | Promise<Claim[]>;
+    knowledgeBit(id: string): KnowledgeBit | Promise<KnowledgeBit>;
+    knowledgeBits(claimSlug: string): KnowledgeBit[] | Promise<KnowledgeBit[]>;
     nonce(): string | Promise<string>;
+    opinion(id: string): Opinion | Promise<Opinion>;
     profile(username: string): Nullable<Profile> | Promise<Nullable<Profile>>;
+    relatedClaims(slug: string): Claim[] | Promise<Claim[]>;
     searchTags(term?: Nullable<string>): Tag[] | Promise<Tag[]>;
     session(): Session | Promise<Session>;
     source(id: number): Source | Promise<Source>;
     sources(): Source[] | Promise<Source[]>;
     tag(id: number): Tag | Promise<Tag>;
+    trendingClaims(limit: number, offset: number): Claim[] | Promise<Claim[]>;
     userClaims(relation: UserClaimRelation, username: string): Claim[] | Promise<Claim[]>;
+    userKnowledgeBitVotes(claimSlug: string): Nullable<KnowledgeBitVote[]> | Promise<Nullable<KnowledgeBitVote[]>>;
+    userOpinion(claimSlug: string): Nullable<Opinion> | Promise<Nullable<Opinion>>;
 }
 
 export interface Session {
@@ -198,6 +417,8 @@ export interface User {
     email?: Nullable<string>;
     ethAddress?: Nullable<string>;
     id: string;
+    knowledgeBitVotes?: Nullable<KnowledgeBitVote[]>;
+    knowledgeBits?: Nullable<KnowledgeBit[]>;
     updatedAt: string;
     username?: Nullable<string>;
     usernameSource?: Nullable<UsernameSource>;

@@ -2,9 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
 import { Repository } from 'typeorm';
-import { User } from '../users/entities/user.entity';
 
+import { sendMail } from 'src/common/services/mail';
+import { User } from '../users/entities/user.entity';
 import { CreateClaimInput } from './dto/create-claim.input';
+import { InviteFriendsInput } from './dto/invite-friends.input';
 import { UpdateClaimInput } from './dto/update-claim.input';
 import { Claim } from './entities/claim.entity';
 
@@ -36,6 +38,28 @@ export class ClaimsService {
     return await this.claimsRepository.find();
   }
 
+  async findRelated(slug: string) {
+    const claim = await this.claimsRepository.findOne({
+      where: { slug },
+      relations: ['tags'],
+    });
+
+    if (claim.tags.length > 0) {
+      return await this.claimsRepository
+        .createQueryBuilder('claim')
+        .leftJoinAndSelect('claim.user', 'user')
+        .leftJoinAndSelect('claim.tags', 'tags')
+        .innerJoin('claim.tags', 'tag', 'tag.id IN (:...tagIds)', {
+          tagIds: claim.tags.map(({ id }) => id),
+        })
+        .where('claim.slug != :slug', { slug })
+        .take(3)
+        .getMany();
+    } else {
+      return Promise.resolve([]);
+    }
+  }
+
   async find(query) {
     return await this.claimsRepository.find(query);
   }
@@ -48,15 +72,46 @@ export class ClaimsService {
       .getMany();
   }
 
-  async findOne(slug: string) {
-    return await this.claimsRepository.findOne({ slug });
+  async findOne(query) {
+    return await this.claimsRepository.findOne(query);
   }
 
-  update(id: number, updateClaimInput: UpdateClaimInput) {
-    return `This action updates a #${id} claim`;
+  async update(id: string, updateClaimInput: UpdateClaimInput) {
+    return await this.claimsRepository.save({ ...updateClaimInput, id });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} claim`;
+  async softDelete(id: string) {
+    return await this.claimsRepository.softDelete(id);
+  }
+
+  async inviteFriends({
+    user,
+    inviteFriendsInput: { slug, emails, message },
+  }: {
+    user: User;
+    inviteFriendsInput: InviteFriendsInput;
+  }) {
+    const claim = await this.claimsRepository.findOne({ where: { slug } });
+    const blockquoteMessage = message
+      ? `
+      <blockquote>
+        <strong>${user.username}:</strong> "${message}"
+      </blockquote>
+    `
+      : '';
+
+    await sendMail({
+      to: emails,
+      subject: `${user.username} has invited you to participate in a claim`,
+      html: `
+        Hello,<br /><br />
+
+        <strong>${user.username}</strong> has invited you to participate in the <a href="${process.env.FRONTEND_HOST}/claim/${claim.slug}">${claim.title}</a> claim.
+
+        ${blockquoteMessage}        
+      `,
+    });
+
+    return true;
   }
 }

@@ -1,10 +1,11 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, OneToMany } from 'typeorm';
+import { registerEnumType } from '@nestjs/graphql';
 
 import { Claim } from 'src/modules/claims/entities/claim.entity';
+import { KnowledgeBit } from 'src/modules/knowledge-bits/entities/knowledge-bit.entity';
 import { BaseEntity } from 'src/common/entities/base.entity';
-
-import { registerEnumType } from '@nestjs/graphql';
+import { KnowledgeBitVote } from 'src/modules/knowledge-bit-votes/entities/knowledge-bit-vote.entity';
 
 export enum UsernameSource {
   ENS,
@@ -77,4 +78,12 @@ export class User extends BaseEntity {
   @Field(() => [Claim], { description: 'User claims', nullable: true })
   @OneToMany(() => Claim, (claim) => claim.user)
   claims: Claim[];
+
+  @Field(() => [KnowledgeBit], { nullable: true })
+  @OneToMany(() => KnowledgeBit, (knowledgeBit) => knowledgeBit.user)
+  knowledgeBits: KnowledgeBit[];
+
+  @Field(() => [KnowledgeBitVote], { nullable: true })
+  @OneToMany(() => KnowledgeBitVote, (vote) => vote.user)
+  knowledgeBitVotes: KnowledgeBitVote[];
 }

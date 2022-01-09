@@ -29,6 +29,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/typeorm": "^8.0.2",
+    "@sendgrid/mail": "^7.6.0",
     "apollo-server-express": "^3.5.0",
     "bcrypt": "^5.0.1",
     "connect-pg-simple": "^7.0.0",

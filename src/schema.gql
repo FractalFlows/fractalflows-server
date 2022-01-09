@@ -7,9 +7,43 @@ type APIKey {
   secret: String
 }
 
-type Attribution {
-  """Claim"""
+type Argument {
   claim: Claim!
+  comments: [ArgumentComment!]
+
+  """Created at"""
+  createdAt: String!
+  evidences: [KnowledgeBit!]
+  id: String!
+  opinions: [Opinion!]
+  side: ArgumentSides!
+  summary: String!
+
+  """Updated at"""
+  updatedAt: String!
+  user: User!
+}
+
+type ArgumentComment {
+  argument: Argument!
+  content: String!
+
+  """Created at"""
+  createdAt: String!
+  id: String!
+
+  """Updated at"""
+  updatedAt: String!
+  user: User!
+}
+
+enum ArgumentSides {
+  CON
+  PRO
+}
+
+type Attribution {
+  claims: [Claim!]!
 
   """Created at"""
   createdAt: String!
@@ -17,6 +51,7 @@ type Attribution {
 
   """Claimant identifier"""
   identifier: String!
+  knowledgeBits: [KnowledgeBit!]!
 
   """Origin"""
   origin: String!
@@ -31,12 +66,16 @@ enum AvatarSource {
 }
 
 type Claim {
+  arguments: [Argument!]
+
   """Attributions"""
   attributions: [Attribution!]
 
   """Created at"""
   createdAt: String!
   id: String!
+  knowledgeBits: [KnowledgeBit!]
+  opinions: [Opinion!]
 
   """Slug"""
   slug: String!
@@ -60,59 +99,201 @@ type Claim {
   user: User!
 }
 
-input CreateAttributionInput {
-  """Identifier"""
-  identifier: String!
+input ClaimInput {
+  id: String!
+}
 
-  """Origin"""
-  origin: String!
+input CreateArgumentCommentInput {
+  argument: IDInput!
+  content: String!
+}
+
+input CreateArgumentInput {
+  evidences: [IDInput!]
+  side: ArgumentSides!
+  summary: String!
 }
 
 input CreateClaimInput {
   """Attributions"""
-  attributions: [CreateAttributionInput!]
+  attributions: [SaveAttributionInput!]
 
   """Sources"""
-  sources: [CreateSourceInput!]
+  sources: [SaveSourceInput!]
 
   """Summary"""
   summary: String!
 
   """Tags"""
-  tags: [CreateTagInput!]
+  tags: [SaveTagInput!]
 
   """Title"""
   title: String!
 }
 
-input CreateSourceInput {
-  origin: String!
+input CreateKnowledgeBitInput {
+  attributions: [SaveAttributionInput!]
+  customLocation: String
+  customType: String
+  location: KnowledgeBitLocations!
+  name: String!
+  side: KnowledgeBitSides!
+  summary: String
+  type: KnowledgeBitTypes!
   url: String!
 }
 
-input CreateTagInput {
-  id: String
+input IDInput {
+  id: String!
+}
 
-  """Label"""
-  label: String!
+input InviteFriendsInput {
+  """Friends' emails"""
+  emails: [String!]!
+  message: String
+  slug: String!
+}
+
+type KnowledgeBit {
+  attributions: [Attribution!]
+  claim: Claim!
+
+  """Created at"""
+  createdAt: String!
+  customLocation: String
+  customType: String
+  downvotesCount: Int
+  id: String!
+  location: KnowledgeBitLocations!
+  name: String!
+  side: KnowledgeBitSides!
+  summary: String
+  type: KnowledgeBitTypes!
+
+  """Updated at"""
+  updatedAt: String!
+  upvotesCount: Int
+  url: String!
+  user: User!
+  votes: [KnowledgeBitVote!]
+}
+
+enum KnowledgeBitLocations {
+  ACADEMIA_EDU
+  ARXIV
+  BIT_TORRENT
+  BLOG
+  BOX
+  DAT
+  DATABASE
+  DROPBOX
+  EMAIL
+  ETHEREUM_SWARM
+  FIGSHARE
+  GIT
+  GOOGLE_DRIVE
+  HAL_ARCHIVES
+  IPFS
+  JUPYTER
+  KAGGLE
+  ONEDRIVE
+  OPENAIRE
+  OTHER
+  PDF
+  PUBPEER
+  RE3DATA
+  RESEARCH_GATE
+  RESEARCH_ID
+  SCIENTIFIC_PUBLISHER
+  SLIDESHARE
+  STACK_OVERFLOW
+  WEBSITE
+  WIKIPEDIA
+  YOUTUBE
+  ZENODO
+}
+
+enum KnowledgeBitSides {
+  REFUTING
+  SUPPORTING
+}
+
+enum KnowledgeBitTypes {
+  DATA_SET
+  DESCRIPTION_OF_METHODOLOGIES
+  DETAILED_ANALYSIS
+  DETAILED_MATHEMATICAL_FORMULATION
+  EXPERIMENTAL_RESULTS
+  OTHER
+  PUBLICATION_OR_ARTICLE_OR_REPORT
+  REPRODUCTION_OF_RESULTS
+  REVIEWS
+  SCRIPTS
+  SIMULATION_RESULTS
+  SOURCE_CODE
+  STATEMENT_OF_ASSUMPTIONS
+  STATEMENT_OF_HYPOTHESIS
+}
+
+type KnowledgeBitVote {
+  """Created at"""
+  createdAt: String!
+  id: String!
+  knowledgeBit: KnowledgeBit!
+  type: KnowledgeBitVoteTypes!
+
+  """Updated at"""
+  updatedAt: String!
+  user: User!
+}
+
+enum KnowledgeBitVoteTypes {
+  DOWNVOTE
+  UPVOTE
 }
 
 type Mutation {
   connectEthereumWallet(address: String!): User!
   createAPIKey: APIKey!
+  createArgument(claimSlug: String!, createArgumentInput: CreateArgumentInput!): Argument!
+  createArgumentComment(createArgumentCommentInput: CreateArgumentCommentInput!): ArgumentComment!
   createClaim(createClaimInput: CreateClaimInput!): Claim!
+  createKnowledgeBit(claimSlug: String!, createKnowledgeBitInput: CreateKnowledgeBitInput!): KnowledgeBit!
+  deleteArgumentComment(id: String!): Boolean!
+  deleteClaim(id: String!): Boolean!
+  deleteKnowledgeBit(id: String!): Boolean!
+  inviteFriends(inviteFriendsInput: InviteFriendsInput!): Boolean!
   removeAPIKey: Boolean!
+  removeArgument(id: Int!): Argument!
   removeAttribution(id: Int!): Attribution!
-  removeClaim(id: Int!): Claim!
+  removeOpinion(id: Int!): Opinion!
   removeSource(id: Int!): Source!
+  saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
+  saveOpinion(saveOpinionInput: SaveOpinionInput!): Opinion!
   sendMagicLink(email: String!): Boolean!
   signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput!): User!
   signOut: Boolean!
+  updateArgument(updateArgumentInput: UpdateArgumentInput!): Argument!
+  updateArgumentComment(updateArgumentCommentInput: UpdateArgumentCommentInput!): ArgumentComment!
   updateClaim(updateClaimInput: UpdateClaimInput!): Claim!
   updateEmail(email: String!): User!
+  updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput!): KnowledgeBit!
   updateProfile(updateProfileInput: UpdateProfileInput!): User!
-  updateSource(updateSourceInput: UpdateSourceInput!): Source!
   verifyMagicLink(hash: String!): User!
+}
+
+type Opinion {
+  acceptance: Float!
+  arguments: [Argument!]
+  claim: Claim!
+
+  """Created at"""
+  createdAt: String!
+  id: String!
+
+  """Updated at"""
+  updatedAt: String!
+  user: User!
 }
 
 type Profile {
@@ -123,18 +304,57 @@ type Profile {
 
 type Query {
   apiKey: String
+  argument(id: String!): Argument!
+  arguments(claimSlug: String!): [Argument!]!
   attribution(id: Int!): Attribution!
   attributions: [Attribution!]!
   claim(slug: String!): Claim!
-  claims: [Claim!]!
+  claims(limit: Int!, offset: Int!): [Claim!]!
+  knowledgeBit(id: String!): KnowledgeBit!
+  knowledgeBits(claimSlug: String!): [KnowledgeBit!]!
   nonce: String!
+  opinion(id: String!): Opinion!
   profile(username: String!): Profile
+  relatedClaims(slug: String!): [Claim!]!
   searchTags(term: String): [Tag!]!
   session: Session!
   source(id: Int!): Source!
   sources: [Source!]!
   tag(id: Int!): Tag!
+  trendingClaims(limit: Int!, offset: Int!): [Claim!]!
   userClaims(relation: UserClaimRelation!, username: String!): [Claim!]!
+  userKnowledgeBitVotes(claimSlug: String!): [KnowledgeBitVote!]
+  userOpinion(claimSlug: String!): Opinion
+}
+
+input SaveAttributionInput {
+  id: String
+
+  """Identifier"""
+  identifier: String!
+
+  """Origin"""
+  origin: String!
+}
+
+input SaveOpinionInput {
+  acceptance: Float!
+  arguments: [IDInput!]!
+  claim: ClaimInput!
+  id: String
+}
+
+input SaveSourceInput {
+  id: String
+  origin: String!
+  url: String!
+}
+
+input SaveTagInput {
+  id: String
+
+  """Label"""
+  label: String!
 }
 
 type Session {
@@ -247,22 +467,48 @@ type Tag {
   updatedAt: String!
 }
 
+input UpdateArgumentCommentInput {
+  argument: IDInput!
+  content: String!
+  id: String!
+}
+
+input UpdateArgumentInput {
+  evidences: [IDInput!]
+  id: Int!
+  side: ArgumentSides
+  summary: String
+}
+
 input UpdateClaimInput {
   """Attributions"""
-  attributions: [CreateAttributionInput!]
-  id: Int!
+  attributions: [SaveAttributionInput!]
+  id: String!
 
   """Sources"""
-  sources: [CreateSourceInput!]
+  sources: [SaveSourceInput!]
 
   """Summary"""
-  summary: String
+  summary: String!
 
   """Tags"""
-  tags: [CreateTagInput!]
+  tags: [SaveTagInput!]
 
   """Title"""
-  title: String
+  title: String!
+}
+
+input UpdateKnowledgeBitInput {
+  attributions: [SaveAttributionInput!]
+  customLocation: String
+  customType: String
+  id: String!
+  location: KnowledgeBitLocations!
+  name: String!
+  side: KnowledgeBitSides!
+  summary: String
+  type: KnowledgeBitTypes!
+  url: String!
 }
 
 input UpdateProfileInput {
@@ -270,12 +516,6 @@ input UpdateProfileInput {
   avatarSource: AvatarSource!
   username: String!
   usernameSource: UsernameSource!
-}
-
-input UpdateSourceInput {
-  id: Int!
-  origin: String
-  url: String
 }
 
 type User {
@@ -303,6 +543,8 @@ type User {
   """Ethereum wallet address"""
   ethAddress: String
   id: String!
+  knowledgeBitVotes: [KnowledgeBitVote!]
+  knowledgeBits: [KnowledgeBit!]
 
   """Updated at"""
   updatedAt: String!

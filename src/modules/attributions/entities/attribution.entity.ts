@@ -1,8 +1,9 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToMany } from 'typeorm';
 
 import { BaseEntity } from 'src/common/entities/base.entity';
 import { Claim } from 'src/modules/claims/entities/claim.entity';
+import { KnowledgeBit } from 'src/modules/knowledge-bits/entities/knowledge-bit.entity';
 
 @Entity()
 @ObjectType()
@@ -12,10 +13,14 @@ export class Attribution extends BaseEntity {
   origin: string;
 
   @Field(() => String, { description: 'Claimant identifier' })
-  @Column()
+  @Column({ unique: true })
   identifier: string;
 
-  @Field(() => Claim, { description: 'Claim' })
-  @ManyToOne(() => Claim, (claim) => claim.attributions)
-  claim: Claim;
+  @Field(() => [Claim])
+  @ManyToMany(() => Claim, (claim) => claim.attributions)
+  claims: Claim[];
+
+  @Field(() => [KnowledgeBit])
+  @ManyToMany(() => KnowledgeBit, (knowledgeBit) => knowledgeBit.attributions)
+  knowledgeBits: KnowledgeBit[];
 }

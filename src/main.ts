@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import session from 'express-session';
 import sessionFileStore from 'session-file-store';
 import path from 'path';
+import sendgrid from '@sendgrid/mail';
 
 import { AppModule } from './app.module';
 
@@ -24,6 +25,8 @@ async function bootstrap() {
     },
   };
   app.use(session(sessionOptions));
+
+  sendgrid.setApiKey(configService.get('SENDGRID_API_KEY'));
 
   await app.listen(configService.get('PORT'));
 }

@@ -12,6 +12,11 @@ import { SourcesModule } from './modules/sources/sources.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { AttributionsModule } from './modules/attributions/attributions.module';
 import { AuthAPIKeyMiddleware } from './modules/auth/auth-api-key.middleware';
+import { KnowledgeBitsModule } from './modules/knowledge-bits/knowledge-bits.module';
+import { KnowledgeBitVotesModule } from './modules/knowledge-bit-votes/knowledge-bit-votes.module';
+import { ArgumentsModule } from './modules/arguments/arguments.module';
+import { ArgumentCommentsModule } from './modules/argument-comments/argument-comments.module';
+import { OpinionsModule } from './modules/opinions/opinions.module';
 
 @Module({
   imports: [
@@ -40,6 +45,11 @@ import { AuthAPIKeyMiddleware } from './modules/auth/auth-api-key.middleware';
     SourcesModule,
     TagsModule,
     AttributionsModule,
+    KnowledgeBitsModule,
+    KnowledgeBitVotesModule,
+    ArgumentsModule,
+    ArgumentCommentsModule,
+    OpinionsModule,
   ],
   providers: [AppService],
 })

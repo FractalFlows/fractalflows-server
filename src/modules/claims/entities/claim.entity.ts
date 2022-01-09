@@ -2,9 +2,6 @@ import { ObjectType, Field } from '@nestjs/graphql';
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
   ManyToOne,
   ManyToMany,
   JoinTable,
@@ -15,7 +12,10 @@ import { User } from 'src/modules/users/entities/user.entity';
 import { Tag } from 'src/modules/tags/entities/tag.entity';
 import { Source } from 'src/modules/sources/entities/source.entity';
 import { Attribution } from 'src/modules/attributions/entities/attribution.entity';
+import { KnowledgeBit } from 'src/modules/knowledge-bits/entities/knowledge-bit.entity';
 import { BaseEntity } from 'src/common/entities/base.entity';
+import { Argument } from 'src/modules/arguments/entities/argument.entity';
+import { Opinion } from 'src/modules/opinions/entities/opinion.entity';
 
 @Entity()
 @ObjectType()
@@ -37,13 +37,26 @@ export class Claim extends BaseEntity {
   sources: Source[];
 
   @Field(() => [Tag], { description: 'Tags', nullable: true })
-  @ManyToMany(() => Tag, { nullable: true })
+  @ManyToMany(() => Tag, (tag) => tag.claims)
   @JoinTable()
   tags: Tag[];
 
   @Field(() => [Attribution], { description: 'Attributions', nullable: true })
-  @OneToMany(() => Attribution, (attribution) => attribution.claim)
+  @ManyToMany(() => Attribution, (attribution) => attribution.claims)
+  @JoinTable()
   attributions: Attribution[];
+
+  @Field(() => [KnowledgeBit], { nullable: true })
+  @OneToMany(() => KnowledgeBit, (knowledgeBit) => knowledgeBit.claim)
+  knowledgeBits: KnowledgeBit[];
+
+  @Field(() => [Argument], { nullable: true })
+  @OneToMany(() => Argument, (argument) => argument.claim)
+  arguments: Argument[];
+
+  @Field(() => [Opinion], { nullable: true })
+  @OneToMany(() => Opinion, (opinion) => opinion.claim)
+  opinions: Opinion[];
 
   @Field(() => User, { description: 'Created by' })
   @ManyToOne(() => User, (user) => user.claims)

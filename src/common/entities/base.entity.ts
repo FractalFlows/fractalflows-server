@@ -1,6 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import {
   CreateDateColumn,
+  DeleteDateColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -13,9 +14,12 @@ export abstract class BaseEntity {
 
   @Field(() => String, { description: 'Created at' })
   @CreateDateColumn()
-  createdAt: string;
+  createdAt: Date;
 
   @Field(() => String, { description: 'Updated at' })
   @UpdateDateColumn()
-  updatedAt: string;
+  updatedAt?: Date;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }
