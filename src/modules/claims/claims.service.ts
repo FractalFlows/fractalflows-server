@@ -9,6 +9,7 @@ import { CreateClaimInput } from './dto/create-claim.input';
 import { InviteFriendsInput } from './dto/invite-friends.input';
 import { UpdateClaimInput } from './dto/update-claim.input';
 import { Claim } from './entities/claim.entity';
+import { KnowledgeBit } from '../knowledge-bits/entities/knowledge-bit.entity';
 
 @Injectable()
 export class ClaimsService {
@@ -38,6 +39,24 @@ export class ClaimsService {
     return await this.claimsRepository.find();
   }
 
+  async count() {
+    return await this.claimsRepository.count();
+  }
+
+  async findTrending({ limit, offset }: { limit: number; offset: number }) {
+    return await this.claimsRepository
+      .createQueryBuilder('claim')
+      .select('claim.id')
+      .addSelect('COUNT(knowledgeBits.id) as knowledgeBitsCount')
+      .leftJoin('claim.knowledgeBits', 'knowledgeBits')
+      .groupBy('claim.id')
+      .orderBy('knowledgeBitsCount', 'DESC')
+      .addOrderBy('claim.updatedAt', 'DESC')
+      .offset(offset)
+      .limit(limit)
+      .execute();
+  }
+
   async findRelated(slug: string) {
     const claim = await this.claimsRepository.findOne({
       where: { slug },
@@ -53,7 +72,7 @@ export class ClaimsService {
           tagIds: claim.tags.map(({ id }) => id),
         })
         .where('claim.slug != :slug', { slug })
-        .take(3)
+        .limit(3)
         .getMany();
     } else {
       return Promise.resolve([]);

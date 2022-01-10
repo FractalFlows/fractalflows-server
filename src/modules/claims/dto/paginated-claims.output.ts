@@ -3,7 +3,7 @@ import { Search } from 'src/common/dto/search.output';
 import { Claim } from '../entities/claim.entity';
 
 @ObjectType()
-export class ClaimsSearch extends Search {
-  @Field(() => [Claim])
-  data: Claim[];
+export class PaginatedClaims extends Search {
+  @Field(() => [Claim], { nullable: true })
+  data?: Claim[];
 }

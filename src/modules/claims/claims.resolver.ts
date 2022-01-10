@@ -15,7 +15,7 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { InviteFriendsInput } from './dto/invite-friends.input';
 import { In } from 'typeorm';
-import { ClaimsSearch } from './dto/search.output';
+import { PaginatedClaims } from './dto/paginated-claims.output';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -74,16 +74,29 @@ export class ClaimsResolver {
     });
   }
 
-  @Query(() => [Claim], { name: 'trendingClaims' })
+  @Query(() => PaginatedClaims, { name: 'trendingClaims' })
   async findTrending(
-    @Args('limit', { type: () => Int }) limit = 20,
+    @Args('limit', { type: () => Int }) limit = 10,
     @Args('offset', { type: () => Int }) offset = 0,
   ) {
-    return await this.claimsService.find({
-      relations: ['user', 'tags'],
-      take: limit,
-      skip: offset,
+    const trendingClaims = await this.claimsService.findTrending({
+      limit,
+      offset,
     });
+    const trendingClaimsIds = trendingClaims.map(({ claim_id }) => claim_id);
+    const completeTrendingClaims = await this.claimsService.find({
+      where: { id: In(trendingClaimsIds) },
+      relations: ['user', 'tags', 'knowledgeBits'],
+    });
+
+    return {
+      totalCount: await this.claimsService.count(),
+      data: trendingClaimsIds.map((id) =>
+        completeTrendingClaims.find(
+          (completeTrendingClaim) => completeTrendingClaim.id === id,
+        ),
+      ),
+    };
   }
 
   @Query(() => [Claim], { name: 'relatedClaims' })
@@ -91,7 +104,7 @@ export class ClaimsResolver {
     return await this.claimsService.findRelated(slug);
   }
 
-  @Query(() => ClaimsSearch, { name: 'searchClaims', nullable: true })
+  @Query(() => PaginatedClaims, { name: 'searchClaims', nullable: true })
   async searchClaims(
     @Args('term') term: string,
     @Args('limit', { type: () => Int }) limit = 10,

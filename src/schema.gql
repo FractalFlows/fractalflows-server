@@ -106,11 +106,6 @@ input ClaimInput {
   id: String!
 }
 
-type ClaimsSearch {
-  data: [Claim!]!
-  totalCount: Int!
-}
-
 input CreateArgumentCommentInput {
   argument: IDInput!
   content: String!
@@ -304,6 +299,11 @@ type Opinion {
   user: User!
 }
 
+type PaginatedClaims {
+  data: [Claim!]
+  totalCount: Int!
+}
+
 type Profile {
   avatar: String
   ethAddress: String
@@ -324,13 +324,13 @@ type Query {
   opinion(id: String!): Opinion!
   profile(username: String!): Profile
   relatedClaims(slug: String!): [Claim!]!
-  searchClaims(limit: Int!, offset: Int!, term: String!): ClaimsSearch
+  searchClaims(limit: Int!, offset: Int!, term: String!): PaginatedClaims
   searchTags(term: String): [Tag!]!
   session: Session!
   source(id: Int!): Source!
   sources: [Source!]!
   tag(id: Int!): Tag!
-  trendingClaims(limit: Int!, offset: Int!): [Claim!]!
+  trendingClaims(limit: Int!, offset: Int!): PaginatedClaims!
   userClaims(relation: UserClaimRelation!, username: String!): [Claim!]!
   userKnowledgeBitVotes(claimSlug: String!): [KnowledgeBitVote!]
   userOpinion(claimSlug: String!): Opinion

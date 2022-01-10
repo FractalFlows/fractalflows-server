@@ -274,11 +274,6 @@ export interface Claim {
     user: User;
 }
 
-export interface ClaimsSearch {
-    data: Claim[];
-    totalCount: number;
-}
-
 export interface KnowledgeBit {
     attributions?: Nullable<Attribution[]>;
     claim: Claim;
@@ -348,6 +343,11 @@ export interface Opinion {
     user: User;
 }
 
+export interface PaginatedClaims {
+    data?: Nullable<Claim[]>;
+    totalCount: number;
+}
+
 export interface Profile {
     avatar?: Nullable<string>;
     ethAddress?: Nullable<string>;
@@ -368,13 +368,13 @@ export interface IQuery {
     opinion(id: string): Opinion | Promise<Opinion>;
     profile(username: string): Nullable<Profile> | Promise<Nullable<Profile>>;
     relatedClaims(slug: string): Claim[] | Promise<Claim[]>;
-    searchClaims(limit: number, offset: number, term: string): Nullable<ClaimsSearch> | Promise<Nullable<ClaimsSearch>>;
+    searchClaims(limit: number, offset: number, term: string): Nullable<PaginatedClaims> | Promise<Nullable<PaginatedClaims>>;
     searchTags(term?: Nullable<string>): Tag[] | Promise<Tag[]>;
     session(): Session | Promise<Session>;
     source(id: number): Source | Promise<Source>;
     sources(): Source[] | Promise<Source[]>;
     tag(id: number): Tag | Promise<Tag>;
-    trendingClaims(limit: number, offset: number): Claim[] | Promise<Claim[]>;
+    trendingClaims(limit: number, offset: number): PaginatedClaims | Promise<PaginatedClaims>;
     userClaims(relation: UserClaimRelation, username: string): Claim[] | Promise<Claim[]>;
     userKnowledgeBitVotes(claimSlug: string): Nullable<KnowledgeBitVote[]> | Promise<Nullable<KnowledgeBitVote[]>>;
     userOpinion(claimSlug: string): Nullable<Opinion> | Promise<Nullable<Opinion>>;
