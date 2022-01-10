@@ -64,6 +64,26 @@ export class ClaimsService {
     return await this.claimsRepository.find(query);
   }
 
+  async search({ term }) {
+    return await this.claimsRepository.query(
+      `
+      select id, count(*) OVER() AS totalCount, ts_rank(p_search.document, to_tsquery('''${term}'':*')) as relevance from (
+        select claim.id as id,
+          setweight(to_tsvector("claim"."title"), 'A') ||
+          setweight(to_tsvector("claim"."summary"),  'A') ||
+       		-- setweight(to_tsvector(coalesce(string_agg("tag"."label", ' '))), 'B') ||
+          setweight(to_tsvector("user"."username"), 'C') as document
+        from claim
+        join "user" ON "user"."id" = "claim"."userId"
+        left join claim_tags_tag ON "claim_tags_tag"."claimId" = "claim"."id"
+        left join tag ON tag.id = "claim_tags_tag"."tagId"
+        group by claim.id, "user"."id"
+      ) p_search where p_search.document @@ to_tsquery('''${term}'':*')
+      ORDER BY relevance DESC
+    `,
+    );
+  }
+
   async findByUserId(userId: string) {
     return await this.claimsRepository
       .createQueryBuilder('claim')

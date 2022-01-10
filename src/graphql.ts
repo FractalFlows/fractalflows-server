@@ -264,6 +264,7 @@ export interface Claim {
     id: string;
     knowledgeBits?: Nullable<KnowledgeBit[]>;
     opinions?: Nullable<Opinion[]>;
+    relevance?: Nullable<number>;
     slug: string;
     sources?: Nullable<Source[]>;
     summary: string;
@@ -271,6 +272,11 @@ export interface Claim {
     title: string;
     updatedAt: string;
     user: User;
+}
+
+export interface ClaimsSearch {
+    data: Claim[];
+    totalCount: number;
 }
 
 export interface KnowledgeBit {
@@ -362,6 +368,7 @@ export interface IQuery {
     opinion(id: string): Opinion | Promise<Opinion>;
     profile(username: string): Nullable<Profile> | Promise<Nullable<Profile>>;
     relatedClaims(slug: string): Claim[] | Promise<Claim[]>;
+    searchClaims(limit: number, offset: number, term: string): Nullable<ClaimsSearch> | Promise<Nullable<ClaimsSearch>>;
     searchTags(term?: Nullable<string>): Tag[] | Promise<Tag[]>;
     session(): Session | Promise<Session>;
     source(id: number): Source | Promise<Source>;

@@ -52,9 +52,11 @@ import { OpinionsModule } from './modules/opinions/opinions.module';
       logging: Boolean(process.env.POSTGRES_LOGGING),
       ssl: {
         rejectUnauthorized: true,
-        ca: fs
-          .readFileSync(join(process.cwd(), 'certs/ca-certificate.crt'))
-          .toString(),
+        ca: process.env.POSTGRES_SSL_OFF
+          ? undefined
+          : fs
+              .readFileSync(join(process.cwd(), 'certs/ca-certificate.crt'))
+              .toString(),
       },
     }),
     UsersModule,
