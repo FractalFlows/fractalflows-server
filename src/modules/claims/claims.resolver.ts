@@ -14,6 +14,8 @@ import { UsersService } from '../users/users.service';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { InviteFriendsInput } from './dto/invite-friends.input';
+import { In } from 'typeorm';
+import { ClaimsSearch } from './dto/search.output';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -87,6 +89,34 @@ export class ClaimsResolver {
   @Query(() => [Claim], { name: 'relatedClaims' })
   async findRelated(@Args('slug') slug: string) {
     return await this.claimsService.findRelated(slug);
+  }
+
+  @Query(() => ClaimsSearch, { name: 'searchClaims', nullable: true })
+  async searchClaims(
+    @Args('term') term: string,
+    @Args('limit', { type: () => Int }) limit = 10,
+    @Args('offset', { type: () => Int }) offset = 0,
+  ) {
+    const searchedClaims = await this.claimsService.search({ term });
+    const searchedClaimsIds = searchedClaims
+      .slice(offset, offset + limit)
+      .map(({ id }) => id);
+    const completeSearchedClaims = await this.claimsService.find({
+      where: { id: In(searchedClaimsIds) },
+      relations: ['user', 'tags'],
+    });
+    const weightedSearchedClaims = completeSearchedClaims.map(
+      (searchedClaim) => ({
+        ...searchedClaim,
+        relevance: searchedClaims.find(({ id }) => searchedClaim.id === id)
+          .relevance,
+      }),
+    );
+
+    return {
+      totalCount: searchedClaims.length,
+      data: weightedSearchedClaims,
+    };
   }
 
   @Query(() => [Claim], { name: 'userClaims' })

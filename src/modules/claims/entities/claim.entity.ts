@@ -1,4 +1,4 @@
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, Float } from '@nestjs/graphql';
 import {
   Entity,
   Column,
@@ -61,4 +61,10 @@ export class Claim extends BaseEntity {
   @Field(() => User, { description: 'Created by' })
   @ManyToOne(() => User, (user) => user.claims)
   user: User;
+
+  @Field(() => Float, {
+    description: 'Relevance on search listing',
+    nullable: true,
+  })
+  relevance?: number;
 }

@@ -77,6 +77,9 @@ type Claim {
   knowledgeBits: [KnowledgeBit!]
   opinions: [Opinion!]
 
+  """Relevance on search listing"""
+  relevance: Float
+
   """Slug"""
   slug: String!
 
@@ -101,6 +104,11 @@ type Claim {
 
 input ClaimInput {
   id: String!
+}
+
+type ClaimsSearch {
+  data: [Claim!]!
+  totalCount: Int!
 }
 
 input CreateArgumentCommentInput {
@@ -316,6 +324,7 @@ type Query {
   opinion(id: String!): Opinion!
   profile(username: String!): Profile
   relatedClaims(slug: String!): [Claim!]!
+  searchClaims(limit: Int!, offset: Int!, term: String!): ClaimsSearch
   searchTags(term: String): [Tag!]!
   session: Session!
   source(id: Int!): Source!
