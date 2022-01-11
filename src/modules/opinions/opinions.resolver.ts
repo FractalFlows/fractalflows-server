@@ -8,6 +8,7 @@ import { SaveOpinionInput } from './dto/save-opinion.input';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { ClaimsService } from '../claims/claims.service';
+import { getClaimURL } from 'src/common/utils/claim';
 
 @Resolver(() => Opinion)
 export class OpinionsResolver {
@@ -23,10 +24,24 @@ export class OpinionsResolver {
     saveOpinionInput: SaveOpinionInput,
     @CurrentUser() user: User,
   ) {
+    const claim = await this.claimsService.findOne(saveOpinionInput.claim.id);
     const opinion = await this.opinionsService.save({
       ...saveOpinionInput,
       user,
     });
+    if (saveOpinionInput.id === undefined) {
+      this.claimsService.notifyFollowers({
+        id: claim.id,
+        subject: 'A claim you are following has been updated',
+        html: `
+          The claim <a href="${getClaimURL(claim.slug)}">${
+          claim.title
+        }</a> that you are following has a new opinion from <b>${
+          user.username
+        }`,
+      });
+    }
+
     return await this.opinionsService.findOne({
       where: { id: opinion.id },
       relations: ['arguments', 'arguments.comments', 'claim', 'user'],

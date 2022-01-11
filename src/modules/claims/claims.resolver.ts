@@ -16,6 +16,7 @@ import { User, UserRole } from '../users/entities/user.entity';
 import { InviteFriendsInput } from './dto/invite-friends.input';
 import { In } from 'typeorm';
 import { PaginatedClaims } from './dto/paginated-claims.output';
+import { getClaimURL } from 'src/common/utils/claim';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -163,19 +164,42 @@ export class ClaimsResolver {
   @UseGuards(SessionGuard)
   async updateClaim(
     @Args('updateClaimInput') updateClaimInput: UpdateClaimInput,
+    @CurrentUser() user: User,
   ) {
     await this.sourcesService.save(updateClaimInput.sources);
     await this.attributionsService.save(updateClaimInput.attributions);
     await this.tagsService.save(updateClaimInput.tags);
     await this.claimsService.update(updateClaimInput.id, updateClaimInput);
 
-    return await this.claimsService.findOne(updateClaimInput.id);
+    const updatedClaim = await this.claimsService.findOne(updateClaimInput.id);
+
+    this.claimsService.notifyFollowers({
+      id: updatedClaim.id,
+      subject: 'A claim you are following has been updated',
+      html: `
+        The claim <a href="${getClaimURL(updatedClaim.slug)}">${
+        updateClaimInput.title
+      }</a> that you are following has been updated by <b>${user.username}</b>
+      `,
+    });
+
+    return updatedClaim;
   }
 
   @Mutation(() => Boolean)
   @UseGuards(SessionGuard)
-  async deleteClaim(@Args('id') id: string) {
+  async deleteClaim(@Args('id') id: string, @CurrentUser() user: User) {
+    const claim = await this.claimsService.findOne({ where: { id } });
+
     await this.claimsService.softDelete(id);
+    this.claimsService.notifyFollowers({
+      id,
+      subject: 'A claim you are following has been deleted',
+      html: `
+        The claim "${claim.title}" that you are following has been deleted by <b>${user.username}</b>
+      `,
+    });
+
     return true;
   }
 
@@ -196,11 +220,21 @@ export class ClaimsResolver {
   async disableClaim(@Args('id') id: string, @CurrentUser() user: User) {
     if (user.role !== UserRole.ADMIN) return false;
 
+    const claim = await this.claimsService.findOne(id);
+
     await this.claimsService.update(id, {
       id,
       disabled: true,
     });
     await this.claimsService.softDelete(id);
+
+    this.claimsService.notifyFollowers({
+      id,
+      subject: 'A claim you are following has been deleted',
+      html: `
+        The claim "${claim.title}" that you are following has been deleted by <b>${user.username}</b> due to off topic reasons
+      `,
+    });
 
     return true;
   }

@@ -158,4 +158,30 @@ export class ClaimsService {
 
     return true;
   }
+
+  async notifyFollowers({
+    id,
+    subject,
+    html,
+  }: {
+    id: string;
+    subject: string;
+    html: string;
+  }) {
+    const claim = await this.claimsRepository.findOne({
+      where: { id },
+      relations: ['followers'],
+      withDeleted: true,
+    });
+
+    if (claim.followers && claim.followers.length > 0) {
+      await sendMail({
+        to: claim.followers.map(({ email }) => email).filter(Boolean),
+        subject,
+        html,
+      });
+    }
+
+    return true;
+  }
 }

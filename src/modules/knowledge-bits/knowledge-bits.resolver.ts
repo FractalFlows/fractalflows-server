@@ -15,6 +15,7 @@ import { UseGuards } from '@nestjs/common';
 import { SessionGuard } from '../auth/auth.guard';
 import { KnowledgeBitVotesService } from '../knowledge-bit-votes/knowledge-bit-votes.service';
 import { KnowledgeBitVoteTypes } from '../knowledge-bit-votes/entities/knowledge-bit-vote.entity';
+import { getClaimURL } from 'src/common/utils/claim';
 
 @Resolver(() => KnowledgeBit)
 export class KnowledgeBitsResolver {
@@ -33,6 +34,10 @@ export class KnowledgeBitsResolver {
     createKnowledgeBitInput: CreateKnowledgeBitInput,
     @CurrentUser() user: User,
   ) {
+    const claim = await this.claimsService.findOne({
+      where: { slug: claimSlug },
+    });
+
     await this.attributionsService.upsert(createKnowledgeBitInput.attributions);
     const createKnowledgeBit = await this.knowledgeBitsService.create({
       ...createKnowledgeBitInput,
@@ -40,6 +45,20 @@ export class KnowledgeBitsResolver {
         where: { slug: claimSlug },
       }),
       user,
+    });
+
+    this.claimsService.notifyFollowers({
+      id: claim.id,
+      subject: 'A claim you are following has been updated',
+      html: `
+      The claim <a href="${getClaimURL(claim.slug)}">${
+        claim.title
+      }</a> that you are following has a new ${
+        createKnowledgeBit.side === KnowledgeBitSides.REFUTING
+          ? 'refuting'
+          : 'supporting'
+      } knowledge bit: "${createKnowledgeBit.name}"
+      `,
     });
 
     return await this.findOne(createKnowledgeBit.id);
