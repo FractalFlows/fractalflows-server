@@ -62,6 +62,7 @@ export class ClaimsService {
       where: { slug },
       relations: ['tags'],
     });
+    const tagIds = claim.tags.map(({ id }) => id);
 
     if (claim.tags.length > 0) {
       return await this.claimsRepository
@@ -69,7 +70,7 @@ export class ClaimsService {
         .leftJoinAndSelect('claim.user', 'user')
         .leftJoinAndSelect('claim.tags', 'tags')
         .innerJoin('claim.tags', 'tag', 'tag.id IN (:...tagIds)', {
-          tagIds: claim.tags.map(({ id }) => id),
+          tagIds,
         })
         .where('claim.slug != :slug', { slug })
         .limit(3)

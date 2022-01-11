@@ -39,8 +39,8 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   email?: string;
 
-  @Field(() => String, { description: 'Username', nullable: true })
-  @Column({ nullable: true })
+  @Field(() => String)
+  @Column()
   username?: string;
 
   @Field(() => UsernameSource, {
@@ -48,7 +48,7 @@ export class User extends BaseEntity {
     nullable: true,
   })
   @Column({ nullable: true })
-  usernameSource: UsernameSource;
+  usernameSource?: UsernameSource;
 
   @Field(() => String, {
     description: 'Avatar',
@@ -62,7 +62,7 @@ export class User extends BaseEntity {
     nullable: true,
   })
   @Column({ nullable: true })
-  avatarSource: AvatarSource;
+  avatarSource?: AvatarSource;
 
   @Column({ nullable: true })
   magicLinkHash?: string;

@@ -67,4 +67,19 @@ export class Claim extends BaseEntity {
     nullable: true,
   })
   relevance?: number;
+
+  @Field(() => Float, {
+    description: 'Tweet from which this claim was originated from',
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  tweet?: string;
+
+  @Field(() => Float, {
+    description:
+      'Token used to claim ownership over claims created by the Twitter bot',
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  ownershipToken?: string;
 }

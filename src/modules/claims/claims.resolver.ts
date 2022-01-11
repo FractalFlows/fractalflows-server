@@ -62,16 +62,22 @@ export class ClaimsResolver {
     });
   }
 
-  @Query(() => [Claim], { name: 'claims' })
+  @Query(() => PaginatedClaims, { name: 'claims' })
   async find(
-    @Args('limit', { type: () => Int }) limit = 20,
+    @Args('limit', { type: () => Int }) limit = 10,
     @Args('offset', { type: () => Int }) offset = 0,
   ) {
-    return await this.claimsService.find({
-      relations: ['user', 'tags'],
-      take: limit,
-      skip: offset,
-    });
+    return {
+      totalCount: await this.claimsService.count(),
+      data: await this.claimsService.find({
+        relations: ['user', 'tags', 'knowledgeBits'],
+        take: limit,
+        skip: offset,
+        order: {
+          createdAt: 'DESC',
+        },
+      }),
+    };
   }
 
   @Query(() => PaginatedClaims, { name: 'trendingClaims' })

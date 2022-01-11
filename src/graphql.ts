@@ -264,12 +264,14 @@ export interface Claim {
     id: string;
     knowledgeBits?: Nullable<KnowledgeBit[]>;
     opinions?: Nullable<Opinion[]>;
+    ownershipToken?: Nullable<number>;
     relevance?: Nullable<number>;
     slug: string;
     sources?: Nullable<Source[]>;
     summary: string;
     tags?: Nullable<Tag[]>;
     title: string;
+    tweet?: Nullable<number>;
     updatedAt: string;
     user: User;
 }
@@ -361,7 +363,7 @@ export interface IQuery {
     attribution(id: number): Attribution | Promise<Attribution>;
     attributions(): Attribution[] | Promise<Attribution[]>;
     claim(slug: string): Claim | Promise<Claim>;
-    claims(limit: number, offset: number): Claim[] | Promise<Claim[]>;
+    claims(limit: number, offset: number): PaginatedClaims | Promise<PaginatedClaims>;
     knowledgeBit(id: string): KnowledgeBit | Promise<KnowledgeBit>;
     knowledgeBits(claimSlug: string): KnowledgeBit[] | Promise<KnowledgeBit[]>;
     nonce(): string | Promise<string>;
@@ -427,7 +429,7 @@ export interface User {
     knowledgeBitVotes?: Nullable<KnowledgeBitVote[]>;
     knowledgeBits?: Nullable<KnowledgeBit[]>;
     updatedAt: string;
-    username?: Nullable<string>;
+    username: string;
     usernameSource?: Nullable<UsernameSource>;
 }
 

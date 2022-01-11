@@ -77,6 +77,9 @@ type Claim {
   knowledgeBits: [KnowledgeBit!]
   opinions: [Opinion!]
 
+  """Token used to claim ownership over claims created by the Twitter bot"""
+  ownershipToken: Float
+
   """Relevance on search listing"""
   relevance: Float
 
@@ -94,6 +97,9 @@ type Claim {
 
   """Title"""
   title: String!
+
+  """Tweet from which this claim was originated from"""
+  tweet: Float
 
   """Updated at"""
   updatedAt: String!
@@ -317,7 +323,7 @@ type Query {
   attribution(id: Int!): Attribution!
   attributions: [Attribution!]!
   claim(slug: String!): Claim!
-  claims(limit: Int!, offset: Int!): [Claim!]!
+  claims(limit: Int!, offset: Int!): PaginatedClaims!
   knowledgeBit(id: String!): KnowledgeBit!
   knowledgeBits(claimSlug: String!): [KnowledgeBit!]!
   nonce: String!
@@ -557,9 +563,7 @@ type User {
 
   """Updated at"""
   updatedAt: String!
-
-  """Username"""
-  username: String
+  username: String!
 
   """Username source"""
   usernameSource: UsernameSource
