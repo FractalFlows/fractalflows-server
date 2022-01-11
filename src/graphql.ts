@@ -85,6 +85,12 @@ export enum UserClaimRelation {
     OWN = "OWN"
 }
 
+export enum UserRole {
+    ADMIN = "ADMIN",
+    NORMAL = "NORMAL",
+    VALIDATOR = "VALIDATOR"
+}
+
 export enum UsernameSource {
     CUSTOM = "CUSTOM",
     ENS = "ENS"
@@ -195,9 +201,9 @@ export interface UpdateClaimInput {
     attributions?: Nullable<SaveAttributionInput[]>;
     id: string;
     sources?: Nullable<SaveSourceInput[]>;
-    summary: string;
+    summary?: Nullable<string>;
     tags?: Nullable<SaveTagInput[]>;
-    title: string;
+    title?: Nullable<string>;
 }
 
 export interface UpdateKnowledgeBitInput {
@@ -261,22 +267,21 @@ export interface Claim {
     arguments?: Nullable<Argument[]>;
     attributions?: Nullable<Attribution[]>;
     createdAt: string;
+    disabled: boolean;
+    followers?: Nullable<User[]>;
     id: string;
     knowledgeBits?: Nullable<KnowledgeBit[]>;
     opinions?: Nullable<Opinion[]>;
+    ownershipToken?: Nullable<number>;
     relevance?: Nullable<number>;
     slug: string;
     sources?: Nullable<Source[]>;
     summary: string;
     tags?: Nullable<Tag[]>;
     title: string;
+    tweet?: Nullable<number>;
     updatedAt: string;
     user: User;
-}
-
-export interface ClaimsSearch {
-    data: Claim[];
-    totalCount: number;
 }
 
 export interface KnowledgeBit {
@@ -309,6 +314,7 @@ export interface KnowledgeBitVote {
 }
 
 export interface IMutation {
+    addFollowerToClaim(id: string): boolean | Promise<boolean>;
     connectEthereumWallet(address: string): User | Promise<User>;
     createAPIKey(): APIKey | Promise<APIKey>;
     createArgument(claimSlug: string, createArgumentInput: CreateArgumentInput): Argument | Promise<Argument>;
@@ -318,10 +324,12 @@ export interface IMutation {
     deleteArgumentComment(id: string): boolean | Promise<boolean>;
     deleteClaim(id: string): boolean | Promise<boolean>;
     deleteKnowledgeBit(id: string): boolean | Promise<boolean>;
+    disableClaim(id: string): boolean | Promise<boolean>;
     inviteFriends(inviteFriendsInput: InviteFriendsInput): boolean | Promise<boolean>;
     removeAPIKey(): boolean | Promise<boolean>;
     removeArgument(id: number): Argument | Promise<Argument>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
+    removeFollowerFromClaim(id: string): boolean | Promise<boolean>;
     removeOpinion(id: number): Opinion | Promise<Opinion>;
     removeSource(id: number): Source | Promise<Source>;
     saveKnowledgeBitVote(knowledgeBitId: string, type: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
@@ -348,6 +356,11 @@ export interface Opinion {
     user: User;
 }
 
+export interface PaginatedClaims {
+    data?: Nullable<Claim[]>;
+    totalCount: number;
+}
+
 export interface Profile {
     avatar?: Nullable<string>;
     ethAddress?: Nullable<string>;
@@ -361,20 +374,20 @@ export interface IQuery {
     attribution(id: number): Attribution | Promise<Attribution>;
     attributions(): Attribution[] | Promise<Attribution[]>;
     claim(slug: string): Claim | Promise<Claim>;
-    claims(limit: number, offset: number): Claim[] | Promise<Claim[]>;
+    claims(limit: number, offset: number): PaginatedClaims | Promise<PaginatedClaims>;
     knowledgeBit(id: string): KnowledgeBit | Promise<KnowledgeBit>;
     knowledgeBits(claimSlug: string): KnowledgeBit[] | Promise<KnowledgeBit[]>;
     nonce(): string | Promise<string>;
     opinion(id: string): Opinion | Promise<Opinion>;
     profile(username: string): Nullable<Profile> | Promise<Nullable<Profile>>;
     relatedClaims(slug: string): Claim[] | Promise<Claim[]>;
-    searchClaims(limit: number, offset: number, term: string): Nullable<ClaimsSearch> | Promise<Nullable<ClaimsSearch>>;
+    searchClaims(limit: number, offset: number, term: string): Nullable<PaginatedClaims> | Promise<Nullable<PaginatedClaims>>;
     searchTags(term?: Nullable<string>): Tag[] | Promise<Tag[]>;
     session(): Session | Promise<Session>;
     source(id: number): Source | Promise<Source>;
     sources(): Source[] | Promise<Source[]>;
     tag(id: number): Tag | Promise<Tag>;
-    trendingClaims(limit: number, offset: number): Claim[] | Promise<Claim[]>;
+    trendingClaims(limit: number, offset: number): PaginatedClaims | Promise<PaginatedClaims>;
     userClaims(relation: UserClaimRelation, username: string): Claim[] | Promise<Claim[]>;
     userKnowledgeBitVotes(claimSlug: string): Nullable<KnowledgeBitVote[]> | Promise<Nullable<KnowledgeBitVote[]>>;
     userOpinion(claimSlug: string): Nullable<Opinion> | Promise<Nullable<Opinion>>;
@@ -426,8 +439,9 @@ export interface User {
     id: string;
     knowledgeBitVotes?: Nullable<KnowledgeBitVote[]>;
     knowledgeBits?: Nullable<KnowledgeBit[]>;
+    role: UserRole;
     updatedAt: string;
-    username?: Nullable<string>;
+    username: string;
     usernameSource?: Nullable<UsernameSource>;
 }
 

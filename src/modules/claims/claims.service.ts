@@ -9,6 +9,7 @@ import { CreateClaimInput } from './dto/create-claim.input';
 import { InviteFriendsInput } from './dto/invite-friends.input';
 import { UpdateClaimInput } from './dto/update-claim.input';
 import { Claim } from './entities/claim.entity';
+import { KnowledgeBit } from '../knowledge-bits/entities/knowledge-bit.entity';
 
 @Injectable()
 export class ClaimsService {
@@ -38,11 +39,30 @@ export class ClaimsService {
     return await this.claimsRepository.find();
   }
 
+  async count() {
+    return await this.claimsRepository.count();
+  }
+
+  async findTrending({ limit, offset }: { limit: number; offset: number }) {
+    return await this.claimsRepository
+      .createQueryBuilder('claim')
+      .select('claim.id')
+      .addSelect('COUNT(knowledgeBits.id) as knowledgeBitsCount')
+      .leftJoin('claim.knowledgeBits', 'knowledgeBits')
+      .groupBy('claim.id')
+      .orderBy('knowledgeBitsCount', 'DESC')
+      .addOrderBy('claim.updatedAt', 'DESC')
+      .offset(offset)
+      .limit(limit)
+      .execute();
+  }
+
   async findRelated(slug: string) {
     const claim = await this.claimsRepository.findOne({
       where: { slug },
       relations: ['tags'],
     });
+    const tagIds = claim.tags.map(({ id }) => id);
 
     if (claim.tags.length > 0) {
       return await this.claimsRepository
@@ -50,10 +70,10 @@ export class ClaimsService {
         .leftJoinAndSelect('claim.user', 'user')
         .leftJoinAndSelect('claim.tags', 'tags')
         .innerJoin('claim.tags', 'tag', 'tag.id IN (:...tagIds)', {
-          tagIds: claim.tags.map(({ id }) => id),
+          tagIds,
         })
         .where('claim.slug != :slug', { slug })
-        .take(3)
+        .limit(3)
         .getMany();
     } else {
       return Promise.resolve([]);
@@ -100,6 +120,10 @@ export class ClaimsService {
     return await this.claimsRepository.save({ ...updateClaimInput, id });
   }
 
+  async save(query) {
+    return await this.claimsRepository.save(query);
+  }
+
   async softDelete(id: string) {
     return await this.claimsRepository.softDelete(id);
   }
@@ -131,6 +155,32 @@ export class ClaimsService {
         ${blockquoteMessage}        
       `,
     });
+
+    return true;
+  }
+
+  async notifyFollowers({
+    id,
+    subject,
+    html,
+  }: {
+    id: string;
+    subject: string;
+    html: string;
+  }) {
+    const claim = await this.claimsRepository.findOne({
+      where: { id },
+      relations: ['followers'],
+      withDeleted: true,
+    });
+
+    if (claim.followers && claim.followers.length > 0) {
+      await sendMail({
+        to: claim.followers.map(({ email }) => email).filter(Boolean),
+        subject,
+        html,
+      });
+    }
 
     return true;
   }

@@ -2,7 +2,12 @@ import { Module } from '@nestjs/common';
 
 import { UsersService } from './users.service';
 import { UsersResolver } from './users.resolver';
-import { User } from './entities/user.entity';
+import {
+  AvatarSource,
+  User,
+  UsernameSource,
+  UserRole,
+} from './entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
@@ -10,4 +15,21 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   exports: [UsersService],
   providers: [UsersResolver, UsersService],
 })
-export class UsersModule {}
+export class UsersModule {
+  constructor(private readonly usersService: UsersService) {}
+
+  async configure() {
+    const bot = await this.usersService.findOne({
+      where: { username: 'fractalflowsbot' },
+    });
+
+    if (bot === undefined) {
+      this.usersService.save({
+        username: 'fractalflowsbot',
+        usernameSource: UsernameSource.CUSTOM,
+        avatar: null,
+        avatarSource: AvatarSource.GRAVATAR,
+      });
+    }
+  }
+}

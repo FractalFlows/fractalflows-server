@@ -13,14 +13,18 @@ export class CreateClaimInput {
   summary: string;
 
   @Field(() => [SaveSourceInput], { description: 'Sources', nullable: true })
-  sources: SaveSourceInput[];
+  sources?: SaveSourceInput[];
 
   @Field(() => [SaveTagInput], { description: 'Tags', nullable: true })
-  tags: SaveTagInput[];
+  tags?: SaveTagInput[];
 
   @Field(() => [SaveAttributionInput], {
     description: 'Attributions',
     nullable: true,
   })
-  attributions: SaveAttributionInput[];
+  attributions?: SaveAttributionInput[];
+
+  tweet?: string;
+  tweetReply?: string;
+  ownershipToken?: string;
 }

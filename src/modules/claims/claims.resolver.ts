@@ -12,10 +12,11 @@ import { SessionGuard } from '../auth/auth.guard';
 import { UserClaimRelation } from './dto/get-user-claim.input';
 import { UsersService } from '../users/users.service';
 import { CurrentUser } from '../auth/current-user.decorator';
-import { User } from '../users/entities/user.entity';
+import { User, UserRole } from '../users/entities/user.entity';
 import { InviteFriendsInput } from './dto/invite-friends.input';
 import { In } from 'typeorm';
-import { ClaimsSearch } from './dto/search.output';
+import { PaginatedClaims } from './dto/paginated-claims.output';
+import { getClaimURL } from 'src/common/utils/claim';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -53,6 +54,7 @@ export class ClaimsResolver {
         'sources',
         'attributions',
         'arguments',
+        'followers',
         'arguments.comments',
         'arguments.opinions',
         'arguments.opinions.user',
@@ -62,28 +64,47 @@ export class ClaimsResolver {
     });
   }
 
-  @Query(() => [Claim], { name: 'claims' })
+  @Query(() => PaginatedClaims, { name: 'claims' })
   async find(
-    @Args('limit', { type: () => Int }) limit = 20,
+    @Args('limit', { type: () => Int }) limit = 10,
     @Args('offset', { type: () => Int }) offset = 0,
   ) {
-    return await this.claimsService.find({
-      relations: ['user', 'tags'],
-      take: limit,
-      skip: offset,
-    });
+    return {
+      totalCount: await this.claimsService.count(),
+      data: await this.claimsService.find({
+        relations: ['user', 'tags', 'knowledgeBits'],
+        take: limit,
+        skip: offset,
+        order: {
+          createdAt: 'DESC',
+        },
+      }),
+    };
   }
 
-  @Query(() => [Claim], { name: 'trendingClaims' })
+  @Query(() => PaginatedClaims, { name: 'trendingClaims' })
   async findTrending(
-    @Args('limit', { type: () => Int }) limit = 20,
+    @Args('limit', { type: () => Int }) limit = 10,
     @Args('offset', { type: () => Int }) offset = 0,
   ) {
-    return await this.claimsService.find({
-      relations: ['user', 'tags'],
-      take: limit,
-      skip: offset,
+    const trendingClaims = await this.claimsService.findTrending({
+      limit,
+      offset,
     });
+    const trendingClaimsIds = trendingClaims.map(({ claim_id }) => claim_id);
+    const completeTrendingClaims = await this.claimsService.find({
+      where: { id: In(trendingClaimsIds) },
+      relations: ['user', 'tags', 'knowledgeBits'],
+    });
+
+    return {
+      totalCount: await this.claimsService.count(),
+      data: trendingClaimsIds.map((id) =>
+        completeTrendingClaims.find(
+          (completeTrendingClaim) => completeTrendingClaim.id === id,
+        ),
+      ),
+    };
   }
 
   @Query(() => [Claim], { name: 'relatedClaims' })
@@ -91,7 +112,7 @@ export class ClaimsResolver {
     return await this.claimsService.findRelated(slug);
   }
 
-  @Query(() => ClaimsSearch, { name: 'searchClaims', nullable: true })
+  @Query(() => PaginatedClaims, { name: 'searchClaims', nullable: true })
   async searchClaims(
     @Args('term') term: string,
     @Args('limit', { type: () => Int }) limit = 10,
@@ -143,19 +164,42 @@ export class ClaimsResolver {
   @UseGuards(SessionGuard)
   async updateClaim(
     @Args('updateClaimInput') updateClaimInput: UpdateClaimInput,
+    @CurrentUser() user: User,
   ) {
     await this.sourcesService.save(updateClaimInput.sources);
     await this.attributionsService.save(updateClaimInput.attributions);
     await this.tagsService.save(updateClaimInput.tags);
     await this.claimsService.update(updateClaimInput.id, updateClaimInput);
 
-    return await this.claimsService.findOne(updateClaimInput.id);
+    const updatedClaim = await this.claimsService.findOne(updateClaimInput.id);
+
+    this.claimsService.notifyFollowers({
+      id: updatedClaim.id,
+      subject: 'A claim you are following has been updated',
+      html: `
+        The claim <a href="${getClaimURL(updatedClaim.slug)}">${
+        updateClaimInput.title
+      }</a> that you are following has been updated by <b>${user.username}</b>
+      `,
+    });
+
+    return updatedClaim;
   }
 
   @Mutation(() => Boolean)
   @UseGuards(SessionGuard)
-  async deleteClaim(@Args('id') id: string) {
+  async deleteClaim(@Args('id') id: string, @CurrentUser() user: User) {
+    const claim = await this.claimsService.findOne({ where: { id } });
+
     await this.claimsService.softDelete(id);
+    this.claimsService.notifyFollowers({
+      id,
+      subject: 'A claim you are following has been deleted',
+      html: `
+        The claim "${claim.title}" that you are following has been deleted by <b>${user.username}</b>
+      `,
+    });
+
     return true;
   }
 
@@ -169,5 +213,64 @@ export class ClaimsResolver {
       user,
       inviteFriendsInput,
     });
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(SessionGuard)
+  async disableClaim(@Args('id') id: string, @CurrentUser() user: User) {
+    if (user.role !== UserRole.ADMIN) return false;
+
+    const claim = await this.claimsService.findOne(id);
+
+    await this.claimsService.update(id, {
+      id,
+      disabled: true,
+    });
+    await this.claimsService.softDelete(id);
+
+    this.claimsService.notifyFollowers({
+      id,
+      subject: 'A claim you are following has been deleted',
+      html: `
+        The claim "${claim.title}" that you are following has been deleted by <b>${user.username}</b> due to off topic reasons
+      `,
+    });
+
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(SessionGuard)
+  async addFollowerToClaim(@Args('id') id: string, @CurrentUser() user: User) {
+    const claim = await this.claimsService.findOne({
+      where: { id },
+      relations: ['followers'],
+    });
+
+    this.claimsService.save({
+      ...claim,
+      followers: [...(claim.followers || []), user],
+    });
+
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(SessionGuard)
+  async removeFollowerFromClaim(
+    @Args('id') id: string,
+    @CurrentUser() user: User,
+  ) {
+    const claim = await this.claimsService.findOne({
+      where: { id },
+      relations: ['followers'],
+    });
+
+    this.claimsService.save({
+      ...claim,
+      followers: claim.followers.map(({ id }) => id !== user.id),
+    });
+
+    return true;
   }
 }

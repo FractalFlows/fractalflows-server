@@ -73,9 +73,16 @@ type Claim {
 
   """Created at"""
   createdAt: String!
+  disabled: Boolean!
+
+  """Followers"""
+  followers: [User!]
   id: String!
   knowledgeBits: [KnowledgeBit!]
   opinions: [Opinion!]
+
+  """Token used to claim ownership over claims created by the Twitter bot"""
+  ownershipToken: Float
 
   """Relevance on search listing"""
   relevance: Float
@@ -95,6 +102,9 @@ type Claim {
   """Title"""
   title: String!
 
+  """Tweet from which this claim was originated from"""
+  tweet: Float
+
   """Updated at"""
   updatedAt: String!
 
@@ -104,11 +114,6 @@ type Claim {
 
 input ClaimInput {
   id: String!
-}
-
-type ClaimsSearch {
-  data: [Claim!]!
-  totalCount: Int!
 }
 
 input CreateArgumentCommentInput {
@@ -261,6 +266,7 @@ enum KnowledgeBitVoteTypes {
 }
 
 type Mutation {
+  addFollowerToClaim(id: String!): Boolean!
   connectEthereumWallet(address: String!): User!
   createAPIKey: APIKey!
   createArgument(claimSlug: String!, createArgumentInput: CreateArgumentInput!): Argument!
@@ -270,10 +276,12 @@ type Mutation {
   deleteArgumentComment(id: String!): Boolean!
   deleteClaim(id: String!): Boolean!
   deleteKnowledgeBit(id: String!): Boolean!
+  disableClaim(id: String!): Boolean!
   inviteFriends(inviteFriendsInput: InviteFriendsInput!): Boolean!
   removeAPIKey: Boolean!
   removeArgument(id: Int!): Argument!
   removeAttribution(id: Int!): Attribution!
+  removeFollowerFromClaim(id: String!): Boolean!
   removeOpinion(id: Int!): Opinion!
   removeSource(id: Int!): Source!
   saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
@@ -304,6 +312,11 @@ type Opinion {
   user: User!
 }
 
+type PaginatedClaims {
+  data: [Claim!]
+  totalCount: Int!
+}
+
 type Profile {
   avatar: String
   ethAddress: String
@@ -317,20 +330,20 @@ type Query {
   attribution(id: Int!): Attribution!
   attributions: [Attribution!]!
   claim(slug: String!): Claim!
-  claims(limit: Int!, offset: Int!): [Claim!]!
+  claims(limit: Int!, offset: Int!): PaginatedClaims!
   knowledgeBit(id: String!): KnowledgeBit!
   knowledgeBits(claimSlug: String!): [KnowledgeBit!]!
   nonce: String!
   opinion(id: String!): Opinion!
   profile(username: String!): Profile
   relatedClaims(slug: String!): [Claim!]!
-  searchClaims(limit: Int!, offset: Int!, term: String!): ClaimsSearch
+  searchClaims(limit: Int!, offset: Int!, term: String!): PaginatedClaims
   searchTags(term: String): [Tag!]!
   session: Session!
   source(id: Int!): Source!
   sources: [Source!]!
   tag(id: Int!): Tag!
-  trendingClaims(limit: Int!, offset: Int!): [Claim!]!
+  trendingClaims(limit: Int!, offset: Int!): PaginatedClaims!
   userClaims(relation: UserClaimRelation!, username: String!): [Claim!]!
   userKnowledgeBitVotes(claimSlug: String!): [KnowledgeBitVote!]
   userOpinion(claimSlug: String!): Opinion
@@ -498,13 +511,13 @@ input UpdateClaimInput {
   sources: [SaveSourceInput!]
 
   """Summary"""
-  summary: String!
+  summary: String
 
   """Tags"""
   tags: [SaveTagInput!]
 
   """Title"""
-  title: String!
+  title: String
 }
 
 input UpdateKnowledgeBitInput {
@@ -554,12 +567,11 @@ type User {
   id: String!
   knowledgeBitVotes: [KnowledgeBitVote!]
   knowledgeBits: [KnowledgeBit!]
+  role: UserRole!
 
   """Updated at"""
   updatedAt: String!
-
-  """Username"""
-  username: String
+  username: String!
 
   """Username source"""
   usernameSource: UsernameSource
@@ -569,6 +581,12 @@ enum UserClaimRelation {
   CONTRIBUTED
   FOLLOWING
   OWN
+}
+
+enum UserRole {
+  ADMIN
+  NORMAL
+  VALIDATOR
 }
 
 enum UsernameSource {

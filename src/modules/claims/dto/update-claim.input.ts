@@ -1,9 +1,11 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType, Field, PartialType } from '@nestjs/graphql';
 
 import { CreateClaimInput } from './create-claim.input';
 
 @InputType()
-export class UpdateClaimInput extends CreateClaimInput {
+export class UpdateClaimInput extends PartialType(CreateClaimInput) {
   @Field(() => String)
   id: string;
+
+  disabled?: boolean;
 }

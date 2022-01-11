@@ -5,7 +5,6 @@ import { ConfigModule } from '@nestjs/config';
 import { join } from 'path';
 import fs from 'fs';
 
-import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ClaimsModule } from './modules/claims/claims.module';
@@ -18,6 +17,7 @@ import { KnowledgeBitVotesModule } from './modules/knowledge-bit-votes/knowledge
 import { ArgumentsModule } from './modules/arguments/arguments.module';
 import { ArgumentCommentsModule } from './modules/argument-comments/argument-comments.module';
 import { OpinionsModule } from './modules/opinions/opinions.module';
+import { TwitterModule } from './modules/twitter/twitter.module';
 
 @Module({
   imports: [
@@ -70,8 +70,8 @@ import { OpinionsModule } from './modules/opinions/opinions.module';
     ArgumentsModule,
     ArgumentCommentsModule,
     OpinionsModule,
+    TwitterModule,
   ],
-  providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

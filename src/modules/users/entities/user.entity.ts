@@ -25,6 +25,16 @@ registerEnumType(AvatarSource, {
   name: 'AvatarSource',
 });
 
+export enum UserRole {
+  NORMAL,
+  ADMIN,
+  VALIDATOR,
+}
+
+registerEnumType(UserRole, {
+  name: 'UserRole',
+});
+
 @Entity()
 @ObjectType()
 export class User extends BaseEntity {
@@ -39,8 +49,8 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   email?: string;
 
-  @Field(() => String, { description: 'Username', nullable: true })
-  @Column({ nullable: true })
+  @Field(() => String)
+  @Column()
   username?: string;
 
   @Field(() => UsernameSource, {
@@ -48,7 +58,7 @@ export class User extends BaseEntity {
     nullable: true,
   })
   @Column({ nullable: true })
-  usernameSource: UsernameSource;
+  usernameSource?: UsernameSource;
 
   @Field(() => String, {
     description: 'Avatar',
@@ -62,10 +72,18 @@ export class User extends BaseEntity {
     nullable: true,
   })
   @Column({ nullable: true })
-  avatarSource: AvatarSource;
+  avatarSource?: AvatarSource;
 
   @Column({ nullable: true })
   magicLinkHash?: string;
+
+  @Field(() => UserRole)
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.NORMAL,
+  })
+  role?: UserRole;
 
   @Field(() => String, { description: 'API Key', nullable: true })
   @Column({ nullable: true })
