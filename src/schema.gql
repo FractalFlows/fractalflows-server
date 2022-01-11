@@ -73,6 +73,10 @@ type Claim {
 
   """Created at"""
   createdAt: String!
+  disabled: Boolean!
+
+  """Followers"""
+  followers: [User!]
   id: String!
   knowledgeBits: [KnowledgeBit!]
   opinions: [Opinion!]
@@ -262,6 +266,7 @@ enum KnowledgeBitVoteTypes {
 }
 
 type Mutation {
+  addFollowerToClaim(id: String!): Boolean!
   connectEthereumWallet(address: String!): User!
   createAPIKey: APIKey!
   createArgument(claimSlug: String!, createArgumentInput: CreateArgumentInput!): Argument!
@@ -271,10 +276,12 @@ type Mutation {
   deleteArgumentComment(id: String!): Boolean!
   deleteClaim(id: String!): Boolean!
   deleteKnowledgeBit(id: String!): Boolean!
+  disableClaim(id: String!): Boolean!
   inviteFriends(inviteFriendsInput: InviteFriendsInput!): Boolean!
   removeAPIKey: Boolean!
   removeArgument(id: Int!): Argument!
   removeAttribution(id: Int!): Attribution!
+  removeFollowerFromClaim(id: String!): Boolean!
   removeOpinion(id: Int!): Opinion!
   removeSource(id: Int!): Source!
   saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
@@ -504,13 +511,13 @@ input UpdateClaimInput {
   sources: [SaveSourceInput!]
 
   """Summary"""
-  summary: String!
+  summary: String
 
   """Tags"""
   tags: [SaveTagInput!]
 
   """Title"""
-  title: String!
+  title: String
 }
 
 input UpdateKnowledgeBitInput {
@@ -560,6 +567,7 @@ type User {
   id: String!
   knowledgeBitVotes: [KnowledgeBitVote!]
   knowledgeBits: [KnowledgeBit!]
+  role: UserRole!
 
   """Updated at"""
   updatedAt: String!
@@ -573,6 +581,12 @@ enum UserClaimRelation {
   CONTRIBUTED
   FOLLOWING
   OWN
+}
+
+enum UserRole {
+  ADMIN
+  NORMAL
+  VALIDATOR
 }
 
 enum UsernameSource {

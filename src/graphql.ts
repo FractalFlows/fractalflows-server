@@ -85,6 +85,12 @@ export enum UserClaimRelation {
     OWN = "OWN"
 }
 
+export enum UserRole {
+    ADMIN = "ADMIN",
+    NORMAL = "NORMAL",
+    VALIDATOR = "VALIDATOR"
+}
+
 export enum UsernameSource {
     CUSTOM = "CUSTOM",
     ENS = "ENS"
@@ -195,9 +201,9 @@ export interface UpdateClaimInput {
     attributions?: Nullable<SaveAttributionInput[]>;
     id: string;
     sources?: Nullable<SaveSourceInput[]>;
-    summary: string;
+    summary?: Nullable<string>;
     tags?: Nullable<SaveTagInput[]>;
-    title: string;
+    title?: Nullable<string>;
 }
 
 export interface UpdateKnowledgeBitInput {
@@ -261,6 +267,8 @@ export interface Claim {
     arguments?: Nullable<Argument[]>;
     attributions?: Nullable<Attribution[]>;
     createdAt: string;
+    disabled: boolean;
+    followers?: Nullable<User[]>;
     id: string;
     knowledgeBits?: Nullable<KnowledgeBit[]>;
     opinions?: Nullable<Opinion[]>;
@@ -306,6 +314,7 @@ export interface KnowledgeBitVote {
 }
 
 export interface IMutation {
+    addFollowerToClaim(id: string): boolean | Promise<boolean>;
     connectEthereumWallet(address: string): User | Promise<User>;
     createAPIKey(): APIKey | Promise<APIKey>;
     createArgument(claimSlug: string, createArgumentInput: CreateArgumentInput): Argument | Promise<Argument>;
@@ -315,10 +324,12 @@ export interface IMutation {
     deleteArgumentComment(id: string): boolean | Promise<boolean>;
     deleteClaim(id: string): boolean | Promise<boolean>;
     deleteKnowledgeBit(id: string): boolean | Promise<boolean>;
+    disableClaim(id: string): boolean | Promise<boolean>;
     inviteFriends(inviteFriendsInput: InviteFriendsInput): boolean | Promise<boolean>;
     removeAPIKey(): boolean | Promise<boolean>;
     removeArgument(id: number): Argument | Promise<Argument>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
+    removeFollowerFromClaim(id: string): boolean | Promise<boolean>;
     removeOpinion(id: number): Opinion | Promise<Opinion>;
     removeSource(id: number): Source | Promise<Source>;
     saveKnowledgeBitVote(knowledgeBitId: string, type: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
@@ -428,6 +439,7 @@ export interface User {
     id: string;
     knowledgeBitVotes?: Nullable<KnowledgeBitVote[]>;
     knowledgeBits?: Nullable<KnowledgeBit[]>;
+    role: UserRole;
     updatedAt: string;
     username: string;
     usernameSource?: Nullable<UsernameSource>;

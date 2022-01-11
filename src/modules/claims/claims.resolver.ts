@@ -12,7 +12,7 @@ import { SessionGuard } from '../auth/auth.guard';
 import { UserClaimRelation } from './dto/get-user-claim.input';
 import { UsersService } from '../users/users.service';
 import { CurrentUser } from '../auth/current-user.decorator';
-import { User } from '../users/entities/user.entity';
+import { User, UserRole } from '../users/entities/user.entity';
 import { InviteFriendsInput } from './dto/invite-friends.input';
 import { In } from 'typeorm';
 import { PaginatedClaims } from './dto/paginated-claims.output';
@@ -53,6 +53,7 @@ export class ClaimsResolver {
         'sources',
         'attributions',
         'arguments',
+        'followers',
         'arguments.comments',
         'arguments.opinions',
         'arguments.opinions.user',
@@ -188,5 +189,54 @@ export class ClaimsResolver {
       user,
       inviteFriendsInput,
     });
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(SessionGuard)
+  async disableClaim(@Args('id') id: string, @CurrentUser() user: User) {
+    if (user.role !== UserRole.ADMIN) return false;
+
+    await this.claimsService.update(id, {
+      id,
+      disabled: true,
+    });
+    await this.claimsService.softDelete(id);
+
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(SessionGuard)
+  async addFollowerToClaim(@Args('id') id: string, @CurrentUser() user: User) {
+    const claim = await this.claimsService.findOne({
+      where: { id },
+      relations: ['followers'],
+    });
+
+    this.claimsService.save({
+      ...claim,
+      followers: [...(claim.followers || []), user],
+    });
+
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(SessionGuard)
+  async removeFollowerFromClaim(
+    @Args('id') id: string,
+    @CurrentUser() user: User,
+  ) {
+    const claim = await this.claimsService.findOne({
+      where: { id },
+      relations: ['followers'],
+    });
+
+    this.claimsService.save({
+      ...claim,
+      followers: claim.followers.map(({ id }) => id !== user.id),
+    });
+
+    return true;
   }
 }

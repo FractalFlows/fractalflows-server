@@ -120,6 +120,10 @@ export class ClaimsService {
     return await this.claimsRepository.save({ ...updateClaimInput, id });
   }
 
+  async save(query) {
+    return await this.claimsRepository.save(query);
+  }
+
   async softDelete(id: string) {
     return await this.claimsRepository.softDelete(id);
   }

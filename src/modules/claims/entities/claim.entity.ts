@@ -58,6 +58,11 @@ export class Claim extends BaseEntity {
   @OneToMany(() => Opinion, (opinion) => opinion.claim)
   opinions: Opinion[];
 
+  @Field(() => [User], { description: 'Followers', nullable: true })
+  @ManyToMany(() => User)
+  @JoinTable()
+  followers: User[];
+
   @Field(() => User, { description: 'Created by' })
   @ManyToOne(() => User, (user) => user.claims)
   user: User;
@@ -82,4 +87,8 @@ export class Claim extends BaseEntity {
   })
   @Column({ nullable: true })
   ownershipToken?: string;
+
+  @Field(() => Boolean)
+  @Column({ default: false })
+  disabled?: boolean;
 }
