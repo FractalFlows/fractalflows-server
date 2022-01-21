@@ -7,6 +7,8 @@ import { ClaimsService } from '../claims/claims.service';
 import { UsersService } from '../users/users.service';
 import { SourcesService } from '../sources/sources.service';
 import { TagsService } from '../tags/tags.service';
+import { getClaimURL } from 'src/common/utils/claim';
+import { ClaimOrigins } from '../claims/entities/claim.entity';
 
 @Injectable()
 export class TwitterService {
@@ -17,9 +19,11 @@ export class TwitterService {
     private readonly usersService: UsersService,
   ) {}
 
-  private readonly twitterClient = new TwitterApi(
-    process.env.TWITTER_BEARER_TOKEN,
-  );
+  private readonly twitterClient = new TwitterApi({
+    clientId: process.env.TWITTER_API_KEY,
+    clientSecret: process.env.TWITTER_API_SECRET,
+    // process.env.TWITTER_BEARER_TOKEN,
+  });
   private readonly twit = new Twit({
     consumer_key: process.env.TWITTER_API_KEY,
     consumer_secret: process.env.TWITTER_API_SECRET,
@@ -30,13 +34,12 @@ export class TwitterService {
   async startStreamV1() {
     const handleData = async (tweet) => {
       const tweetId = tweet.in_reply_to_status_id_str;
-      const tweetReplyId = tweet.id;
       // If the reply is dedicated to a user and not a status,
       // go to next item of the loop
       if (!tweetId) return;
 
       const existingClaimForTweet = await this.claimsService.findOne({
-        where: { tweet: tweetId },
+        where: { tweetId },
       });
 
       if (existingClaimForTweet) return;
@@ -48,8 +51,7 @@ export class TwitterService {
           return;
         }
 
-        const userScreenName = tweet.user.screen_name;
-        const ownershipToken = crypto.randomBytes(24).toString('hex');
+        const tweetOwner = tweet.user.screen_name;
 
         const user = await this.usersService.findOne({
           where: { username: 'fractalflowsbot' },
@@ -57,7 +59,7 @@ export class TwitterService {
         const sources = await this.sourcesService.save([
           {
             origin: 'twitter',
-            url: `https://twitter.com/${userScreenName}/status/${tweetId}`,
+            url: `https://twitter.com/${tweetOwner}/status/${tweetId}`,
           },
           ...(tweet.entities.urls.map(({ expanded_url }) => ({
             origin: 'other',
@@ -68,12 +70,12 @@ export class TwitterService {
           title:
             tweet.text.substring(0, tweet.text.lastIndexOf(' ')) ||
             'No title in this tweet',
-          summary: `This claim was originally posted on Twitter by @${userScreenName}. No further details are available as of yet.`,
+          summary: `This claim was originally posted on Twitter by @${tweetOwner}. No further details are available as of yet.`,
           user,
           sources,
-          tweet: tweetId,
-          tweetReply: tweetReplyId,
-          ownershipToken,
+          tweetId,
+          tweetOwner,
+          origin: ClaimOrigins.TWITTER,
         });
 
         const claimLink = `${process.env.FRONTEND_HOST}/claim/${claim.slug}`;
@@ -84,7 +86,7 @@ export class TwitterService {
 
         // Reply back the claim link to the tweet
         this.twit.post('statuses/update', {
-          status: `@${userScreenName} ${claimLink}`,
+          status: `@${tweetOwner} ${claimLink}`,
           in_reply_to_status_id: tweetId,
         });
 
@@ -92,25 +94,34 @@ export class TwitterService {
         this.twit.post('statuses/update', {
           status,
         });
-
-        // Send the tweet owner a direct message containing the link
-        // they will use to become owner of the claim just created
-        // this.twit.post('direct_messages/events/new', {
-        //   event: {
-        //     type: 'message_create',
-        //     message_create: {
-        //       target: { recipient_id: tweet.user.id_str },
-        //       message_data: {
-        //         text: `Fractal Flows is now hosting a claim that was was originally posted on Twitter by you. Please click on the link to become owner of the claim, with editing rights: ${claimLink}/own?token=${ownershipToken}`,
-        //       },
-        //     },
-        //   },
-        // });
       });
     };
 
     const stream = this.twit.stream('statuses/filter', { track: '#ffclaimit' });
     stream.on('tweet', handleData);
+  }
+
+  async requestOAuthUrl({ callbackUrl }: { callbackUrl: string }) {
+    const twitterClient = new TwitterApi({
+      appKey: process.env.TWITTER_API_KEY,
+      appSecret: process.env.TWITTER_API_SECRET,
+    });
+    const authLink = await twitterClient.generateAuthLink(callbackUrl);
+
+    return authLink;
+  }
+
+  async validateOAuth({ oauthToken, oauthVerifier, oauthTokenSecret }) {
+    const client = new TwitterApi({
+      appKey: process.env.TWITTER_API_KEY,
+      appSecret: process.env.TWITTER_API_SECRET,
+      accessToken: oauthToken,
+      accessSecret: oauthTokenSecret,
+    });
+
+    const { client: loggedClient } = await client.login(oauthVerifier);
+
+    return loggedClient.currentUser();
   }
 
   // async startStream() {

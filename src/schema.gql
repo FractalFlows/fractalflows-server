@@ -80,9 +80,8 @@ type Claim {
   id: String!
   knowledgeBits: [KnowledgeBit!]
   opinions: [Opinion!]
-
-  """Token used to claim ownership over claims created by the Twitter bot"""
-  ownershipToken: Float
+  origin: ClaimOrigins!
+  ownershipRequestedAt: String
 
   """Relevance on search listing"""
   relevance: Float
@@ -103,7 +102,10 @@ type Claim {
   title: String!
 
   """Tweet from which this claim was originated from"""
-  tweet: Float
+  tweetId: String
+
+  """Tweet owner from which this claim was originated from"""
+  tweetOwner: String
 
   """Updated at"""
   updatedAt: String!
@@ -114,6 +116,11 @@ type Claim {
 
 input ClaimInput {
   id: String!
+}
+
+enum ClaimOrigins {
+  FRACTALFLOWS
+  TWITTER
 }
 
 input CreateArgumentCommentInput {
@@ -284,6 +291,8 @@ type Mutation {
   removeFollowerFromClaim(id: String!): Boolean!
   removeOpinion(id: Int!): Opinion!
   removeSource(id: Int!): Source!
+  requestClaimOwnership(id: String!): Boolean!
+  requestTwitterOAuthUrl(callbackUrl: String!): String!
   saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
   saveOpinion(saveOpinionInput: SaveOpinionInput!): Opinion!
   sendMagicLink(email: String!): Boolean!
@@ -295,6 +304,7 @@ type Mutation {
   updateEmail(email: String!): User!
   updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput!): KnowledgeBit!
   updateProfile(updateProfileInput: UpdateProfileInput!): User!
+  validateTwitterOAuth(oauthToken: String!, oauthVerifier: String!): String!
   verifyMagicLink(hash: String!): User!
 }
 
@@ -568,6 +578,7 @@ type User {
   knowledgeBitVotes: [KnowledgeBitVote!]
   knowledgeBits: [KnowledgeBit!]
   role: UserRole!
+  twitter: String
 
   """Updated at"""
   updatedAt: String!

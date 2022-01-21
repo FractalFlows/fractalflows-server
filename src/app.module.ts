@@ -52,11 +52,9 @@ import { TwitterModule } from './modules/twitter/twitter.module';
       logging: Boolean(process.env.POSTGRES_LOGGING),
       ssl: {
         rejectUnauthorized: true,
-        ca: process.env.POSTGRES_SSL_OFF
-          ? undefined
-          : fs
-              .readFileSync(join(process.cwd(), 'certs/ca-certificate.crt'))
-              .toString(),
+        ca: fs
+          .readFileSync(join(process.cwd(), 'certs/ca-certificate.crt'))
+          .toString(),
       },
     }),
     UsersModule,

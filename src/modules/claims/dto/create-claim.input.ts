@@ -3,6 +3,7 @@ import { InputType, Field } from '@nestjs/graphql';
 import { SaveAttributionInput } from 'src/modules/attributions/dto/save-attribution.input';
 import { SaveSourceInput } from 'src/modules/sources/dto/save-source.input';
 import { SaveTagInput } from 'src/modules/tags/dto/save-tag.input';
+import { ClaimOrigins } from '../entities/claim.entity';
 
 @InputType()
 export class CreateClaimInput {
@@ -24,7 +25,7 @@ export class CreateClaimInput {
   })
   attributions?: SaveAttributionInput[];
 
-  tweet?: string;
-  tweetReply?: string;
-  ownershipToken?: string;
+  tweetId?: string;
+  tweetOwner?: string;
+  origin?: ClaimOrigins;
 }

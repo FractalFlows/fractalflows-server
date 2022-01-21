@@ -17,6 +17,11 @@ export enum AvatarSource {
     GRAVATAR = "GRAVATAR"
 }
 
+export enum ClaimOrigins {
+    FRACTALFLOWS = "FRACTALFLOWS",
+    TWITTER = "TWITTER"
+}
+
 export enum KnowledgeBitLocations {
     ACADEMIA_EDU = "ACADEMIA_EDU",
     ARXIV = "ARXIV",
@@ -272,14 +277,16 @@ export interface Claim {
     id: string;
     knowledgeBits?: Nullable<KnowledgeBit[]>;
     opinions?: Nullable<Opinion[]>;
-    ownershipToken?: Nullable<number>;
+    origin: ClaimOrigins;
+    ownershipRequestedAt?: Nullable<string>;
     relevance?: Nullable<number>;
     slug: string;
     sources?: Nullable<Source[]>;
     summary: string;
     tags?: Nullable<Tag[]>;
     title: string;
-    tweet?: Nullable<number>;
+    tweetId?: Nullable<string>;
+    tweetOwner?: Nullable<string>;
     updatedAt: string;
     user: User;
 }
@@ -332,6 +339,8 @@ export interface IMutation {
     removeFollowerFromClaim(id: string): boolean | Promise<boolean>;
     removeOpinion(id: number): Opinion | Promise<Opinion>;
     removeSource(id: number): Source | Promise<Source>;
+    requestClaimOwnership(id: string): boolean | Promise<boolean>;
+    requestTwitterOAuthUrl(callbackUrl: string): string | Promise<string>;
     saveKnowledgeBitVote(knowledgeBitId: string, type: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
     saveOpinion(saveOpinionInput: SaveOpinionInput): Opinion | Promise<Opinion>;
     sendMagicLink(email: string): boolean | Promise<boolean>;
@@ -343,6 +352,7 @@ export interface IMutation {
     updateEmail(email: string): User | Promise<User>;
     updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput): KnowledgeBit | Promise<KnowledgeBit>;
     updateProfile(updateProfileInput: UpdateProfileInput): User | Promise<User>;
+    validateTwitterOAuth(oauthToken: string, oauthVerifier: string): string | Promise<string>;
     verifyMagicLink(hash: string): User | Promise<User>;
 }
 
@@ -440,6 +450,7 @@ export interface User {
     knowledgeBitVotes?: Nullable<KnowledgeBitVote[]>;
     knowledgeBits?: Nullable<KnowledgeBit[]>;
     role: UserRole;
+    twitter?: Nullable<string>;
     updatedAt: string;
     username: string;
     usernameSource?: Nullable<UsernameSource>;

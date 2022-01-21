@@ -1,4 +1,4 @@
-import { ObjectType, Field, Float } from '@nestjs/graphql';
+import { ObjectType, Field, Float, registerEnumType } from '@nestjs/graphql';
 import {
   Entity,
   Column,
@@ -16,6 +16,15 @@ import { KnowledgeBit } from 'src/modules/knowledge-bits/entities/knowledge-bit.
 import { BaseEntity } from 'src/common/entities/base.entity';
 import { Argument } from 'src/modules/arguments/entities/argument.entity';
 import { Opinion } from 'src/modules/opinions/entities/opinion.entity';
+
+export enum ClaimOrigins {
+  FRACTALFLOWS,
+  TWITTER,
+}
+
+registerEnumType(ClaimOrigins, {
+  name: 'ClaimOrigins',
+});
 
 @Entity()
 @ObjectType()
@@ -73,22 +82,33 @@ export class Claim extends BaseEntity {
   })
   relevance?: number;
 
-  @Field(() => Float, {
+  @Field(() => String, {
     description: 'Tweet from which this claim was originated from',
     nullable: true,
   })
   @Column({ nullable: true })
-  tweet?: string;
+  tweetId?: string;
 
-  @Field(() => Float, {
-    description:
-      'Token used to claim ownership over claims created by the Twitter bot',
+  @Field(() => String, {
+    description: 'Tweet owner from which this claim was originated from',
     nullable: true,
   })
   @Column({ nullable: true })
-  ownershipToken?: string;
+  tweetOwner?: string;
 
   @Field(() => Boolean)
   @Column({ default: false })
   disabled?: boolean;
+
+  @Field(() => ClaimOrigins)
+  @Column({
+    type: 'enum',
+    enum: ClaimOrigins,
+    default: ClaimOrigins.FRACTALFLOWS,
+  })
+  origin: ClaimOrigins;
+
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
+  ownershipRequestedAt?: Date;
 }

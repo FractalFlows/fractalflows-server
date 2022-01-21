@@ -20,12 +20,12 @@ export class UsersModule {
 
   async configure() {
     const bot = await this.usersService.findOne({
-      where: { username: 'fractalflowsbot' },
+      where: { username: process.env.FRACTALFLOWS_BOT_USERNAME },
     });
 
     if (bot === undefined) {
       this.usersService.save({
-        username: 'fractalflowsbot',
+        username: process.env.FRACTALFLOWS_BOT_USERNAME,
         usernameSource: UsernameSource.CUSTOM,
         avatar: null,
         avatarSource: AvatarSource.GRAVATAR,
