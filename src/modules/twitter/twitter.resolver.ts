@@ -52,6 +52,16 @@ export class TwitterResolver {
     });
     const twitterUsername = twitterUser.screen_name;
 
+    const twitterAlreadyInUse = await this.usersService.findOne({
+      where: { twitter: twitterUsername },
+    });
+
+    if (twitterAlreadyInUse) {
+      throw new Error(
+        'This Twitter account is already connected to a different user',
+      );
+    }
+
     await this.usersService.save({
       id: user.id,
       twitter: twitterUsername,

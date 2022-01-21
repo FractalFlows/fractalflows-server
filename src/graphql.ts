@@ -278,6 +278,7 @@ export interface Claim {
     knowledgeBits?: Nullable<KnowledgeBit[]>;
     opinions?: Nullable<Opinion[]>;
     origin: ClaimOrigins;
+    ownershipRequestedAt?: Nullable<string>;
     relevance?: Nullable<number>;
     slug: string;
     sources?: Nullable<Source[]>;
@@ -338,7 +339,7 @@ export interface IMutation {
     removeFollowerFromClaim(id: string): boolean | Promise<boolean>;
     removeOpinion(id: number): Opinion | Promise<Opinion>;
     removeSource(id: number): Source | Promise<Source>;
-    requestOwnership(id: string): boolean | Promise<boolean>;
+    requestClaimOwnership(id: string): boolean | Promise<boolean>;
     requestTwitterOAuthUrl(callbackUrl: string): string | Promise<string>;
     saveKnowledgeBitVote(knowledgeBitId: string, type: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
     saveOpinion(saveOpinionInput: SaveOpinionInput): Opinion | Promise<Opinion>;
@@ -449,7 +450,7 @@ export interface User {
     knowledgeBitVotes?: Nullable<KnowledgeBitVote[]>;
     knowledgeBits?: Nullable<KnowledgeBit[]>;
     role: UserRole;
-    twitter: string;
+    twitter?: Nullable<string>;
     updatedAt: string;
     username: string;
     usernameSource?: Nullable<UsernameSource>;

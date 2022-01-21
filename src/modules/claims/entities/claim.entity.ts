@@ -107,4 +107,8 @@ export class Claim extends BaseEntity {
     default: ClaimOrigins.FRACTALFLOWS,
   })
   origin: ClaimOrigins;
+
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
+  ownershipRequestedAt?: Date;
 }

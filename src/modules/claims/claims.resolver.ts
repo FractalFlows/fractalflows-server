@@ -276,17 +276,34 @@ export class ClaimsResolver {
 
   @Mutation(() => Boolean)
   @UseGuards(SessionGuard)
-  async requestOwnership(@Args('id') id: string, @CurrentUser() user: User) {
+  async requestClaimOwnership(
+    @Args('id') id: string,
+    @CurrentUser() user: User,
+  ) {
     const claim = await this.claimsService.findOne({
       where: { id },
       relations: ['user'],
     });
 
-    if (claim.user.username === process.env.FRACTALFLOWS_BOT_USERNAME)
-      this.claimsService.save({
-        ...claim,
-        followers: claim.followers.map(({ id }) => id !== user.id),
+    if (!claim) {
+      throw new Error('Claim not found');
+    } else if (claim.user.username !== process.env.FRACTALFLOWS_BOT_USERNAME) {
+      throw new Error(`This claim is already owned by ${claim.user.username}`);
+    } else if (!user.twitter) {
+      throw new Error(
+        'You must first connect your Twitter account to request ownership over this claim',
+      );
+    } else if (claim.tweetOwner !== user.twitter) {
+      throw new Error(
+        `Only the original tweet owner, @${claim.tweetOwner}, can request ownership over this claim`,
+      );
+    } else {
+      await this.claimsService.save({
+        id: claim.id,
+        user,
+        ownershipRequestedAt: new Date(),
       });
+    }
 
     return true;
   }

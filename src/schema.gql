@@ -81,6 +81,7 @@ type Claim {
   knowledgeBits: [KnowledgeBit!]
   opinions: [Opinion!]
   origin: ClaimOrigins!
+  ownershipRequestedAt: String
 
   """Relevance on search listing"""
   relevance: Float
@@ -290,7 +291,7 @@ type Mutation {
   removeFollowerFromClaim(id: String!): Boolean!
   removeOpinion(id: Int!): Opinion!
   removeSource(id: Int!): Source!
-  requestOwnership(id: String!): Boolean!
+  requestClaimOwnership(id: String!): Boolean!
   requestTwitterOAuthUrl(callbackUrl: String!): String!
   saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
   saveOpinion(saveOpinionInput: SaveOpinionInput!): Opinion!
@@ -577,7 +578,7 @@ type User {
   knowledgeBitVotes: [KnowledgeBitVote!]
   knowledgeBits: [KnowledgeBit!]
   role: UserRole!
-  twitter: String!
+  twitter: String
 
   """Updated at"""
   updatedAt: String!
