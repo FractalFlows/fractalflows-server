@@ -273,4 +273,21 @@ export class ClaimsResolver {
 
     return true;
   }
+
+  @Mutation(() => Boolean)
+  @UseGuards(SessionGuard)
+  async requestOwnership(@Args('id') id: string, @CurrentUser() user: User) {
+    const claim = await this.claimsService.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+
+    if (claim.user.username === process.env.FRACTALFLOWS_BOT_USERNAME)
+      this.claimsService.save({
+        ...claim,
+        followers: claim.followers.map(({ id }) => id !== user.id),
+      });
+
+    return true;
+  }
 }

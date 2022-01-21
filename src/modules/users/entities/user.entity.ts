@@ -104,4 +104,8 @@ export class User extends BaseEntity {
   @Field(() => [KnowledgeBitVote], { nullable: true })
   @OneToMany(() => KnowledgeBitVote, (vote) => vote.user)
   knowledgeBitVotes: KnowledgeBitVote[];
+
+  @Field(() => String)
+  @Column({ nullable: true })
+  twitter?: string;
 }

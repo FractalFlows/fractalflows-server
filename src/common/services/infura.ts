@@ -10,7 +10,7 @@ export const InfuraService = {
         url: `${InfuraUtils.getUrl(chainId)}/${process.env.INFURA_PROJECT_ID}`,
         headers: {
           Accept: '*/*',
-          Origin: `${process.env.HOST}:${process.env.PORT}`,
+          Origin: process.env.ORIGIN,
           'Accept-Encoding': 'gzip, deflate, br',
           'Content-Type': 'application/json',
         },
