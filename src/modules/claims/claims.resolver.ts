@@ -72,7 +72,13 @@ export class ClaimsResolver {
     return {
       totalCount: await this.claimsService.count(),
       data: await this.claimsService.find({
-        relations: ['user', 'tags', 'knowledgeBits'],
+        relations: [
+          'user',
+          'tags',
+          'knowledgeBits',
+          'opinions',
+          'opinions.user',
+        ],
         take: limit,
         skip: offset,
         order: {
@@ -92,10 +98,9 @@ export class ClaimsResolver {
       offset,
     });
     const trendingClaimsIds = trendingClaims.map(({ claim_id }) => claim_id);
-    const completeTrendingClaims = await this.claimsService.find({
-      where: { id: In(trendingClaimsIds) },
-      relations: ['user', 'tags', 'knowledgeBits'],
-    });
+    const completeTrendingClaims = await this.claimsService.findIn(
+      trendingClaimsIds,
+    );
 
     return {
       totalCount: await this.claimsService.count(),
@@ -109,7 +114,12 @@ export class ClaimsResolver {
 
   @Query(() => [Claim], { name: 'relatedClaims' })
   async findRelated(@Args('slug') slug: string) {
-    return await this.claimsService.findRelated(slug);
+    const relatedClaims = await this.claimsService.findRelated(slug);
+    const completeRelatedClaims = await this.claimsService.findIn(
+      relatedClaims.map(({ id }) => id),
+    );
+
+    return completeRelatedClaims;
   }
 
   @Query(() => PaginatedClaims, { name: 'searchClaims', nullable: true })
@@ -122,10 +132,9 @@ export class ClaimsResolver {
     const searchedClaimsIds = searchedClaims
       .slice(offset, offset + limit)
       .map(({ id }) => id);
-    const completeSearchedClaims = await this.claimsService.find({
-      where: { id: In(searchedClaimsIds) },
-      relations: ['user', 'tags'],
-    });
+    const completeSearchedClaims = await this.claimsService.findIn(
+      searchedClaimsIds,
+    );
     const weightedSearchedClaims = completeSearchedClaims.map(
       (searchedClaim) => ({
         ...searchedClaim,

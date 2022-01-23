@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { sendMail } from 'src/common/services/mail';
 import { User } from '../users/entities/user.entity';
@@ -82,6 +82,13 @@ export class ClaimsService {
 
   async find(query) {
     return await this.claimsRepository.find(query);
+  }
+
+  async findIn(ids: string[]) {
+    return await this.claimsRepository.find({
+      where: { id: In(ids) },
+      relations: ['user', 'tags', 'knowledgeBits', 'opinions', 'opinions.user'],
+    });
   }
 
   async search({ term }) {
