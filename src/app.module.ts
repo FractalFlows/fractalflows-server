@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { join } from 'path';
 import fs from 'fs';
+import { ScheduleModule } from '@nestjs/schedule';
 
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -18,6 +19,7 @@ import { ArgumentsModule } from './modules/arguments/arguments.module';
 import { ArgumentCommentsModule } from './modules/argument-comments/argument-comments.module';
 import { OpinionsModule } from './modules/opinions/opinions.module';
 import { TwitterModule } from './modules/twitter/twitter.module';
+import { FrontendModule } from './modules/frontend/frontend.module';
 
 @Module({
   imports: [
@@ -39,7 +41,6 @@ import { TwitterModule } from './modules/twitter/twitter.module';
         credentials: true,
       },
     }),
-
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.POSTGRES_HOST,
@@ -57,6 +58,7 @@ import { TwitterModule } from './modules/twitter/twitter.module';
           .toString(),
       },
     }),
+    ScheduleModule.forRoot(),
     UsersModule,
     AuthModule,
     ClaimsModule,
@@ -69,6 +71,7 @@ import { TwitterModule } from './modules/twitter/twitter.module';
     ArgumentCommentsModule,
     OpinionsModule,
     TwitterModule,
+    FrontendModule,
   ],
 })
 export class AppModule implements NestModule {
