@@ -115,7 +115,10 @@ export class User extends BaseEntity {
   opinions: Opinion[];
 
   @Field(() => [KnowledgeBitVote], { nullable: true })
-  @OneToMany(() => KnowledgeBitVote, (vote) => vote.user)
+  @OneToMany(
+    () => KnowledgeBitVote,
+    (knowledgeBitVote) => knowledgeBitVote.user,
+  )
   knowledgeBitVotes: KnowledgeBitVote[];
 
   @Field(() => String, { nullable: true })

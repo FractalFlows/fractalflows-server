@@ -173,30 +173,31 @@ export class ClaimsResolver {
         'arguments.claim',
         'opinions',
         'opinions.claim',
+        'knowledgeBitVotes',
+        'knowledgeBitVotes.knowledgeBit',
+        'knowledgeBitVotes.knowledgeBit.claim',
       ],
     });
     const knowledgeBitsClaimIds = user.knowledgeBits.map(
       ({ claim }) => claim.id,
     );
+    const knowledgeBitVotesClaimIds = user.knowledgeBitVotes.map(
+      ({ knowledgeBit }) => knowledgeBit.claim.id,
+    );
     const argumentsClaimIds = user.arguments.map(({ claim }) => claim.id);
     const opinionsClaimIds = user.opinions.map(({ claim }) => claim.id);
     const userContributedClaimsIds = [
       ...knowledgeBitsClaimIds,
+      ...knowledgeBitVotesClaimIds,
       ...argumentsClaimIds,
       ...opinionsClaimIds,
     ];
-
     const userContributedClaims = await this.claimsService.find({
       where: { id: In(userContributedClaimsIds) },
       relations: CLAIM_CORE_RELATIONS,
     });
 
     return userContributedClaims;
-    const userFollowingClaims = await this.claimsService.find({
-      where: { followers: { user } },
-    });
-
-    return userFollowingClaims;
   }
 
   @Query(() => [Claim], { name: 'userFollowingClaims' })
