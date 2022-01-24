@@ -436,6 +436,7 @@ export interface Tag {
 export interface User {
     apiKey?: Nullable<string>;
     apiSecret?: Nullable<string>;
+    arguments?: Nullable<Argument[]>;
     avatar?: Nullable<string>;
     avatarSource?: Nullable<AvatarSource>;
     claims?: Nullable<Claim[]>;
@@ -445,6 +446,7 @@ export interface User {
     id: string;
     knowledgeBitVotes?: Nullable<KnowledgeBitVote[]>;
     knowledgeBits?: Nullable<KnowledgeBit[]>;
+    opinions?: Nullable<Opinion[]>;
     role: UserRole;
     twitter?: Nullable<string>;
     updatedAt: string;

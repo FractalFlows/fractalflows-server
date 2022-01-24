@@ -6,6 +6,8 @@ import { Claim } from 'src/modules/claims/entities/claim.entity';
 import { KnowledgeBit } from 'src/modules/knowledge-bits/entities/knowledge-bit.entity';
 import { BaseEntity } from 'src/common/entities/base.entity';
 import { KnowledgeBitVote } from 'src/modules/knowledge-bit-votes/entities/knowledge-bit-vote.entity';
+import { Argument } from 'src/modules/arguments/entities/argument.entity';
+import { Opinion } from 'src/modules/opinions/entities/opinion.entity';
 
 export enum UsernameSource {
   ENS,
@@ -104,8 +106,19 @@ export class User extends BaseEntity {
   @OneToMany(() => KnowledgeBit, (knowledgeBit) => knowledgeBit.user)
   knowledgeBits: KnowledgeBit[];
 
+  @Field(() => [Argument], { nullable: true })
+  @OneToMany(() => Argument, (argument) => argument.user)
+  arguments: Argument[];
+
+  @Field(() => [Opinion], { nullable: true })
+  @OneToMany(() => Opinion, (opinions) => opinions.user)
+  opinions: Opinion[];
+
   @Field(() => [KnowledgeBitVote], { nullable: true })
-  @OneToMany(() => KnowledgeBitVote, (vote) => vote.user)
+  @OneToMany(
+    () => KnowledgeBitVote,
+    (knowledgeBitVote) => knowledgeBitVote.user,
+  )
   knowledgeBitVotes: KnowledgeBitVote[];
 
   @Field(() => String, { nullable: true })
