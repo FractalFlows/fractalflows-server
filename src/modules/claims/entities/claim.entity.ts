@@ -68,7 +68,7 @@ export class Claim extends BaseEntity {
   opinions: Opinion[];
 
   @Field(() => [User], { description: 'Followers', nullable: true })
-  @ManyToMany(() => User)
+  @ManyToMany(() => User, (user) => user.followingClaims)
   @JoinTable()
   followers: User[];
 

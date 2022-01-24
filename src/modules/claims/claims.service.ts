@@ -9,7 +9,14 @@ import { CreateClaimInput } from './dto/create-claim.input';
 import { InviteFriendsInput } from './dto/invite-friends.input';
 import { UpdateClaimInput } from './dto/update-claim.input';
 import { Claim } from './entities/claim.entity';
-import { KnowledgeBit } from '../knowledge-bits/entities/knowledge-bit.entity';
+
+export const CLAIM_CORE_RELATIONS = [
+  'user',
+  'tags',
+  'knowledgeBits',
+  'opinions',
+  'opinions.user',
+];
 
 @Injectable()
 export class ClaimsService {
@@ -87,7 +94,7 @@ export class ClaimsService {
   async findIn(ids: string[]) {
     return await this.claimsRepository.find({
       where: { id: In(ids) },
-      relations: ['user', 'tags', 'knowledgeBits', 'opinions', 'opinions.user'],
+      relations: CLAIM_CORE_RELATIONS,
     });
   }
 
@@ -109,14 +116,6 @@ export class ClaimsService {
       ORDER BY relevance DESC
     `,
     );
-  }
-
-  async findByUserId(userId: string) {
-    return await this.claimsRepository
-      .createQueryBuilder('claim')
-      .leftJoinAndSelect('claim.user', 'user')
-      .where('user.id = :userId', { userId })
-      .getMany();
   }
 
   async findOne(query) {

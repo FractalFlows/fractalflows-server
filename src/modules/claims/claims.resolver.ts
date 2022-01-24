@@ -1,7 +1,7 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 
-import { ClaimsService } from './claims.service';
+import { ClaimsService, CLAIM_CORE_RELATIONS } from './claims.service';
 import { Claim } from './entities/claim.entity';
 import { CreateClaimInput } from './dto/create-claim.input';
 import { UpdateClaimInput } from './dto/update-claim.input';
@@ -9,12 +9,10 @@ import { SourcesService } from '../sources/sources.service';
 import { AttributionsService } from '../attributions/attributions.service';
 import { TagsService } from '../tags/tags.service';
 import { SessionGuard } from '../auth/auth.guard';
-import { UserClaimRelation } from './dto/get-user-claim.input';
 import { UsersService } from '../users/users.service';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { User, UserRole } from '../users/entities/user.entity';
 import { InviteFriendsInput } from './dto/invite-friends.input';
-import { In } from 'typeorm';
 import { PaginatedClaims } from './dto/paginated-claims.output';
 import { getClaimURL } from 'src/common/utils/claim';
 
@@ -150,23 +148,41 @@ export class ClaimsResolver {
   }
 
   @Query(() => [Claim], { name: 'userClaims' })
-  async findUserClaims(
-    @Args('username') username: string,
-    @Args('relation', { type: () => UserClaimRelation })
-    relation: UserClaimRelation,
-  ) {
+  async findUserClaims(@Args('username') username: string) {
+    const user = await this.usersService.findOne({ where: { username } });
+    const userClaims = await this.claimsService.find({
+      where: { user },
+      relations: CLAIM_CORE_RELATIONS,
+    });
+
+    return userClaims;
+  }
+
+  @Query(() => [Claim], { name: 'userContributedClaims' })
+  async findUserContributedClaims(@Args('username') username: string) {
     const user = await this.usersService.findOne({ where: { username } });
 
-    switch (relation) {
-      case UserClaimRelation.OWN:
-        return await this.claimsService.findByUserId(user.id);
-      case UserClaimRelation.CONTRIBUTED:
-        return await this.claimsService.find({});
-      case UserClaimRelation.FOLLOWING:
-        return await this.claimsService.findByUserId(user.id);
-      default:
-        return [];
-    }
+    return [];
+    const userFollowingClaims = await this.claimsService.find({
+      where: { followers: { user } },
+    });
+
+    return userFollowingClaims;
+  }
+
+  @Query(() => [Claim], { name: 'userFollowingClaims' })
+  async findUserFollowingClaims(@Args('username') username: string) {
+    const user = await this.usersService.findOne({
+      where: { username },
+      relations: [
+        'followingClaims',
+        ...CLAIM_CORE_RELATIONS.map(
+          (relation) => `followingClaims.${relation}`,
+        ),
+      ],
+    });
+
+    return user.followingClaims;
   }
 
   @Mutation(() => Claim)

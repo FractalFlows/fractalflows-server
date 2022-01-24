@@ -1,5 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, ManyToMany, OneToMany } from 'typeorm';
 import { registerEnumType } from '@nestjs/graphql';
 
 import { Claim } from 'src/modules/claims/entities/claim.entity';
@@ -96,6 +96,9 @@ export class User extends BaseEntity {
   @Field(() => [Claim], { description: 'User claims', nullable: true })
   @OneToMany(() => Claim, (claim) => claim.user)
   claims: Claim[];
+
+  @ManyToMany(() => Claim, (claim) => claim.followers)
+  followingClaims: Claim[];
 
   @Field(() => [KnowledgeBit], { nullable: true })
   @OneToMany(() => KnowledgeBit, (knowledgeBit) => knowledgeBit.user)

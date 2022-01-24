@@ -354,7 +354,9 @@ type Query {
   sources: [Source!]!
   tag(id: Int!): Tag!
   trendingClaims(limit: Int!, offset: Int!): PaginatedClaims!
-  userClaims(relation: UserClaimRelation!, username: String!): [Claim!]!
+  userClaims(username: String!): [Claim!]!
+  userContributedClaims(username: String!): [Claim!]!
+  userFollowingClaims(username: String!): [Claim!]!
   userKnowledgeBitVotes(claimSlug: String!): [KnowledgeBitVote!]
   userOpinion(claimSlug: String!): Opinion
 }
@@ -586,12 +588,6 @@ type User {
 
   """Username source"""
   usernameSource: UsernameSource
-}
-
-enum UserClaimRelation {
-  CONTRIBUTED
-  FOLLOWING
-  OWN
 }
 
 enum UserRole {
