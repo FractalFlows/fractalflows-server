@@ -15,6 +15,7 @@ import { User, UserRole } from '../users/entities/user.entity';
 import { InviteFriendsInput } from './dto/invite-friends.input';
 import { PaginatedClaims } from './dto/paginated-claims.output';
 import { getClaimURL } from 'src/common/utils/claim';
+import { In } from 'typeorm';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -153,6 +154,9 @@ export class ClaimsResolver {
     const userClaims = await this.claimsService.find({
       where: { user },
       relations: CLAIM_CORE_RELATIONS,
+      order: {
+        createdAt: 'DESC',
+      },
     });
 
     return userClaims;
@@ -160,9 +164,34 @@ export class ClaimsResolver {
 
   @Query(() => [Claim], { name: 'userContributedClaims' })
   async findUserContributedClaims(@Args('username') username: string) {
-    const user = await this.usersService.findOne({ where: { username } });
+    const user = await this.usersService.findOne({
+      where: { username },
+      relations: [
+        'knowledgeBits',
+        'knowledgeBits.claim',
+        'arguments',
+        'arguments.claim',
+        'opinions',
+        'opinions.claim',
+      ],
+    });
+    const knowledgeBitsClaimIds = user.knowledgeBits.map(
+      ({ claim }) => claim.id,
+    );
+    const argumentsClaimIds = user.arguments.map(({ claim }) => claim.id);
+    const opinionsClaimIds = user.opinions.map(({ claim }) => claim.id);
+    const userContributedClaimsIds = [
+      ...knowledgeBitsClaimIds,
+      ...argumentsClaimIds,
+      ...opinionsClaimIds,
+    ];
 
-    return [];
+    const userContributedClaims = await this.claimsService.find({
+      where: { id: In(userContributedClaimsIds) },
+      relations: CLAIM_CORE_RELATIONS,
+    });
+
+    return userContributedClaims;
     const userFollowingClaims = await this.claimsService.find({
       where: { followers: { user } },
     });
@@ -180,6 +209,9 @@ export class ClaimsResolver {
           (relation) => `followingClaims.${relation}`,
         ),
       ],
+      order: {
+        createdAt: 'DESC',
+      },
     });
 
     return user.followingClaims;

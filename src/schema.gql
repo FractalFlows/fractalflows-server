@@ -558,6 +558,7 @@ type User {
 
   """API Secret"""
   apiSecret: String
+  arguments: [Argument!]
 
   """Avatar"""
   avatar: String
@@ -579,6 +580,7 @@ type User {
   id: String!
   knowledgeBitVotes: [KnowledgeBitVote!]
   knowledgeBits: [KnowledgeBit!]
+  opinions: [Opinion!]
   role: UserRole!
   twitter: String
 
