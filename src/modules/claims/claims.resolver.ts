@@ -195,6 +195,9 @@ export class ClaimsResolver {
     const userContributedClaims = await this.claimsService.find({
       where: { id: In(userContributedClaimsIds) },
       relations: CLAIM_CORE_RELATIONS,
+      order: {
+        createdAt: 'DESC',
+      },
     });
 
     return userContributedClaims;
