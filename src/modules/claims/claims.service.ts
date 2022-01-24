@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { sendMail } from 'src/common/services/mail';
 import { User } from '../users/entities/user.entity';
@@ -9,7 +9,14 @@ import { CreateClaimInput } from './dto/create-claim.input';
 import { InviteFriendsInput } from './dto/invite-friends.input';
 import { UpdateClaimInput } from './dto/update-claim.input';
 import { Claim } from './entities/claim.entity';
-import { KnowledgeBit } from '../knowledge-bits/entities/knowledge-bit.entity';
+
+export const CLAIM_CORE_RELATIONS = [
+  'user',
+  'tags',
+  'knowledgeBits',
+  'opinions',
+  'opinions.user',
+];
 
 @Injectable()
 export class ClaimsService {
@@ -84,6 +91,13 @@ export class ClaimsService {
     return await this.claimsRepository.find(query);
   }
 
+  async findIn(ids: string[]) {
+    return await this.claimsRepository.find({
+      where: { id: In(ids) },
+      relations: CLAIM_CORE_RELATIONS,
+    });
+  }
+
   async search({ term }) {
     return await this.claimsRepository.query(
       `
@@ -102,14 +116,6 @@ export class ClaimsService {
       ORDER BY relevance DESC
     `,
     );
-  }
-
-  async findByUserId(userId: string) {
-    return await this.claimsRepository
-      .createQueryBuilder('claim')
-      .leftJoinAndSelect('claim.user', 'user')
-      .where('user.id = :userId', { userId })
-      .getMany();
   }
 
   async findOne(query) {

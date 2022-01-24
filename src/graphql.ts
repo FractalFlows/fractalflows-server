@@ -84,12 +84,6 @@ export enum KnowledgeBitVoteTypes {
     UPVOTE = "UPVOTE"
 }
 
-export enum UserClaimRelation {
-    CONTRIBUTED = "CONTRIBUTED",
-    FOLLOWING = "FOLLOWING",
-    OWN = "OWN"
-}
-
 export enum UserRole {
     ADMIN = "ADMIN",
     NORMAL = "NORMAL",
@@ -398,7 +392,9 @@ export interface IQuery {
     sources(): Source[] | Promise<Source[]>;
     tag(id: number): Tag | Promise<Tag>;
     trendingClaims(limit: number, offset: number): PaginatedClaims | Promise<PaginatedClaims>;
-    userClaims(relation: UserClaimRelation, username: string): Claim[] | Promise<Claim[]>;
+    userClaims(username: string): Claim[] | Promise<Claim[]>;
+    userContributedClaims(username: string): Claim[] | Promise<Claim[]>;
+    userFollowingClaims(username: string): Claim[] | Promise<Claim[]>;
     userKnowledgeBitVotes(claimSlug: string): Nullable<KnowledgeBitVote[]> | Promise<Nullable<KnowledgeBitVote[]>>;
     userOpinion(claimSlug: string): Nullable<Opinion> | Promise<Nullable<Opinion>>;
 }
