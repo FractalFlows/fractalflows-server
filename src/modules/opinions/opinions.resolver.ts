@@ -32,13 +32,21 @@ export class OpinionsResolver {
     if (saveOpinionInput.id === undefined) {
       this.claimsService.notifyFollowers({
         id: claim.id,
-        subject: 'A claim you are following has been updated',
+        subject: 'A claim you follow has a new opinion',
         html: `
           The claim <a href="${getClaimURL(claim.slug)}">${
           claim.title
-        }</a> that you are following has a new opinion from <b>${
-          user.username
-        }`,
+        }</a> you follow has a new opinion from <b>${user.username}</b>`,
+        triggeredBy: user,
+      });
+      this.claimsService.notifyOwner({
+        id: claim.id,
+        subject: 'Your claim has a new opinion',
+        html: `
+          Your claim <a href="${getClaimURL(claim.slug)}">${
+          claim.title
+        }</a> has a new opinion from <b>${user.username}</b>`,
+        triggeredBy: user,
       });
     }
 

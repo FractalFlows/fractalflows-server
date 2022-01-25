@@ -67,9 +67,7 @@ export class TwitterService {
           })) || []),
         ]);
         const claim = await this.claimsService.create({
-          title:
-            tweet.text.substring(0, tweet.text.lastIndexOf(' ')) ||
-            'No title in this tweet',
+          title: tweet.text || 'No title in this tweet',
           summary: `This claim was originally posted on Twitter by @${tweetOwner}. No further details are available as of yet.`,
           user,
           sources,

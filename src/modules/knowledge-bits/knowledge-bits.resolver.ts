@@ -49,7 +49,7 @@ export class KnowledgeBitsResolver {
 
     this.claimsService.notifyFollowers({
       id: claim.id,
-      subject: 'A claim you are following has been updated',
+      subject: 'A claim you follow has a new knowledge bit',
       html: `
       The claim <a href="${getClaimURL(claim.slug)}">${
         claim.title
@@ -59,6 +59,21 @@ export class KnowledgeBitsResolver {
           : 'supporting'
       } knowledge bit: "${createKnowledgeBit.name}"
       `,
+      triggeredBy: user,
+    });
+    this.claimsService.notifyOwner({
+      id: claim.id,
+      subject: 'Your claim has a new knowledge bit',
+      html: `
+      Your claim <a href="${getClaimURL(claim.slug)}">${
+        claim.title
+      }</a> has a new ${
+        createKnowledgeBit.side === KnowledgeBitSides.REFUTING
+          ? 'refuting'
+          : 'supporting'
+      } knowledge bit: "${createKnowledgeBit.name}"
+      `,
+      triggeredBy: user,
     });
 
     return await this.findOne(createKnowledgeBit.id);

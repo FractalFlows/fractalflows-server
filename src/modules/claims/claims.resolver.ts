@@ -227,6 +227,8 @@ export class ClaimsResolver {
     @Args('updateClaimInput') updateClaimInput: UpdateClaimInput,
     @CurrentUser() user: User,
   ) {
+    const claim = await this.claimsService.findOne(updateClaimInput.id);
+
     await this.sourcesService.save(updateClaimInput.sources);
     await this.attributionsService.save(updateClaimInput.attributions);
     await this.tagsService.save(updateClaimInput.tags);
@@ -236,12 +238,23 @@ export class ClaimsResolver {
 
     this.claimsService.notifyFollowers({
       id: updatedClaim.id,
-      subject: 'A claim you are following has been updated',
+      subject: 'A claim you follow has been updated',
       html: `
         The claim <a href="${getClaimURL(updatedClaim.slug)}">${
-        updateClaimInput.title
-      }</a> that you are following has been updated by <b>${user.username}</b>
+        claim.title
+      }</a> you follow has been updated by <b>${user.username}</b>
       `,
+      triggeredBy: user,
+    });
+    this.claimsService.notifyOwner({
+      id: updatedClaim.id,
+      subject: 'Your claim has been updated',
+      html: `
+        Your claim <a href="${getClaimURL(updatedClaim.slug)}">"${
+        claim.title
+      }"</a> has been updated by <b>${user.username}</b>
+      `,
+      triggeredBy: user,
     });
 
     return updatedClaim;
@@ -253,12 +266,22 @@ export class ClaimsResolver {
     const claim = await this.claimsService.findOne({ where: { id } });
 
     await this.claimsService.softDelete(id);
+
     this.claimsService.notifyFollowers({
       id,
-      subject: 'A claim you are following has been deleted',
+      subject: 'A claim you follow has been deleted',
       html: `
-        The claim "${claim.title}" that you are following has been deleted by <b>${user.username}</b>
+        The claim "${claim.title}" you follow has been deleted by <b>${user.username}</b>
       `,
+      triggeredBy: user,
+    });
+    this.claimsService.notifyOwner({
+      id,
+      subject: 'Your claim has been deleted',
+      html: `
+        Your claim "${claim.title}" has been deleted by <b>${user.username}</b>
+      `,
+      triggeredBy: user,
     });
 
     return true;
@@ -291,10 +314,19 @@ export class ClaimsResolver {
 
     this.claimsService.notifyFollowers({
       id,
-      subject: 'A claim you are following has been deleted',
+      subject: 'A claim you follow has been disabled',
       html: `
-        The claim "${claim.title}" that you are following has been deleted by <b>${user.username}</b> due to off topic reasons
+        The claim "${claim.title}" you follow has been disabled by <b>${user.username}</b> due to off topic reasons
       `,
+      triggeredBy: user,
+    });
+    this.claimsService.notifyOwner({
+      id,
+      subject: 'Your claim has been disabled',
+      html: `
+        Your claim "${claim.title}" has been disabled by <b>${user.username}</b> due to off topic reasons
+      `,
+      triggeredBy: user,
     });
 
     return true;

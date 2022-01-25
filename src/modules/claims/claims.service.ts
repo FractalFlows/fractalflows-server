@@ -169,10 +169,12 @@ export class ClaimsService {
     id,
     subject,
     html,
+    triggeredBy,
   }: {
     id: string;
     subject: string;
     html: string;
+    triggeredBy: User;
   }) {
     const claim = await this.claimsRepository.findOne({
       where: { id },
@@ -182,11 +184,42 @@ export class ClaimsService {
 
     if (claim.followers && claim.followers.length > 0) {
       await sendMail({
-        to: claim.followers.map(({ email }) => email).filter(Boolean),
+        to: claim.followers
+          .filter(({ id }) => id !== triggeredBy.id)
+          .map(({ email }) => email)
+          .filter(Boolean),
         subject,
         html,
       });
     }
+
+    return true;
+  }
+
+  async notifyOwner({
+    id,
+    subject,
+    html,
+    triggeredBy,
+  }: {
+    id: string;
+    subject: string;
+    html: string;
+    triggeredBy: User;
+  }) {
+    const claim = await this.claimsRepository.findOne({
+      where: { id },
+      relations: ['user'],
+      withDeleted: true,
+    });
+
+    if (!claim.user.email || claim.user.id === triggeredBy.id) return;
+    console.log(claim);
+    await sendMail({
+      to: claim.user.email,
+      subject,
+      html,
+    });
 
     return true;
   }
