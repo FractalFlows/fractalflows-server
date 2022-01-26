@@ -2,12 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { UsersService } from './users.service';
 import { UsersResolver } from './users.resolver';
-import {
-  AvatarSource,
-  User,
-  UsernameSource,
-  UserRole,
-} from './entities/user.entity';
+import { AvatarSource, User, UsernameSource } from './entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({

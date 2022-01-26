@@ -2,13 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { KnowledgeBit } from '../knowledge-bits/entities/knowledge-bit.entity';
-import { User } from '../users/entities/user.entity';
-import { SaveKnowledgeBitVoteInput } from './dto/save-knowledge-bit-vote.input';
-import {
-  KnowledgeBitVote,
-  KnowledgeBitVoteTypes,
-} from './entities/knowledge-bit-vote.entity';
+import { KnowledgeBitVote } from './entities/knowledge-bit-vote.entity';
 
 @Injectable()
 export class KnowledgeBitVotesService {

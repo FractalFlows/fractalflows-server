@@ -1,13 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import TwitterApi, { ETwitterStreamEvent } from 'twitter-api-v2';
+import TwitterApi from 'twitter-api-v2';
 import Twit from 'twit';
-import crypto from 'crypto';
 
 import { ClaimsService } from '../claims/claims.service';
 import { UsersService } from '../users/users.service';
 import { SourcesService } from '../sources/sources.service';
 import { TagsService } from '../tags/tags.service';
-import { getClaimURL } from 'src/common/utils/claim';
 import { ClaimOrigins } from '../claims/entities/claim.entity';
 
 @Injectable()
