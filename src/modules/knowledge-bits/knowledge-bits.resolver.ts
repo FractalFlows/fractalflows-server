@@ -110,6 +110,10 @@ export class KnowledgeBitsResolver {
       ],
     });
 
+    if (!claim) {
+      throw new Error('Claim not found');
+    }
+
     return await Promise.all(
       claim.knowledgeBits?.map(async (knowledgeBit) => ({
         ...knowledgeBit,

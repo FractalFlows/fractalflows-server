@@ -285,6 +285,7 @@ type Mutation {
   deleteKnowledgeBit(id: String!): Boolean!
   disableClaim(id: String!): Boolean!
   inviteFriends(inviteFriendsInput: InviteFriendsInput!): Boolean!
+  reenableClaim(id: String!): Boolean!
   removeAPIKey: Boolean!
   removeArgument(id: Int!): Argument!
   removeAttribution(id: Int!): Attribution!
@@ -341,6 +342,7 @@ type Query {
   attributions: [Attribution!]!
   claim(slug: String!): Claim!
   claims(limit: Int!, offset: Int!): PaginatedClaims!
+  disabledClaims(limit: Int!, offset: Int!): PaginatedClaims!
   knowledgeBit(id: String!): KnowledgeBit!
   knowledgeBits(claimSlug: String!): [KnowledgeBit!]!
   nonce: String!

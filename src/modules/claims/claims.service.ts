@@ -71,6 +71,10 @@ export class ClaimsService {
     });
     const tagIds = claim.tags.map(({ id }) => id);
 
+    if (!claim) {
+      throw new Error('Claim not found');
+    }
+
     if (claim.tags.length > 0) {
       return await this.claimsRepository
         .createQueryBuilder('claim')
@@ -85,6 +89,27 @@ export class ClaimsService {
     } else {
       return Promise.resolve([]);
     }
+  }
+
+  async findDisabled({ limit, offset }: { limit: number; offset: number }) {
+    const disabledClaims = await this.claimsRepository.find({
+      where: { disabled: true },
+      relations: CLAIM_CORE_RELATIONS,
+      take: limit,
+      skip: offset,
+      order: {
+        deletedAt: 'DESC',
+      },
+      withDeleted: true,
+    });
+
+    return {
+      totalCount: await this.claimsRepository.count({
+        where: { disabled: true },
+        withDeleted: true,
+      }),
+      data: disabledClaims,
+    };
   }
 
   async find(query) {
@@ -128,6 +153,13 @@ export class ClaimsService {
 
   async save(query) {
     return await this.claimsRepository.save(query);
+  }
+
+  async reenable(id: string) {
+    await this.claimsRepository.restore(id);
+    await this.claimsRepository.update(id, { disabled: false });
+
+    return true;
   }
 
   async softDelete(id: string) {
@@ -214,7 +246,7 @@ export class ClaimsService {
     });
 
     if (!claim.user.email || claim.user.id === triggeredBy.id) return;
-    console.log(claim);
+
     await sendMail({
       to: claim.user.email,
       subject,

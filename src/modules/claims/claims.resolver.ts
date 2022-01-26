@@ -8,10 +8,10 @@ import { UpdateClaimInput } from './dto/update-claim.input';
 import { SourcesService } from '../sources/sources.service';
 import { AttributionsService } from '../attributions/attributions.service';
 import { TagsService } from '../tags/tags.service';
-import { SessionGuard } from '../auth/auth.guard';
+import { AdminGuard, SessionGuard } from '../auth/auth.guard';
 import { UsersService } from '../users/users.service';
 import { CurrentUser } from '../auth/current-user.decorator';
-import { User, UserRole } from '../users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 import { InviteFriendsInput } from './dto/invite-friends.input';
 import { PaginatedClaims } from './dto/paginated-claims.output';
 import { getClaimURL } from 'src/common/utils/claim';
@@ -45,7 +45,7 @@ export class ClaimsResolver {
 
   @Query(() => Claim, { name: 'claim' })
   async findOne(@Args('slug') slug: string) {
-    return await this.claimsService.findOne({
+    const claim = await this.claimsService.findOne({
       where: { slug },
       relations: [
         'user',
@@ -61,6 +61,12 @@ export class ClaimsResolver {
         'opinions.user',
       ],
     });
+
+    if (claim) {
+      return claim;
+    } else {
+      throw new Error('Claim not found');
+    }
   }
 
   @Query(() => PaginatedClaims, { name: 'claims' })
@@ -119,6 +125,20 @@ export class ClaimsResolver {
     );
 
     return completeRelatedClaims;
+  }
+
+  @Query(() => PaginatedClaims, { name: 'disabledClaims' })
+  @UseGuards(AdminGuard)
+  async findDisabled(
+    @Args('limit', { type: () => Int }) limit = 10,
+    @Args('offset', { type: () => Int }) offset = 0,
+  ) {
+    const disabledClaims = await this.claimsService.findDisabled({
+      limit,
+      offset,
+    });
+
+    return disabledClaims;
   }
 
   @Query(() => PaginatedClaims, { name: 'searchClaims', nullable: true })
@@ -250,9 +270,9 @@ export class ClaimsResolver {
       id: updatedClaim.id,
       subject: 'Your claim has been updated',
       html: `
-        Your claim <a href="${getClaimURL(updatedClaim.slug)}">"${
+        Your claim <a href="${getClaimURL(updatedClaim.slug)}">${
         claim.title
-      }"</a> has been updated by <b>${user.username}</b>
+      }</a> has been updated by <b>${user.username}</b>
       `,
       triggeredBy: user,
     });
@@ -300,10 +320,8 @@ export class ClaimsResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(SessionGuard)
+  @UseGuards(AdminGuard)
   async disableClaim(@Args('id') id: string, @CurrentUser() user: User) {
-    if (user.role !== UserRole.ADMIN) return false;
-
     const claim = await this.claimsService.findOne(id);
 
     await this.claimsService.update(id, {
@@ -325,6 +343,37 @@ export class ClaimsResolver {
       subject: 'Your claim has been disabled',
       html: `
         Your claim "${claim.title}" has been disabled by <b>${user.username}</b> due to off topic reasons
+      `,
+      triggeredBy: user,
+    });
+
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(AdminGuard)
+  async reenableClaim(@Args('id') id: string, @CurrentUser() user: User) {
+    await this.claimsService.reenable(id);
+
+    const claim = await this.claimsService.findOne(id);
+
+    this.claimsService.notifyFollowers({
+      id,
+      subject: 'A claim you follow has been re-enabled',
+      html: `
+        The claim <a href="${getClaimURL(claim.slug)}">${
+        claim.title
+      }</a> you follow has been re-enabled by <b>${user.username}</b>
+      `,
+      triggeredBy: user,
+    });
+    this.claimsService.notifyOwner({
+      id,
+      subject: 'Your claim has been re-enabled',
+      html: `
+        Your claim <a href="${getClaimURL(claim.slug)}">${
+        claim.title
+      }</a> has been re-enabled by <b>${user.username}</b>
       `,
       triggeredBy: user,
     });

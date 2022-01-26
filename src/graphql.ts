@@ -327,6 +327,7 @@ export interface IMutation {
     deleteKnowledgeBit(id: string): boolean | Promise<boolean>;
     disableClaim(id: string): boolean | Promise<boolean>;
     inviteFriends(inviteFriendsInput: InviteFriendsInput): boolean | Promise<boolean>;
+    reenableClaim(id: string): boolean | Promise<boolean>;
     removeAPIKey(): boolean | Promise<boolean>;
     removeArgument(id: number): Argument | Promise<Argument>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
@@ -379,6 +380,7 @@ export interface IQuery {
     attributions(): Attribution[] | Promise<Attribution[]>;
     claim(slug: string): Claim | Promise<Claim>;
     claims(limit: number, offset: number): PaginatedClaims | Promise<PaginatedClaims>;
+    disabledClaims(limit: number, offset: number): PaginatedClaims | Promise<PaginatedClaims>;
     knowledgeBit(id: string): KnowledgeBit | Promise<KnowledgeBit>;
     knowledgeBits(claimSlug: string): KnowledgeBit[] | Promise<KnowledgeBit[]>;
     nonce(): string | Promise<string>;
