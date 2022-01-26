@@ -9,6 +9,9 @@ import { CreateClaimInput } from './dto/create-claim.input';
 import { InviteFriendsInput } from './dto/invite-friends.input';
 import { UpdateClaimInput } from './dto/update-claim.input';
 import { Claim } from './entities/claim.entity';
+import { Attribution } from '../attributions/entities/attribution.entity';
+import { getClaimURL } from 'src/common/utils/claim';
+import { AttributionsService } from '../attributions/attributions.service';
 
 export const CLAIM_CORE_RELATIONS = [
   'user',
@@ -22,9 +25,12 @@ export const CLAIM_CORE_RELATIONS = [
 export class ClaimsService {
   constructor(
     @InjectRepository(Claim) private claimsRepository: Repository<Claim>,
+    private readonly attributionsService: AttributionsService,
   ) {}
 
-  async create(createClaimInput: CreateClaimInput & { user: User }) {
+  async create(
+    createClaimInput: CreateClaimInput & { user: User },
+  ): Promise<Claim> {
     let slug;
     let slugIndex = 0;
 
@@ -251,6 +257,31 @@ export class ClaimsService {
       to: claim.user.email,
       subject,
       html,
+    });
+
+    return true;
+  }
+
+  async notifyNewlyAddedAttributions({
+    attributions,
+    existing,
+    slug,
+    title,
+  }: {
+    attributions: Attribution[];
+    existing?: Attribution[];
+    slug: string;
+    title: string;
+  }) {
+    this.attributionsService.notifyNewlyAdded({
+      attributions,
+      existing,
+      subject: 'A claim has been attributed to you',
+      html: `
+          Fractal Flows is now hosting a claim that has been attributed to you. Visit it to participate: <a href="${getClaimURL(
+            slug,
+          )}">${title}</a>
+        `,
     });
 
     return true;

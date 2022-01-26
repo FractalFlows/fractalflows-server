@@ -1,5 +1,6 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { In } from 'typeorm';
 
 import { ClaimsService, CLAIM_CORE_RELATIONS } from './claims.service';
 import { Claim } from './entities/claim.entity';
@@ -15,7 +16,6 @@ import { User } from '../users/entities/user.entity';
 import { InviteFriendsInput } from './dto/invite-friends.input';
 import { PaginatedClaims } from './dto/paginated-claims.output';
 import { getClaimURL } from 'src/common/utils/claim';
-import { In } from 'typeorm';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -37,10 +37,18 @@ export class ClaimsResolver {
     await this.attributionsService.upsert(createClaimInput.attributions);
     await this.tagsService.save(createClaimInput.tags);
 
-    return await this.claimsService.create({
+    const claim = await this.claimsService.create({
       ...createClaimInput,
       user,
     });
+
+    this.claimsService.notifyNewlyAddedAttributions({
+      attributions: claim.attributions,
+      slug: claim.slug,
+      title: claim.title,
+    });
+
+    return claim;
   }
 
   @Query(() => Claim, { name: 'claim' })
@@ -247,14 +255,20 @@ export class ClaimsResolver {
     @Args('updateClaimInput') updateClaimInput: UpdateClaimInput,
     @CurrentUser() user: User,
   ) {
-    const claim = await this.claimsService.findOne(updateClaimInput.id);
+    const claim = await this.claimsService.findOne({
+      where: { id: updateClaimInput.id },
+      relations: ['attributions'],
+    });
 
     await this.sourcesService.save(updateClaimInput.sources);
     await this.attributionsService.save(updateClaimInput.attributions);
     await this.tagsService.save(updateClaimInput.tags);
     await this.claimsService.update(updateClaimInput.id, updateClaimInput);
 
-    const updatedClaim = await this.claimsService.findOne(updateClaimInput.id);
+    const updatedClaim = await this.claimsService.findOne({
+      where: { id: updateClaimInput.id },
+      relations: ['attributions'],
+    });
 
     this.claimsService.notifyFollowers({
       id: updatedClaim.id,
@@ -275,6 +289,12 @@ export class ClaimsResolver {
       }</a> has been updated by <b>${user.username}</b>
       `,
       triggeredBy: user,
+    });
+    this.claimsService.notifyNewlyAddedAttributions({
+      attributions: updatedClaim.attributions,
+      existing: claim.attributions,
+      slug: updatedClaim.slug,
+      title: updatedClaim.title,
     });
 
     return updatedClaim;

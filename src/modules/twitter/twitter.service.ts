@@ -88,6 +88,8 @@ export class TwitterService {
           in_reply_to_status_id: tweetId,
         });
 
+        if (process.env.APP_ENV === 'development') return;
+
         // Post the claim link to the app page
         this.twit.post('statuses/update', {
           status,
