@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
 import { Repository, ILike } from 'typeorm';
 
-import { SaveTagInput } from './dto/save-tag.input';
 import { Tag } from './entities/tag.entity';
 
 @Injectable()
