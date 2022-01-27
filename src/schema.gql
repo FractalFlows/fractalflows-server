@@ -343,6 +343,7 @@ type Query {
   attributions: [Attribution!]!
   claim(slug: String!): Claim!
   claims(limit: Int!, offset: Int!): PaginatedClaims!
+  claimsByTag(limit: Int!, offset: Int!, tag: String!): PaginatedClaims!
   disabledClaims(limit: Int!, offset: Int!): PaginatedClaims!
   knowledgeBit(id: String!): KnowledgeBit!
   knowledgeBits(claimSlug: String!): [KnowledgeBit!]!
@@ -355,7 +356,7 @@ type Query {
   session: Session!
   source(id: Int!): Source!
   sources: [Source!]!
-  tag(id: Int!): Tag!
+  tag(slug: String!): Tag!
   trendingClaims(limit: Int!, offset: Int!): PaginatedClaims!
   userClaims(username: String!): [Claim!]!
   userContributedClaims(username: String!): [Claim!]!
@@ -392,6 +393,7 @@ input SaveTagInput {
 
   """Label"""
   label: String!
+  slug: String
 }
 
 type Session {
@@ -499,6 +501,9 @@ type Tag {
 
   """Label"""
   label: String!
+
+  """Slug"""
+  slug: String!
 
   """Updated at"""
   updatedAt: String!

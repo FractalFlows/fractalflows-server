@@ -129,6 +129,26 @@ export class ClaimsService {
     });
   }
 
+  async countByTag({ tagSlug }) {
+    return await this.claimsRepository
+      .createQueryBuilder('claim')
+      .innerJoin('claim.tags', 'claimTag', 'claimTag.slug = :tagSlug', {
+        tagSlug,
+      })
+      .getCount();
+  }
+
+  async findByTag({ tagSlug, limit, offset }) {
+    return await this.claimsRepository
+      .createQueryBuilder('claim')
+      .innerJoin('claim.tags', 'claimTag', 'claimTag.slug = :tagSlug', {
+        tagSlug,
+      })
+      .offset(offset)
+      .limit(limit)
+      .getMany();
+  }
+
   async search({ term }) {
     return await this.claimsRepository.query(
       `

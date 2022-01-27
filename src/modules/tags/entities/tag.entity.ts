@@ -11,6 +11,10 @@ export class Tag extends BaseEntity {
   @Column({ unique: true })
   label: string;
 
+  @Field(() => String, { description: 'Slug' })
+  @Column({ unique: true })
+  slug: string;
+
   @ManyToMany(() => Claim, (claim) => claim.tags)
   claims: Claim[];
 }

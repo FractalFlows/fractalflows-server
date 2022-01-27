@@ -162,6 +162,7 @@ export interface SaveSourceInput {
 export interface SaveTagInput {
     id?: Nullable<string>;
     label: string;
+    slug?: Nullable<string>;
 }
 
 export interface SignInWithEthereumInput {
@@ -381,6 +382,7 @@ export interface IQuery {
     attributions(): Attribution[] | Promise<Attribution[]>;
     claim(slug: string): Claim | Promise<Claim>;
     claims(limit: number, offset: number): PaginatedClaims | Promise<PaginatedClaims>;
+    claimsByTag(limit: number, offset: number, tag: string): PaginatedClaims | Promise<PaginatedClaims>;
     disabledClaims(limit: number, offset: number): PaginatedClaims | Promise<PaginatedClaims>;
     knowledgeBit(id: string): KnowledgeBit | Promise<KnowledgeBit>;
     knowledgeBits(claimSlug: string): KnowledgeBit[] | Promise<KnowledgeBit[]>;
@@ -393,7 +395,7 @@ export interface IQuery {
     session(): Session | Promise<Session>;
     source(id: number): Source | Promise<Source>;
     sources(): Source[] | Promise<Source[]>;
-    tag(id: number): Tag | Promise<Tag>;
+    tag(slug: string): Tag | Promise<Tag>;
     trendingClaims(limit: number, offset: number): PaginatedClaims | Promise<PaginatedClaims>;
     userClaims(username: string): Claim[] | Promise<Claim[]>;
     userContributedClaims(username: string): Claim[] | Promise<Claim[]>;
@@ -433,6 +435,7 @@ export interface Tag {
     createdAt: string;
     id: string;
     label: string;
+    slug: string;
     updatedAt: string;
 }
 
