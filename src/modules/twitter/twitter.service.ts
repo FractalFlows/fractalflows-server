@@ -32,6 +32,7 @@ export class TwitterService {
   async startStreamV1() {
     const handleData = async (tweet) => {
       const tweetId = tweet.in_reply_to_status_id_str;
+
       // If the reply is dedicated to a user and not a status,
       // go to next item of the loop
       if (!tweetId) return;
@@ -64,11 +65,17 @@ export class TwitterService {
             url: expanded_url,
           })) || []),
         ]);
+        const tags = await this.tagsService.save(
+          tweet.entities.hashtags
+            .slice(0, 4)
+            .map(({ text }) => ({ label: text })),
+        );
         const claim = await this.claimsService.create({
           title: tweet.text || 'No title in this tweet',
           summary: `This claim was originally posted on Twitter by @${tweetOwner}. No further details are available as of yet.`,
           user,
           sources,
+          tags: tags.identifiers,
           tweetId,
           tweetOwner,
           origin: ClaimOrigins.TWITTER,
@@ -80,13 +87,13 @@ export class TwitterService {
           .join(' ');
         const status = `A new claim was just added: ${claimLink} ${hashtags}`;
 
+        if (process.env.APP_ENV === 'development') return;
+
         // Reply back the claim link to the tweet
         this.twit.post('statuses/update', {
           status: `@${tweetOwner} ${claimLink}`,
           in_reply_to_status_id: tweetId,
         });
-
-        if (process.env.APP_ENV === 'development') return;
 
         // Post the claim link to the app page
         this.twit.post('statuses/update', {
