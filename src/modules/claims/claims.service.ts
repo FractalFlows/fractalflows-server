@@ -31,15 +31,15 @@ export class ClaimsService {
   async create(
     createClaimInput: CreateClaimInput & { user: User },
   ): Promise<Claim> {
+    const baseSlug = slugify(createClaimInput.title, {
+      lower: true,
+      strict: true,
+    });
     let slug;
     let slugIndex = 0;
 
     do {
-      slug = `${slugify(createClaimInput.title, {
-        lower: true,
-        strict: true,
-      })}${slugIndex > 0 ? `-${slugIndex}` : ''}`;
-
+      slug = `${baseSlug}${slugIndex > 0 ? `-${slugIndex}` : ''}`;
       slugIndex++;
     } while (
       (await this.claimsRepository.findOne({ where: { slug } })) !== undefined

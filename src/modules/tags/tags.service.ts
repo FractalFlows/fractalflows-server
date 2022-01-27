@@ -20,15 +20,15 @@ export class TagsService {
         return [...acc, tag];
       }
 
+      const baseSlug = slugify(curr.label, {
+        lower: true,
+        strict: true,
+      });
       let slug;
       let slugIndex = 0;
 
       do {
-        slug = `${slugify(curr.label, {
-          lower: true,
-          strict: true,
-        })}${slugIndex > 0 ? `-${slugIndex}` : ''}`;
-
+        slug = `${baseSlug}${slugIndex > 0 ? `-${slugIndex}` : ''}`;
         slugIndex++;
       } while (
         (await this.tagsRepository.findOne({ where: { slug } })) !==
@@ -56,11 +56,9 @@ export class TagsService {
         where: {
           label: ILike(`%${term}%`),
         },
-        take: 20,
-        skip: 0,
       });
     } else {
-      return await this.tagsRepository.find({ take: 20 });
+      return await this.tagsRepository.find({});
     }
   }
 
