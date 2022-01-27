@@ -1,5 +1,6 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { In } from 'typeorm';
 
 import { ClaimsService, CLAIM_CORE_RELATIONS } from './claims.service';
 import { Claim } from './entities/claim.entity';
@@ -8,14 +9,13 @@ import { UpdateClaimInput } from './dto/update-claim.input';
 import { SourcesService } from '../sources/sources.service';
 import { AttributionsService } from '../attributions/attributions.service';
 import { TagsService } from '../tags/tags.service';
-import { SessionGuard } from '../auth/auth.guard';
+import { AdminGuard, SessionGuard } from '../auth/auth.guard';
 import { UsersService } from '../users/users.service';
 import { CurrentUser } from '../auth/current-user.decorator';
-import { User, UserRole } from '../users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 import { InviteFriendsInput } from './dto/invite-friends.input';
 import { PaginatedClaims } from './dto/paginated-claims.output';
 import { getClaimURL } from 'src/common/utils/claim';
-import { In } from 'typeorm';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -35,17 +35,26 @@ export class ClaimsResolver {
   ) {
     await this.sourcesService.save(createClaimInput.sources);
     await this.attributionsService.upsert(createClaimInput.attributions);
-    await this.tagsService.save(createClaimInput.tags);
+    const upsertedTags = await this.tagsService.save(createClaimInput.tags);
 
-    return await this.claimsService.create({
+    const claim = await this.claimsService.create({
       ...createClaimInput,
+      tags: upsertedTags.identifiers,
       user,
     });
+
+    this.claimsService.notifyNewlyAddedAttributions({
+      attributions: claim.attributions,
+      slug: claim.slug,
+      title: claim.title,
+    });
+
+    return claim;
   }
 
   @Query(() => Claim, { name: 'claim' })
   async findOne(@Args('slug') slug: string) {
-    return await this.claimsService.findOne({
+    const claim = await this.claimsService.findOne({
       where: { slug },
       relations: [
         'user',
@@ -61,6 +70,12 @@ export class ClaimsResolver {
         'opinions.user',
       ],
     });
+
+    if (claim) {
+      return claim;
+    } else {
+      throw new Error('Claim not found');
+    }
   }
 
   @Query(() => PaginatedClaims, { name: 'claims' })
@@ -71,13 +86,7 @@ export class ClaimsResolver {
     return {
       totalCount: await this.claimsService.count(),
       data: await this.claimsService.find({
-        relations: [
-          'user',
-          'tags',
-          'knowledgeBits',
-          'opinions',
-          'opinions.user',
-        ],
+        relations: CLAIM_CORE_RELATIONS,
         take: limit,
         skip: offset,
         order: {
@@ -121,6 +130,20 @@ export class ClaimsResolver {
     return completeRelatedClaims;
   }
 
+  @Query(() => PaginatedClaims, { name: 'disabledClaims' })
+  @UseGuards(AdminGuard)
+  async findDisabled(
+    @Args('limit', { type: () => Int }) limit = 10,
+    @Args('offset', { type: () => Int }) offset = 0,
+  ) {
+    const disabledClaims = await this.claimsService.findDisabled({
+      limit,
+      offset,
+    });
+
+    return disabledClaims;
+  }
+
   @Query(() => PaginatedClaims, { name: 'searchClaims', nullable: true })
   async searchClaims(
     @Args('term') term: string,
@@ -160,6 +183,31 @@ export class ClaimsResolver {
     });
 
     return userClaims;
+  }
+
+  @Query(() => PaginatedClaims, { name: 'claimsByTag' })
+  async findClaimsByTag(
+    @Args('tag') tagSlug: string,
+    @Args('limit', { type: () => Int }) limit = 10,
+    @Args('offset', { type: () => Int }) offset = 0,
+  ) {
+    const claimsBySlugTotalCount = await this.claimsService.countByTag({
+      tagSlug,
+    });
+    const claimsBySlug = await this.claimsService.findByTag({
+      tagSlug,
+      limit,
+      offset,
+    });
+    const claimsBySlugIds = claimsBySlug.map(({ id }) => id);
+    const completeClaimsBySlug = await this.claimsService.findIn(
+      claimsBySlugIds,
+    );
+
+    return {
+      totalCount: claimsBySlugTotalCount,
+      data: completeClaimsBySlug,
+    };
   }
 
   @Query(() => [Claim], { name: 'userContributedClaims' })
@@ -227,14 +275,23 @@ export class ClaimsResolver {
     @Args('updateClaimInput') updateClaimInput: UpdateClaimInput,
     @CurrentUser() user: User,
   ) {
-    const claim = await this.claimsService.findOne(updateClaimInput.id);
+    const claim = await this.claimsService.findOne({
+      where: { id: updateClaimInput.id },
+      relations: ['attributions'],
+    });
 
     await this.sourcesService.save(updateClaimInput.sources);
     await this.attributionsService.save(updateClaimInput.attributions);
-    await this.tagsService.save(updateClaimInput.tags);
-    await this.claimsService.update(updateClaimInput.id, updateClaimInput);
+    const upsertedTags = await this.tagsService.save(updateClaimInput.tags);
+    await this.claimsService.update(updateClaimInput.id, {
+      ...updateClaimInput,
+      tags: upsertedTags.identifiers,
+    });
 
-    const updatedClaim = await this.claimsService.findOne(updateClaimInput.id);
+    const updatedClaim = await this.claimsService.findOne({
+      where: { id: updateClaimInput.id },
+      relations: ['attributions'],
+    });
 
     this.claimsService.notifyFollowers({
       id: updatedClaim.id,
@@ -250,11 +307,17 @@ export class ClaimsResolver {
       id: updatedClaim.id,
       subject: 'Your claim has been updated',
       html: `
-        Your claim <a href="${getClaimURL(updatedClaim.slug)}">"${
+        Your claim <a href="${getClaimURL(updatedClaim.slug)}">${
         claim.title
-      }"</a> has been updated by <b>${user.username}</b>
+      }</a> has been updated by <b>${user.username}</b>
       `,
       triggeredBy: user,
+    });
+    this.claimsService.notifyNewlyAddedAttributions({
+      attributions: updatedClaim.attributions,
+      existing: claim.attributions,
+      slug: updatedClaim.slug,
+      title: updatedClaim.title,
     });
 
     return updatedClaim;
@@ -300,10 +363,8 @@ export class ClaimsResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(SessionGuard)
+  @UseGuards(AdminGuard)
   async disableClaim(@Args('id') id: string, @CurrentUser() user: User) {
-    if (user.role !== UserRole.ADMIN) return false;
-
     const claim = await this.claimsService.findOne(id);
 
     await this.claimsService.update(id, {
@@ -325,6 +386,37 @@ export class ClaimsResolver {
       subject: 'Your claim has been disabled',
       html: `
         Your claim "${claim.title}" has been disabled by <b>${user.username}</b> due to off topic reasons
+      `,
+      triggeredBy: user,
+    });
+
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(AdminGuard)
+  async reenableClaim(@Args('id') id: string, @CurrentUser() user: User) {
+    await this.claimsService.reenable(id);
+
+    const claim = await this.claimsService.findOne(id);
+
+    this.claimsService.notifyFollowers({
+      id,
+      subject: 'A claim you follow has been re-enabled',
+      html: `
+        The claim <a href="${getClaimURL(claim.slug)}">${
+        claim.title
+      }</a> you follow has been re-enabled by <b>${user.username}</b>
+      `,
+      triggeredBy: user,
+    });
+    this.claimsService.notifyOwner({
+      id,
+      subject: 'Your claim has been re-enabled',
+      html: `
+        Your claim <a href="${getClaimURL(claim.slug)}">${
+        claim.title
+      }</a> has been re-enabled by <b>${user.username}</b>
       `,
       triggeredBy: user,
     });

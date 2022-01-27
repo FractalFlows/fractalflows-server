@@ -9,6 +9,9 @@ import { CreateClaimInput } from './dto/create-claim.input';
 import { InviteFriendsInput } from './dto/invite-friends.input';
 import { UpdateClaimInput } from './dto/update-claim.input';
 import { Claim } from './entities/claim.entity';
+import { Attribution } from '../attributions/entities/attribution.entity';
+import { getClaimURL } from 'src/common/utils/claim';
+import { AttributionsService } from '../attributions/attributions.service';
 
 export const CLAIM_CORE_RELATIONS = [
   'user',
@@ -22,18 +25,21 @@ export const CLAIM_CORE_RELATIONS = [
 export class ClaimsService {
   constructor(
     @InjectRepository(Claim) private claimsRepository: Repository<Claim>,
+    private readonly attributionsService: AttributionsService,
   ) {}
 
-  async create(createClaimInput: CreateClaimInput & { user: User }) {
+  async create(
+    createClaimInput: CreateClaimInput & { user: User },
+  ): Promise<Claim> {
+    const baseSlug = slugify(createClaimInput.title, {
+      lower: true,
+      strict: true,
+    });
     let slug;
     let slugIndex = 0;
 
     do {
-      slug = `${slugify(createClaimInput.title, {
-        lower: true,
-        strict: true,
-      })}${slugIndex > 0 ? `-${slugIndex}` : ''}`;
-
+      slug = `${baseSlug}${slugIndex > 0 ? `-${slugIndex}` : ''}`;
       slugIndex++;
     } while (
       (await this.claimsRepository.findOne({ where: { slug } })) !== undefined
@@ -71,6 +77,10 @@ export class ClaimsService {
     });
     const tagIds = claim.tags.map(({ id }) => id);
 
+    if (!claim) {
+      throw new Error('Claim not found');
+    }
+
     if (claim.tags.length > 0) {
       return await this.claimsRepository
         .createQueryBuilder('claim')
@@ -87,6 +97,27 @@ export class ClaimsService {
     }
   }
 
+  async findDisabled({ limit, offset }: { limit: number; offset: number }) {
+    const disabledClaims = await this.claimsRepository.find({
+      where: { disabled: true },
+      relations: CLAIM_CORE_RELATIONS,
+      take: limit,
+      skip: offset,
+      order: {
+        deletedAt: 'DESC',
+      },
+      withDeleted: true,
+    });
+
+    return {
+      totalCount: await this.claimsRepository.count({
+        where: { disabled: true },
+        withDeleted: true,
+      }),
+      data: disabledClaims,
+    };
+  }
+
   async find(query) {
     return await this.claimsRepository.find(query);
   }
@@ -96,6 +127,26 @@ export class ClaimsService {
       where: { id: In(ids) },
       relations: CLAIM_CORE_RELATIONS,
     });
+  }
+
+  async countByTag({ tagSlug }) {
+    return await this.claimsRepository
+      .createQueryBuilder('claim')
+      .innerJoin('claim.tags', 'claimTag', 'claimTag.slug = :tagSlug', {
+        tagSlug,
+      })
+      .getCount();
+  }
+
+  async findByTag({ tagSlug, limit, offset }) {
+    return await this.claimsRepository
+      .createQueryBuilder('claim')
+      .innerJoin('claim.tags', 'claimTag', 'claimTag.slug = :tagSlug', {
+        tagSlug,
+      })
+      .offset(offset)
+      .limit(limit)
+      .getMany();
   }
 
   async search({ term }) {
@@ -128,6 +179,13 @@ export class ClaimsService {
 
   async save(query) {
     return await this.claimsRepository.save(query);
+  }
+
+  async reenable(id: string) {
+    await this.claimsRepository.restore(id);
+    await this.claimsRepository.update(id, { disabled: false });
+
+    return true;
   }
 
   async softDelete(id: string) {
@@ -214,11 +272,36 @@ export class ClaimsService {
     });
 
     if (!claim.user.email || claim.user.id === triggeredBy.id) return;
-    console.log(claim);
+
     await sendMail({
       to: claim.user.email,
       subject,
       html,
+    });
+
+    return true;
+  }
+
+  async notifyNewlyAddedAttributions({
+    attributions,
+    existing,
+    slug,
+    title,
+  }: {
+    attributions: Attribution[];
+    existing?: Attribution[];
+    slug: string;
+    title: string;
+  }) {
+    this.attributionsService.notifyNewlyAdded({
+      attributions,
+      existing,
+      subject: 'A claim has been attributed to you',
+      html: `
+          Fractal Flows is now hosting a claim that has been attributed to you. Visit it to participate: <a href="${getClaimURL(
+            slug,
+          )}">${title}</a>
+        `,
     });
 
     return true;

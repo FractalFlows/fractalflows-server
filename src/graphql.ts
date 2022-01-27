@@ -162,6 +162,7 @@ export interface SaveSourceInput {
 export interface SaveTagInput {
     id?: Nullable<string>;
     label: string;
+    slug?: Nullable<string>;
 }
 
 export interface SignInWithEthereumInput {
@@ -327,6 +328,7 @@ export interface IMutation {
     deleteKnowledgeBit(id: string): boolean | Promise<boolean>;
     disableClaim(id: string): boolean | Promise<boolean>;
     inviteFriends(inviteFriendsInput: InviteFriendsInput): boolean | Promise<boolean>;
+    reenableClaim(id: string): boolean | Promise<boolean>;
     removeAPIKey(): boolean | Promise<boolean>;
     removeArgument(id: number): Argument | Promise<Argument>;
     removeAttribution(id: number): Attribution | Promise<Attribution>;
@@ -337,17 +339,18 @@ export interface IMutation {
     requestTwitterOAuthUrl(callbackUrl: string): string | Promise<string>;
     saveKnowledgeBitVote(knowledgeBitId: string, type: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
     saveOpinion(saveOpinionInput: SaveOpinionInput): Opinion | Promise<Opinion>;
-    sendMagicLink(email: string): boolean | Promise<boolean>;
+    sendSignInCode(email: string): boolean | Promise<boolean>;
+    sendUpdateEmailVerificationCode(email: string): boolean | Promise<boolean>;
     signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput): User | Promise<User>;
     signOut(): boolean | Promise<boolean>;
     updateArgument(updateArgumentInput: UpdateArgumentInput): Argument | Promise<Argument>;
     updateArgumentComment(updateArgumentCommentInput: UpdateArgumentCommentInput): ArgumentComment | Promise<ArgumentComment>;
     updateClaim(updateClaimInput: UpdateClaimInput): Claim | Promise<Claim>;
-    updateEmail(email: string): User | Promise<User>;
+    updateEmail(verificationCode: string): boolean | Promise<boolean>;
     updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput): KnowledgeBit | Promise<KnowledgeBit>;
     updateProfile(updateProfileInput: UpdateProfileInput): User | Promise<User>;
     validateTwitterOAuth(oauthToken: string, oauthVerifier: string): string | Promise<string>;
-    verifyMagicLink(hash: string): User | Promise<User>;
+    verifySignInCode(signInCode: string): User | Promise<User>;
 }
 
 export interface Opinion {
@@ -379,6 +382,8 @@ export interface IQuery {
     attributions(): Attribution[] | Promise<Attribution[]>;
     claim(slug: string): Claim | Promise<Claim>;
     claims(limit: number, offset: number): PaginatedClaims | Promise<PaginatedClaims>;
+    claimsByTag(limit: number, offset: number, tag: string): PaginatedClaims | Promise<PaginatedClaims>;
+    disabledClaims(limit: number, offset: number): PaginatedClaims | Promise<PaginatedClaims>;
     knowledgeBit(id: string): KnowledgeBit | Promise<KnowledgeBit>;
     knowledgeBits(claimSlug: string): KnowledgeBit[] | Promise<KnowledgeBit[]>;
     nonce(): string | Promise<string>;
@@ -390,7 +395,7 @@ export interface IQuery {
     session(): Session | Promise<Session>;
     source(id: number): Source | Promise<Source>;
     sources(): Source[] | Promise<Source[]>;
-    tag(id: number): Tag | Promise<Tag>;
+    tag(slug: string): Tag | Promise<Tag>;
     trendingClaims(limit: number, offset: number): PaginatedClaims | Promise<PaginatedClaims>;
     userClaims(username: string): Claim[] | Promise<Claim[]>;
     userContributedClaims(username: string): Claim[] | Promise<Claim[]>;
@@ -430,6 +435,7 @@ export interface Tag {
     createdAt: string;
     id: string;
     label: string;
+    slug: string;
     updatedAt: string;
 }
 

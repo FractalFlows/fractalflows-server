@@ -285,6 +285,7 @@ type Mutation {
   deleteKnowledgeBit(id: String!): Boolean!
   disableClaim(id: String!): Boolean!
   inviteFriends(inviteFriendsInput: InviteFriendsInput!): Boolean!
+  reenableClaim(id: String!): Boolean!
   removeAPIKey: Boolean!
   removeArgument(id: Int!): Argument!
   removeAttribution(id: Int!): Attribution!
@@ -295,17 +296,18 @@ type Mutation {
   requestTwitterOAuthUrl(callbackUrl: String!): String!
   saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
   saveOpinion(saveOpinionInput: SaveOpinionInput!): Opinion!
-  sendMagicLink(email: String!): Boolean!
+  sendSignInCode(email: String!): Boolean!
+  sendUpdateEmailVerificationCode(email: String!): Boolean!
   signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput!): User!
   signOut: Boolean!
   updateArgument(updateArgumentInput: UpdateArgumentInput!): Argument!
   updateArgumentComment(updateArgumentCommentInput: UpdateArgumentCommentInput!): ArgumentComment!
   updateClaim(updateClaimInput: UpdateClaimInput!): Claim!
-  updateEmail(email: String!): User!
+  updateEmail(verificationCode: String!): Boolean!
   updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput!): KnowledgeBit!
   updateProfile(updateProfileInput: UpdateProfileInput!): User!
   validateTwitterOAuth(oauthToken: String!, oauthVerifier: String!): String!
-  verifyMagicLink(hash: String!): User!
+  verifySignInCode(signInCode: String!): User!
 }
 
 type Opinion {
@@ -341,6 +343,8 @@ type Query {
   attributions: [Attribution!]!
   claim(slug: String!): Claim!
   claims(limit: Int!, offset: Int!): PaginatedClaims!
+  claimsByTag(limit: Int!, offset: Int!, tag: String!): PaginatedClaims!
+  disabledClaims(limit: Int!, offset: Int!): PaginatedClaims!
   knowledgeBit(id: String!): KnowledgeBit!
   knowledgeBits(claimSlug: String!): [KnowledgeBit!]!
   nonce: String!
@@ -352,7 +356,7 @@ type Query {
   session: Session!
   source(id: Int!): Source!
   sources: [Source!]!
-  tag(id: Int!): Tag!
+  tag(slug: String!): Tag!
   trendingClaims(limit: Int!, offset: Int!): PaginatedClaims!
   userClaims(username: String!): [Claim!]!
   userContributedClaims(username: String!): [Claim!]!
@@ -389,6 +393,7 @@ input SaveTagInput {
 
   """Label"""
   label: String!
+  slug: String
 }
 
 type Session {
@@ -496,6 +501,9 @@ type Tag {
 
   """Label"""
   label: String!
+
+  """Slug"""
+  slug: String!
 
   """Updated at"""
   updatedAt: String!

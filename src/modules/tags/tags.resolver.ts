@@ -12,7 +12,7 @@ export class TagsResolver {
   }
 
   @Query(() => Tag, { name: 'tag' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.tagsService.findOne(id);
+  async findOne(@Args('slug') slug: string) {
+    return await this.tagsService.findOne({ where: { slug } });
   }
 }

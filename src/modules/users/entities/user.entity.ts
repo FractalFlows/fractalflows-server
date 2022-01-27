@@ -76,9 +76,6 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   avatarSource?: AvatarSource;
 
-  @Column({ nullable: true })
-  magicLinkHash?: string;
-
   @Field(() => UserRole)
   @Column({
     type: 'enum',

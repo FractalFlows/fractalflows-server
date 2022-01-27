@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InfuraService } from 'src/common/services/infura';
+import { sendMail } from 'src/common/services/mail';
 import { Repository } from 'typeorm';
 
 import { CreateUserInput } from './dto/create-user.input';
@@ -54,5 +55,21 @@ export class UsersService {
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  async sendUpdateEmailVerificationCode({
+    email,
+    verificationCode,
+  }: {
+    email: string;
+    verificationCode: string;
+  }) {
+    await sendMail({
+      to: email,
+      subject: `Your email verification code: ${verificationCode}`,
+      html: `
+        In order to update your email, fill in this code on the app: <strong>${verificationCode}</strong>
+      `,
+    });
   }
 }

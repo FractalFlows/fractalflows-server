@@ -3,6 +3,7 @@ import { InputType, Field } from '@nestjs/graphql';
 import { SaveAttributionInput } from 'src/modules/attributions/dto/save-attribution.input';
 import { SaveSourceInput } from 'src/modules/sources/dto/save-source.input';
 import { SaveTagInput } from 'src/modules/tags/dto/save-tag.input';
+import { Tag } from 'src/modules/tags/entities/tag.entity';
 import { ClaimOrigins } from '../entities/claim.entity';
 
 @InputType()
@@ -17,7 +18,7 @@ export class CreateClaimInput {
   sources?: SaveSourceInput[];
 
   @Field(() => [SaveTagInput], { description: 'Tags', nullable: true })
-  tags?: SaveTagInput[];
+  tags?: Partial<Tag>[];
 
   @Field(() => [SaveAttributionInput], {
     description: 'Attributions',

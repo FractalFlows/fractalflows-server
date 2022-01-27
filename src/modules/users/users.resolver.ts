@@ -60,9 +60,44 @@ export class UsersResolver {
     return userWithUpdatedProfile;
   }
 
-  @Mutation(() => User)
+  @Mutation(() => Boolean)
   @UseGuards(SessionGuard)
   async updateEmail(
+    @Args('verificationCode') verificationCode: string,
+    @CurrentUser() user: User,
+    @Context() context,
+  ) {
+    const { email, verificationCode: expectedVerificationCode } =
+      context.req.session.updateEmail || {};
+
+    if (!expectedVerificationCode) {
+      throw new Error('Unable to check verification code');
+    } else if (expectedVerificationCode !== verificationCode.trim()) {
+      throw new Error('Invalid verification code');
+    }
+
+    await this.usersService.save({
+      id: user.id,
+      email,
+      avatar:
+        user.avatarSource === AvatarSource.GRAVATAR
+          ? getGravatarURL(email)
+          : undefined,
+    });
+
+    const userWithUpdatedEmail = await this.usersService.findOne(user.id);
+
+    if (context.req.session) {
+      context.req.session.user = userWithUpdatedEmail;
+      context.req.session.updateEmail = undefined;
+    }
+
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(SessionGuard)
+  async sendUpdateEmailVerificationCode(
     @Args('email') email: string,
     @CurrentUser() user: User,
     @Context() context,
@@ -74,22 +109,21 @@ export class UsersResolver {
     if (isEmailAddressAlreadyInUse) {
       throw new Error('Email address already in use');
     } else {
-      await this.usersService.save({
-        id: user.id,
+      const verificationCode = new Date().getTime().toString().substring(7);
+
+      this.usersService.sendUpdateEmailVerificationCode({
         email,
-        avatar:
-          user.avatarSource === AvatarSource.GRAVATAR
-            ? getGravatarURL(email)
-            : undefined,
+        verificationCode,
       });
 
-      const userWithUpdatedEmail = await this.usersService.findOne(user.id);
-
       if (context.req.session) {
-        context.req.session.user = userWithUpdatedEmail;
+        context.req.session.updateEmail = {
+          email,
+          verificationCode,
+        };
       }
 
-      return userWithUpdatedEmail;
+      return true;
     }
   }
 

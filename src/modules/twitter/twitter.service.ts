@@ -1,13 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import TwitterApi, { ETwitterStreamEvent } from 'twitter-api-v2';
+import TwitterApi from 'twitter-api-v2';
 import Twit from 'twit';
-import crypto from 'crypto';
 
 import { ClaimsService } from '../claims/claims.service';
 import { UsersService } from '../users/users.service';
 import { SourcesService } from '../sources/sources.service';
 import { TagsService } from '../tags/tags.service';
-import { getClaimURL } from 'src/common/utils/claim';
 import { ClaimOrigins } from '../claims/entities/claim.entity';
 
 @Injectable()
@@ -34,6 +32,7 @@ export class TwitterService {
   async startStreamV1() {
     const handleData = async (tweet) => {
       const tweetId = tweet.in_reply_to_status_id_str;
+
       // If the reply is dedicated to a user and not a status,
       // go to next item of the loop
       if (!tweetId) return;
@@ -66,11 +65,17 @@ export class TwitterService {
             url: expanded_url,
           })) || []),
         ]);
+        const tags = await this.tagsService.save(
+          tweet.entities.hashtags
+            .slice(0, 4)
+            .map(({ text }) => ({ label: text })),
+        );
         const claim = await this.claimsService.create({
           title: tweet.text || 'No title in this tweet',
           summary: `This claim was originally posted on Twitter by @${tweetOwner}. No further details are available as of yet.`,
           user,
           sources,
+          tags: tags.identifiers,
           tweetId,
           tweetOwner,
           origin: ClaimOrigins.TWITTER,
@@ -81,6 +86,8 @@ export class TwitterService {
           .map(({ text }) => `#${text}`)
           .join(' ');
         const status = `A new claim was just added: ${claimLink} ${hashtags}`;
+
+        if (process.env.APP_ENV === 'development') return;
 
         // Reply back the claim link to the tweet
         this.twit.post('statuses/update', {

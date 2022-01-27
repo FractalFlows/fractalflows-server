@@ -16,6 +16,7 @@ import { SessionGuard } from '../auth/auth.guard';
 import { KnowledgeBitVotesService } from '../knowledge-bit-votes/knowledge-bit-votes.service';
 import { KnowledgeBitVoteTypes } from '../knowledge-bit-votes/entities/knowledge-bit-vote.entity';
 import { getClaimURL } from 'src/common/utils/claim';
+import { Attribution } from '../attributions/entities/attribution.entity';
 
 @Resolver(() => KnowledgeBit)
 export class KnowledgeBitsResolver {
@@ -75,6 +76,12 @@ export class KnowledgeBitsResolver {
       `,
       triggeredBy: user,
     });
+    this.knowledgeBitsService.notifyNewlyAddedAttributions({
+      attributions: createKnowledgeBitInput.attributions as Attribution[],
+      claimSlug: claim.slug,
+      claimTitle: claim.title,
+      name: createKnowledgeBit.name,
+    });
 
     return await this.findOne(createKnowledgeBit.id);
   }
@@ -109,6 +116,10 @@ export class KnowledgeBitsResolver {
         'knowledgeBits.attributions',
       ],
     });
+
+    if (!claim) {
+      throw new Error('Claim not found');
+    }
 
     return await Promise.all(
       claim.knowledgeBits?.map(async (knowledgeBit) => ({
@@ -145,13 +156,28 @@ export class KnowledgeBitsResolver {
     @Args('updateKnowledgeBitInput')
     updateKnowledgeBitInput: UpdateKnowledgeBitInput,
   ) {
+    const knowledgeBit = await this.knowledgeBitsService.findOne({
+      where: { id: updateKnowledgeBitInput.id },
+      relations: ['claim', 'attributions'],
+    });
+
     await this.attributionsService.save(updateKnowledgeBitInput.attributions);
     await this.knowledgeBitsService.update(
       updateKnowledgeBitInput.id,
       updateKnowledgeBitInput,
     );
 
-    return await this.findOne(updateKnowledgeBitInput.id);
+    const updatedKnowledgeBit = await this.findOne(updateKnowledgeBitInput.id);
+
+    this.knowledgeBitsService.notifyNewlyAddedAttributions({
+      attributions: updatedKnowledgeBit.attributions,
+      existing: knowledgeBit.attributions,
+      claimSlug: knowledgeBit.claim.slug,
+      claimTitle: knowledgeBit.claim.title,
+      name: knowledgeBit.name,
+    });
+
+    return updatedKnowledgeBit;
   }
 
   @Mutation(() => Boolean)
