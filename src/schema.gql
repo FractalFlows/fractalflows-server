@@ -297,12 +297,13 @@ type Mutation {
   saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
   saveOpinion(saveOpinionInput: SaveOpinionInput!): Opinion!
   sendMagicLink(email: String!): Boolean!
+  sendUpdateEmailVerificationCode(email: String!): Boolean!
   signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput!): User!
   signOut: Boolean!
   updateArgument(updateArgumentInput: UpdateArgumentInput!): Argument!
   updateArgumentComment(updateArgumentCommentInput: UpdateArgumentCommentInput!): ArgumentComment!
   updateClaim(updateClaimInput: UpdateClaimInput!): Claim!
-  updateEmail(email: String!): User!
+  updateEmail(verificationCode: String!): Boolean!
   updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput!): KnowledgeBit!
   updateProfile(updateProfileInput: UpdateProfileInput!): User!
   validateTwitterOAuth(oauthToken: String!, oauthVerifier: String!): String!

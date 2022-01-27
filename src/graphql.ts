@@ -339,12 +339,13 @@ export interface IMutation {
     saveKnowledgeBitVote(knowledgeBitId: string, type: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
     saveOpinion(saveOpinionInput: SaveOpinionInput): Opinion | Promise<Opinion>;
     sendMagicLink(email: string): boolean | Promise<boolean>;
+    sendUpdateEmailVerificationCode(email: string): boolean | Promise<boolean>;
     signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput): User | Promise<User>;
     signOut(): boolean | Promise<boolean>;
     updateArgument(updateArgumentInput: UpdateArgumentInput): Argument | Promise<Argument>;
     updateArgumentComment(updateArgumentCommentInput: UpdateArgumentCommentInput): ArgumentComment | Promise<ArgumentComment>;
     updateClaim(updateClaimInput: UpdateClaimInput): Claim | Promise<Claim>;
-    updateEmail(email: string): User | Promise<User>;
+    updateEmail(verificationCode: string): boolean | Promise<boolean>;
     updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput): KnowledgeBit | Promise<KnowledgeBit>;
     updateProfile(updateProfileInput: UpdateProfileInput): User | Promise<User>;
     validateTwitterOAuth(oauthToken: string, oauthVerifier: string): string | Promise<string>;
