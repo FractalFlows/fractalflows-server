@@ -296,7 +296,7 @@ type Mutation {
   requestTwitterOAuthUrl(callbackUrl: String!): String!
   saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
   saveOpinion(saveOpinionInput: SaveOpinionInput!): Opinion!
-  sendMagicLink(email: String!): Boolean!
+  sendSignInCode(email: String!): Boolean!
   sendUpdateEmailVerificationCode(email: String!): Boolean!
   signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput!): User!
   signOut: Boolean!
@@ -307,7 +307,7 @@ type Mutation {
   updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput!): KnowledgeBit!
   updateProfile(updateProfileInput: UpdateProfileInput!): User!
   validateTwitterOAuth(oauthToken: String!, oauthVerifier: String!): String!
-  verifyMagicLink(hash: String!): User!
+  verifySignInCode(signInCode: String!): User!
 }
 
 type Opinion {

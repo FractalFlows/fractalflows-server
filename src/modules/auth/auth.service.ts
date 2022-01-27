@@ -31,15 +31,12 @@ export class AuthService {
     return fields;
   }
 
-  async sendMagicLink({ email, hash }) {
-    const magicLink = `${process.env.FRONTEND_HOST}/signin/magic-link/${hash}`;
-
+  async sendSignInCode({ email, signInCode }) {
     return await sendMail({
-      subject: 'Your sign in magic link',
+      subject: `Your sign in code: ${signInCode}`,
       to: email,
       html: `
-        Click on the link below to confirm that you want to sign in to Fractal Flows.<br /><br />
-        <a href="${magicLink}">${magicLink}</a>
+        Here is your sign in code. Enter it in your open browser window to sign in: <strong>${signInCode}</strong>
       `,
     });
   }

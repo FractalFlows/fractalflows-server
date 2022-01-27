@@ -66,7 +66,7 @@ export class UsersService {
   }) {
     await sendMail({
       to: email,
-      subject: 'Your verification code',
+      subject: `Your email verification code: ${verificationCode}`,
       html: `
         In order to update your email, fill in this code on the app: <strong>${verificationCode}</strong>
       `,

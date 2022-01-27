@@ -10,7 +10,7 @@ export class TagsService {
   constructor(@InjectRepository(Tag) private tagsRepository: Repository<Tag>) {}
 
   async save(saveTagInput: SaveTagInput[]) {
-    return await this.tagsRepository.save(saveTagInput || []);
+    return await this.tagsRepository.upsert(saveTagInput || [], ['label']);
   }
 
   async search(term?: string) {

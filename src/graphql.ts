@@ -338,7 +338,7 @@ export interface IMutation {
     requestTwitterOAuthUrl(callbackUrl: string): string | Promise<string>;
     saveKnowledgeBitVote(knowledgeBitId: string, type: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
     saveOpinion(saveOpinionInput: SaveOpinionInput): Opinion | Promise<Opinion>;
-    sendMagicLink(email: string): boolean | Promise<boolean>;
+    sendSignInCode(email: string): boolean | Promise<boolean>;
     sendUpdateEmailVerificationCode(email: string): boolean | Promise<boolean>;
     signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput): User | Promise<User>;
     signOut(): boolean | Promise<boolean>;
@@ -349,7 +349,7 @@ export interface IMutation {
     updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput): KnowledgeBit | Promise<KnowledgeBit>;
     updateProfile(updateProfileInput: UpdateProfileInput): User | Promise<User>;
     validateTwitterOAuth(oauthToken: string, oauthVerifier: string): string | Promise<string>;
-    verifyMagicLink(hash: string): User | Promise<User>;
+    verifySignInCode(signInCode: string): User | Promise<User>;
 }
 
 export interface Opinion {
