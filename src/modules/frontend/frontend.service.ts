@@ -14,7 +14,7 @@ export class FrontendService {
 
   private readonly logger = new Logger(FrontendService.name);
 
-  @Cron('* */5 * * * *')
+  @Cron('0 */5 * * * *')
   async warmVercelServerlessFunctions() {
     if (process.env.APP_ENV === 'development') return;
 
