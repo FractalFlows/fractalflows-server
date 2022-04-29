@@ -16,6 +16,7 @@ import { User } from '../users/entities/user.entity';
 import { InviteFriendsInput } from './dto/invite-friends.input';
 import { PaginatedClaims } from './dto/paginated-claims.output';
 import { getClaimURL } from 'src/common/utils/claim';
+import { IPFS } from 'src/common/services/ipfs';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -50,6 +51,16 @@ export class ClaimsResolver {
     });
 
     return claim;
+  }
+
+  @Mutation(() => String)
+  @UseGuards(SessionGuard)
+  async saveClaim(
+    @Args('saveClaimInput') saveClaimInput: CreateClaimInput,
+    @CurrentUser() user: User,
+  ) {
+    const url = await IPFS.uploadClaimMetadata(saveClaimInput);
+    return url;
   }
 
   @Query(() => Claim, { name: 'claim' })

@@ -42,6 +42,7 @@
     "ethers": "^5.5.2",
     "express-session": "^1.17.2",
     "graphql": "^15",
+    "nft.storage": "^6.2.0",
     "nodemailer": "^6.7.2",
     "pg": "^8.7.1",
     "redis": "^4.0.1",
