@@ -18,6 +18,7 @@ import { ArgumentsModule } from './modules/arguments/arguments.module';
 import { ArgumentCommentsModule } from './modules/argument-comments/argument-comments.module';
 import { OpinionsModule } from './modules/opinions/opinions.module';
 import { TwitterModule } from './modules/twitter/twitter.module';
+import { AlchemyModule } from './modules/alchemy/alchemy.module';
 import { FrontendModule } from './modules/frontend/frontend.module';
 import typeormConfig from '../ormconfig';
 
@@ -55,6 +56,7 @@ import typeormConfig from '../ormconfig';
     ArgumentCommentsModule,
     OpinionsModule,
     TwitterModule,
+    AlchemyModule,
     FrontendModule,
   ],
 })

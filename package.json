@@ -25,6 +25,7 @@
     "typeorm:migration:run": "yarn typeorm migration:run"
   },
   "dependencies": {
+    "@alch/alchemy-web3": "^1.4.2",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^1.1.5",
     "@nestjs/core": "^8.0.0",
