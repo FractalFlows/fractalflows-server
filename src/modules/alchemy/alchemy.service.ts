@@ -5,6 +5,7 @@ import { ClaimsService } from '../claims/claims.service';
 import { UsersService } from '../users/users.service';
 import { SourcesService } from '../sources/sources.service';
 import { TagsService } from '../tags/tags.service';
+import { IPFSService } from '../ipfs/ipfs.service';
 import claimABI from '../../common/abi/Claim.json';
 
 @Injectable()
@@ -14,6 +15,7 @@ export class AlchemyService {
     private readonly sourcesService: SourcesService,
     private readonly tagsService: TagsService,
     private readonly usersService: UsersService,
+    private readonly ipfsService: IPFSService,
   ) {}
 
   private readonly web3 = createAlchemyWeb3(process.env.ALCHEMY_API_URL);
@@ -25,11 +27,22 @@ export class AlchemyService {
     );
 
     const handleData = async (data) => {
-      console.log(data);
       const tokenID = parseInt(data.topics[3]);
-      console.log(tokenID);
-      const tokenURI = await claimContract.methods.tokenURI(tokenID).call();
-      console.log(tokenURI);
+
+      try {
+        const tokenURI = await claimContract.methods.tokenURI(tokenID).call();
+        const tokenCID = tokenURI.replace(/^ipfs:\/\//, '');
+
+        console.log(data);
+        console.log(tokenID);
+        console.log(tokenURI);
+        console.log(tokenCID);
+
+        const metadata = await this.ipfsService.cat(tokenCID);
+        console.log(metadata);
+      } catch (e) {
+        console.log(e);
+      }
       // const tweetId = tweet.in_reply_to_status_id_str;
 
       // // If the reply is dedicated to a user and not a status,

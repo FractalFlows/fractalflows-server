@@ -19,6 +19,7 @@ import { ArgumentCommentsModule } from './modules/argument-comments/argument-com
 import { OpinionsModule } from './modules/opinions/opinions.module';
 import { TwitterModule } from './modules/twitter/twitter.module';
 import { AlchemyModule } from './modules/alchemy/alchemy.module';
+import { IPFSModule } from './modules/ipfs/ipfs.module';
 import { FrontendModule } from './modules/frontend/frontend.module';
 import typeormConfig from '../ormconfig';
 
@@ -57,6 +58,7 @@ import typeormConfig from '../ormconfig';
     OpinionsModule,
     TwitterModule,
     AlchemyModule,
+    IPFSModule,
     FrontendModule,
   ],
 })
