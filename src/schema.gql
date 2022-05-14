@@ -101,6 +101,9 @@ type Claim {
   """Title"""
   title: String!
 
+  """NFT id"""
+  tokenId: Float
+
   """Tweet from which this claim was originated from"""
   tweetId: String
 

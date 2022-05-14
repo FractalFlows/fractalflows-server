@@ -280,6 +280,7 @@ export interface Claim {
     summary: string;
     tags?: Nullable<Tag[]>;
     title: string;
+    tokenId?: Nullable<number>;
     tweetId?: Nullable<string>;
     tweetOwner?: Nullable<string>;
     updatedAt: string;

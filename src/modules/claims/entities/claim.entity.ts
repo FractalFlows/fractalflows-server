@@ -82,6 +82,13 @@ export class Claim extends BaseEntity {
   })
   relevance?: number;
 
+  @Field(() => Number, {
+    description: 'NFT id',
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  tokenId?: number;
+
   @Field(() => String, {
     description: 'Tweet from which this claim was originated from',
     nullable: true,

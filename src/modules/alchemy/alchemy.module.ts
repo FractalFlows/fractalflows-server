@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AttributionsModule } from '../attributions/attributions.module';
 
 import { ClaimsModule } from '../claims/claims.module';
 import { IPFSModule } from '../ipfs/ipfs.module';
@@ -10,7 +11,14 @@ import { AlchemyService } from './alchemy.service';
 @Module({
   exports: [AlchemyService],
   providers: [AlchemyService],
-  imports: [ClaimsModule, UsersModule, SourcesModule, TagsModule, IPFSModule],
+  imports: [
+    ClaimsModule,
+    UsersModule,
+    AttributionsModule,
+    SourcesModule,
+    TagsModule,
+    IPFSModule,
+  ],
 })
 export class AlchemyModule {
   constructor(private readonly alchemyService: AlchemyService) {}

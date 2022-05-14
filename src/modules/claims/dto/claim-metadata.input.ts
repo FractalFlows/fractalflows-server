@@ -7,13 +7,7 @@ import { Tag } from 'src/modules/tags/entities/tag.entity';
 import { ClaimOrigins } from '../entities/claim.entity';
 
 @InputType()
-export class CreateClaimInput {
-  @Field(() => String, { description: 'Title' })
-  title: string;
-
-  @Field(() => String, { description: 'Summary' })
-  summary: string;
-
+class ClaimMetadataPropertiesInput {
   @Field(() => [SaveSourceInput], { description: 'Sources', nullable: true })
   sources?: SaveSourceInput[];
 
@@ -25,9 +19,19 @@ export class CreateClaimInput {
     nullable: true,
   })
   attributions?: SaveAttributionInput[];
+}
 
-  tokenId?: number;
-  tweetId?: string;
-  tweetOwner?: string;
-  origin?: ClaimOrigins;
+@InputType()
+export class ClaimMetadataInput {
+  @Field(() => String, { description: 'Title' })
+  name: string;
+
+  @Field(() => String, { description: 'Summary' })
+  description: string;
+
+  @Field(() => ClaimMetadataPropertiesInput, {
+    description: 'Properties',
+    nullable: true,
+  })
+  properties?: ClaimMetadataPropertiesInput;
 }
