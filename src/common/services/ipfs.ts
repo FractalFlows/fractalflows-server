@@ -16,6 +16,7 @@ export const IPFS = {
         sources: claim.sources,
         attributions: claim.attributions,
       },
+      external_uri: `${process.env.HOST}/claim/${claim.slug}`,
     });
 
     console.log(metadata);

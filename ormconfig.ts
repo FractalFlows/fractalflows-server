@@ -18,12 +18,15 @@ const ormConfig: TypeOrmModuleOptions = {
   migrations: [process.env.POSTGRES_MIGRATIONS],
   migrationsTableName: process.env.POSTGRES_MIGRATIONS_TABLE_NAME,
   migrationsRun: process.env.POSTGRES_MIGRATIONS_RUN === 'true',
-  ssl: {
-    rejectUnauthorized: true,
-    ca: fs
-      .readFileSync(join(process.cwd(), 'certs/ca-certificate.crt'))
-      .toString(),
-  },
+  ssl:
+    process.env.NODE_ENV === 'development'
+      ? false
+      : {
+          rejectUnauthorized: true,
+          ca: fs
+            .readFileSync(join(process.cwd(), 'certs/ca-certificate.crt'))
+            .toString(),
+        },
   cli: {
     migrationsDir: './src/migrations',
   },

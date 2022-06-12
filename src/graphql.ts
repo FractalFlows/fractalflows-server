@@ -17,6 +17,12 @@ export enum AvatarSource {
     GRAVATAR = "GRAVATAR"
 }
 
+export enum ClaimNFTStatuses {
+    MINTED = "MINTED",
+    MINTING = "MINTING",
+    NOTMINTED = "NOTMINTED"
+}
+
 export enum ClaimOrigins {
     FRACTALFLOWS = "FRACTALFLOWS",
     TWITTER = "TWITTER"
@@ -271,6 +277,7 @@ export interface Claim {
     followers?: Nullable<User[]>;
     id: string;
     knowledgeBits?: Nullable<KnowledgeBit[]>;
+    nftStatus: ClaimNFTStatuses;
     opinions?: Nullable<Opinion[]>;
     origin: ClaimOrigins;
     ownershipRequestedAt?: Nullable<string>;
@@ -338,9 +345,10 @@ export interface IMutation {
     removeSource(id: number): Source | Promise<Source>;
     requestClaimOwnership(id: string): boolean | Promise<boolean>;
     requestTwitterOAuthUrl(callbackUrl: string): string | Promise<string>;
-    saveClaim(saveClaimInput: CreateClaimInput): string | Promise<string>;
+    saveClaimMetadataOnIPFS(id: string): string | Promise<string>;
     saveKnowledgeBitVote(knowledgeBitId: string, type: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
     saveOpinion(saveOpinionInput: SaveOpinionInput): Opinion | Promise<Opinion>;
+    saveTxId(id: string, txId: string): string | Promise<string>;
     sendSignInCode(email: string): boolean | Promise<boolean>;
     sendUpdateEmailVerificationCode(email: string): boolean | Promise<boolean>;
     signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput): User | Promise<User>;

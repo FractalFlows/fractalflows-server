@@ -55,12 +55,30 @@ export class ClaimsResolver {
 
   @Mutation(() => String)
   @UseGuards(SessionGuard)
-  async saveClaim(
-    @Args('saveClaimInput') saveClaimInput: CreateClaimInput,
+  async saveClaimMetadataOnIPFS(
+    @Args('id') id: String,
     @CurrentUser() user: User,
   ) {
-    const url = await IPFS.uploadClaimMetadata(saveClaimInput);
+    const claim = await this.claimsService.findOne({
+      where: { id },
+      relations: ['tags', 'sources', 'attributions'],
+    });
+
+    const url = await IPFS.uploadClaimMetadata(claim);
     return url;
+  }
+
+  @Mutation(() => String)
+  @UseGuards(SessionGuard)
+  async saveTxId(
+    @Args('id') id: String,
+    @Args('txId') txId: String,
+    @CurrentUser() user: User,
+  ) {
+    const claim = await this.claimsService.save({
+      id,
+      txId,
+    });
   }
 
   @Query(() => Claim, { name: 'claim' })

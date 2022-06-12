@@ -31,64 +31,61 @@ export class AlchemyService {
     );
 
     const handleData = async (data) => {
+      console.log(data);
       const tokenId = parseInt(data.topics[3]);
 
       try {
-        const tokenURI = await claimContract.methods.tokenURI(tokenId).call();
-        const tokenCID = tokenURI.replace(/^ipfs:\/\//, '');
-        const recipientAddress = `0x${data.topics[2].slice(26)}`;
+        // const tokenURI = await claimContract.methods.tokenURI(tokenId).call();
+        // const tokenCID = tokenURI.replace(/^ipfs:\/\//, '');
+        // const recipientAddress = `0x${data.topics[2].slice(26)}`;
 
-        console.log(data);
-        console.log(tokenId);
-        console.log(tokenURI);
-        console.log(tokenCID);
+        // console.log(data);
+        // console.log(tokenId);
+        // console.log(tokenURI);
+        // console.log(tokenCID);
 
-        const metadata = (await this.ipfsService.cat(
-          tokenCID,
-        )) as ClaimMetadataInput;
+        // const metadata = (await this.ipfsService.cat(
+        //   tokenCID,
+        // )) as ClaimMetadataInput;
 
-        console.log(metadata);
+        // console.log(metadata);
 
         if (data.removed) {
         } else {
-          const sources = await this.sourcesService.save(
-            metadata.properties.sources,
-          );
-          const attributions = await this.attributionsService.upsert(
-            metadata.properties.attributions,
-          );
-          const tags = await this.tagsService.save(metadata.properties.tags);
-
-          const getUser = async (ethAddress) => {
-            const user = await this.usersService.findOne({ ethAddress });
-
-            if (user) {
-              return user;
-            } else {
-              return await this.usersService.save({
-                ethAddress,
-                username: ethAddress,
-                usernameSource: UsernameSource.CUSTOM,
-              });
-            }
-          };
-          const user = await getUser(recipientAddress);
-
-          const claim = await this.claimsService.create({
-            title: metadata.name,
-            summary: metadata.description,
-            attributions: attributions.identifiers as any,
-            sources,
-            tags: tags.identifiers,
-            tokenId,
-            user,
-          });
-
-          this.claimsService.notifyNewlyAddedAttributions({
-            attributions: claim.attributions,
-            slug: claim.slug,
-            title: claim.title,
-          });
+          // const sources = await this.sourcesService.save(
+          //   metadata.properties.sources,
+          // );
+          // const attributions = await this.attributionsService.upsert(
+          //   metadata.properties.attributions,
+          // );
+          // const tags = await this.tagsService.save(metadata.properties.tags);
+          // const getUser = async (ethAddress) => {
+          //   const user = await this.usersService.findOne({ ethAddress });
+          //   if (user) {
+          //     return user;
+          //   } else {
+          //     return await this.usersService.save({
+          //       ethAddress,
+          //       username: ethAddress,
+          //       usernameSource: UsernameSource.CUSTOM,
+          //     });
+          //   }
+          // };
+          // const user = await getUser(recipientAddress);
+          // const claim = await this.claimsService.create({
+          //   title: metadata.name,
+          //   summary: metadata.description,
+          //   attributions: attributions.identifiers as any,
+          //   sources,
+          //   tags: tags.identifiers,
+          //   tokenId,
+          //   user,
+          // });
+          // this.claimsService.notifyNewlyAddedAttributions({
+          //   attributions: claim.attributions,
+          //   slug: claim.slug,
+          //   title: claim.title,
+          // });
         }
       } catch (e) {
         console.log(e);
