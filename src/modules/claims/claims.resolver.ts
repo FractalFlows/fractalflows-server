@@ -3,7 +3,7 @@ import { UseGuards } from '@nestjs/common';
 import { In } from 'typeorm';
 
 import { ClaimsService, CLAIM_CORE_RELATIONS } from './claims.service';
-import { Claim } from './entities/claim.entity';
+import { Claim, ClaimNFTStatuses } from './entities/claim.entity';
 import { CreateClaimInput } from './dto/create-claim.input';
 import { UpdateClaimInput } from './dto/update-claim.input';
 import { SourcesService } from '../sources/sources.service';
@@ -56,7 +56,7 @@ export class ClaimsResolver {
   @Mutation(() => String)
   @UseGuards(SessionGuard)
   async saveClaimMetadataOnIPFS(
-    @Args('id') id: String,
+    @Args('id') id: string,
     @CurrentUser() user: User,
   ) {
     const claim = await this.claimsService.findOne({
@@ -68,17 +68,19 @@ export class ClaimsResolver {
     return url;
   }
 
-  @Mutation(() => String)
+  @Mutation(() => Boolean)
   @UseGuards(SessionGuard)
-  async saveTxId(
-    @Args('id') id: String,
-    @Args('txId') txId: String,
+  async saveClaimTxId(
+    @Args('id') id: string,
+    @Args('txId') txId: string,
     @CurrentUser() user: User,
   ) {
-    const claim = await this.claimsService.save({
+    await this.claimsService.save({
       id,
-      txId,
+      nftTxId: txId,
+      nftStatus: ClaimNFTStatuses.MINTING,
     });
+    return true;
   }
 
   @Query(() => Claim, { name: 'claim' })

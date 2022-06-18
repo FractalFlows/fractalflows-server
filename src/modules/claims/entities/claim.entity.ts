@@ -92,13 +92,6 @@ export class Claim extends BaseEntity {
   })
   relevance?: number;
 
-  @Field(() => Number, {
-    description: 'NFT id',
-    nullable: true,
-  })
-  @Column({ nullable: true })
-  tokenId?: number;
-
   @Field(() => String, {
     description: 'Tweet from which this claim was originated from',
     nullable: true,
@@ -132,6 +125,22 @@ export class Claim extends BaseEntity {
     default: ClaimNFTStatuses.NOTMINTED,
   })
   nftStatus: ClaimNFTStatuses;
+
+  @Field(() => String, { nullable: true })
+  @Column({ nullable: true })
+  nftTxId?: string;
+
+  @Field(() => String, {
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  nftTokenId?: string;
+
+  @Field(() => String, {
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  nftFractionalizationContractAddress?: string;
 
   @Field(() => String, { nullable: true })
   @Column({ type: 'timestamp', nullable: true })
