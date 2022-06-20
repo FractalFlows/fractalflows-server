@@ -142,6 +142,18 @@ export class Claim extends BaseEntity {
   @Column({ nullable: true })
   nftFractionalizationContractAddress?: string;
 
+  @Field(() => String, {
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  nftMetadataURI?: string;
+
+  @Field(() => String, {
+    nullable: true,
+  })
+  @Column({ type: 'timestamp', nullable: true })
+  nftMetadataURICreatedAt?: Date;
+
   @Field(() => String, { nullable: true })
   @Column({ type: 'timestamp', nullable: true })
   ownershipRequestedAt?: Date;

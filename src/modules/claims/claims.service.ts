@@ -173,7 +173,7 @@ export class ClaimsService {
     return await this.claimsRepository.findOne(query);
   }
 
-  async update(id: string, updateClaimInput: UpdateClaimInput) {
+  async update(id: string, updateClaimInput: Partial<UpdateClaimInput>) {
     return await this.claimsRepository.save({ ...updateClaimInput, id });
   }
 

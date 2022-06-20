@@ -278,6 +278,8 @@ export interface Claim {
     id: string;
     knowledgeBits?: Nullable<KnowledgeBit[]>;
     nftFractionalizationContractAddress?: Nullable<string>;
+    nftMetadataURI?: Nullable<string>;
+    nftMetadataURICreatedAt?: Nullable<string>;
     nftStatus: ClaimNFTStatuses;
     nftTokenId?: Nullable<string>;
     nftTxId?: Nullable<string>;

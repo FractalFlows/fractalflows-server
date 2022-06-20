@@ -80,6 +80,8 @@ type Claim {
   id: String!
   knowledgeBits: [KnowledgeBit!]
   nftFractionalizationContractAddress: String
+  nftMetadataURI: String
+  nftMetadataURICreatedAt: String
   nftStatus: ClaimNFTStatuses!
   nftTokenId: String
   nftTxId: String

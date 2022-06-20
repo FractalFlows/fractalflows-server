@@ -10,6 +10,7 @@ import claimABI from '../../common/abi/Claim.json';
 import { AttributionsService } from '../attributions/attributions.service';
 import { ClaimMetadataInput } from '../claims/dto/claim-metadata.input';
 import { UsernameSource } from '../users/entities/user.entity';
+import { ClaimNFTStatuses } from '../claims/entities/claim.entity';
 
 @Injectable()
 export class AlchemyService {
@@ -25,14 +26,21 @@ export class AlchemyService {
   private readonly web3 = createAlchemyWeb3(process.env.ALCHEMY_API_URL);
 
   async startNFTMintsStream() {
-    const claimContract = new this.web3.eth.Contract(
-      claimABI as any,
-      process.env.CLAIM_CONTRACT_ADDRESS,
-    );
+    // const claimContract = new this.web3.eth.Contract(
+    //   claimABI as any,
+    //   process.env.CLAIM_CONTRACT_ADDRESS,
+    // );
 
     const handleData = async (data) => {
       console.log(data);
-      const tokenId = parseInt(data.topics[3]);
+
+      const claim = await this.claimsService.findOne({
+        nftTxId: data.transactionHash,
+      });
+      const nftFractionalizationContractAddress = `0x${data.topics[2].slice(
+        -40,
+      )}`;
+      const nftTokenId = String(parseInt(data.topics[3]));
 
       try {
         // const tokenURI = await claimContract.methods.tokenURI(tokenId).call();
@@ -51,12 +59,23 @@ export class AlchemyService {
         // console.log(metadata);
 
         if (data.removed) {
+          await this.claimsService.update(claim.id, {
+            nftTokenId: '',
+            nftFractionalizationContractAddress: '',
+            nftStatus: ClaimNFTStatuses.NOTMINTED,
+          });
         } else {
+          await this.claimsService.update(claim.id, {
+            nftTokenId,
+            nftFractionalizationContractAddress,
+            nftStatus: ClaimNFTStatuses.MINTED,
+          });
+
           // const sources = await this.sourcesService.save(
           //   metadata.properties.sources,
           // );
           // const attributions = await this.attributionsService.upsert(
-          //   metadata.properties.attributions,
+          //   metadata.properties.attributions,²³
           // );
           // const tags = await this.tagsService.save(metadata.properties.tags);
           // const getUser = async (ethAddress) => {

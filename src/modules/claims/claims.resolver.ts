@@ -65,6 +65,12 @@ export class ClaimsResolver {
     });
 
     const url = await IPFS.uploadClaimMetadata(claim);
+
+    await this.claimsService.update(id, {
+      nftMetadataURI: url,
+      nftMetadataURICreatedAt: new Date(),
+    });
+
     return url;
   }
 
@@ -75,8 +81,7 @@ export class ClaimsResolver {
     @Args('txId') txId: string,
     @CurrentUser() user: User,
   ) {
-    await this.claimsService.save({
-      id,
+    await this.claimsService.update(id, {
       nftTxId: txId,
       nftStatus: ClaimNFTStatuses.MINTING,
     });
