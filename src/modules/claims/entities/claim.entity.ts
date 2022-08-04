@@ -26,6 +26,16 @@ registerEnumType(ClaimOrigins, {
   name: 'ClaimOrigins',
 });
 
+export enum ClaimNFTStatuses {
+  NOTMINTED,
+  MINTING,
+  MINTED,
+}
+
+registerEnumType(ClaimNFTStatuses, {
+  name: 'ClaimNFTStatuses',
+});
+
 @Entity()
 @ObjectType()
 export class Claim extends BaseEntity {
@@ -107,6 +117,42 @@ export class Claim extends BaseEntity {
     default: ClaimOrigins.FRACTALFLOWS,
   })
   origin: ClaimOrigins;
+
+  @Field(() => ClaimNFTStatuses)
+  @Column({
+    type: 'enum',
+    enum: ClaimNFTStatuses,
+    default: ClaimNFTStatuses.NOTMINTED,
+  })
+  nftStatus: ClaimNFTStatuses;
+
+  @Field(() => String, { nullable: true })
+  @Column({ nullable: true })
+  nftTxId?: string;
+
+  @Field(() => String, {
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  nftTokenId?: string;
+
+  @Field(() => String, {
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  nftFractionalizationContractAddress?: string;
+
+  @Field(() => String, {
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  nftMetadataURI?: string;
+
+  @Field(() => String, {
+    nullable: true,
+  })
+  @Column({ type: 'timestamp', nullable: true })
+  nftMetadataURICreatedAt?: Date;
 
   @Field(() => String, { nullable: true })
   @Column({ type: 'timestamp', nullable: true })

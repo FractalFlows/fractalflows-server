@@ -3,7 +3,7 @@ import { UseGuards } from '@nestjs/common';
 import { In } from 'typeorm';
 
 import { ClaimsService, CLAIM_CORE_RELATIONS } from './claims.service';
-import { Claim } from './entities/claim.entity';
+import { Claim, ClaimNFTStatuses } from './entities/claim.entity';
 import { CreateClaimInput } from './dto/create-claim.input';
 import { UpdateClaimInput } from './dto/update-claim.input';
 import { SourcesService } from '../sources/sources.service';
@@ -16,6 +16,7 @@ import { User } from '../users/entities/user.entity';
 import { InviteFriendsInput } from './dto/invite-friends.input';
 import { PaginatedClaims } from './dto/paginated-claims.output';
 import { getClaimURL } from 'src/common/utils/claim';
+import { IPFS } from 'src/common/services/ipfs';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -50,6 +51,41 @@ export class ClaimsResolver {
     });
 
     return claim;
+  }
+
+  @Mutation(() => String)
+  @UseGuards(SessionGuard)
+  async saveClaimMetadataOnIPFS(
+    @Args('id') id: string,
+    @CurrentUser() user: User,
+  ) {
+    const claim = await this.claimsService.findOne({
+      where: { id },
+      relations: ['tags', 'sources', 'attributions'],
+    });
+
+    const url = await IPFS.uploadClaimMetadata(claim);
+
+    await this.claimsService.update(id, {
+      nftMetadataURI: url,
+      nftMetadataURICreatedAt: new Date(),
+    });
+
+    return url;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(SessionGuard)
+  async saveClaimTxId(
+    @Args('id') id: string,
+    @Args('txId') txId: string,
+    @CurrentUser() user: User,
+  ) {
+    await this.claimsService.update(id, {
+      nftTxId: txId,
+      nftStatus: ClaimNFTStatuses.MINTING,
+    });
+    return true;
   }
 
   @Query(() => Claim, { name: 'claim' })

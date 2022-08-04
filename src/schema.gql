@@ -79,6 +79,12 @@ type Claim {
   followers: [User!]
   id: String!
   knowledgeBits: [KnowledgeBit!]
+  nftFractionalizationContractAddress: String
+  nftMetadataURI: String
+  nftMetadataURICreatedAt: String
+  nftStatus: ClaimNFTStatuses!
+  nftTokenId: String
+  nftTxId: String
   opinions: [Opinion!]
   origin: ClaimOrigins!
   ownershipRequestedAt: String
@@ -116,6 +122,12 @@ type Claim {
 
 input ClaimInput {
   id: String!
+}
+
+enum ClaimNFTStatuses {
+  MINTED
+  MINTING
+  NOTMINTED
 }
 
 enum ClaimOrigins {
@@ -294,6 +306,8 @@ type Mutation {
   removeSource(id: Int!): Source!
   requestClaimOwnership(id: String!): Boolean!
   requestTwitterOAuthUrl(callbackUrl: String!): String!
+  saveClaimMetadataOnIPFS(id: String!): String!
+  saveClaimTxId(id: String!, txId: String!): Boolean!
   saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
   saveOpinion(saveOpinionInput: SaveOpinionInput!): Opinion!
   sendSignInCode(email: String!): Boolean!
