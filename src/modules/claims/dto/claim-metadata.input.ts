@@ -4,16 +4,10 @@ import { SaveAttributionInput } from 'src/modules/attributions/dto/save-attribut
 import { SaveSourceInput } from 'src/modules/sources/dto/save-source.input';
 import { SaveTagInput } from 'src/modules/tags/dto/save-tag.input';
 import { Tag } from 'src/modules/tags/entities/tag.entity';
-import { ClaimNFTStatuses, ClaimOrigins } from '../entities/claim.entity';
+import { ClaimOrigins } from '../entities/claim.entity';
 
 @InputType()
-export class CreateClaimInput {
-  @Field(() => String, { description: 'Title' })
-  title: string;
-
-  @Field(() => String, { description: 'Summary' })
-  summary: string;
-
+class ClaimMetadataPropertiesInput {
   @Field(() => [SaveSourceInput], { description: 'Sources', nullable: true })
   sources?: SaveSourceInput[];
 
@@ -25,14 +19,19 @@ export class CreateClaimInput {
     nullable: true,
   })
   attributions?: SaveAttributionInput[];
+}
 
-  nftTokenId?: string;
-  nftStatus?: ClaimNFTStatuses;
-  nftTxId?: string;
-  nftFractionalizationContractAddress?: string;
-  nftMetadataURI?: string;
-  nftMetadataURICreatedAt?: Date;
-  tweetId?: string;
-  tweetOwner?: string;
-  origin?: ClaimOrigins;
+@InputType()
+export class ClaimMetadataInput {
+  @Field(() => String, { description: 'Title' })
+  name: string;
+
+  @Field(() => String, { description: 'Summary' })
+  description: string;
+
+  @Field(() => ClaimMetadataPropertiesInput, {
+    description: 'Properties',
+    nullable: true,
+  })
+  properties?: ClaimMetadataPropertiesInput;
 }

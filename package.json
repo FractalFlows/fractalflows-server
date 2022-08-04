@@ -25,6 +25,8 @@
     "typeorm:migration:run": "yarn typeorm migration:run"
   },
   "dependencies": {
+    "@alch/alchemy-web3": "^1.4.2",
+    "@nestjs/axios": "^0.0.7",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^1.1.5",
     "@nestjs/core": "^8.0.0",
@@ -42,6 +44,7 @@
     "ethers": "^5.5.2",
     "express-session": "^1.17.2",
     "graphql": "^15",
+    "nft.storage": "^6.2.0",
     "nodemailer": "^6.7.2",
     "pg": "^8.7.1",
     "redis": "^4.0.1",
