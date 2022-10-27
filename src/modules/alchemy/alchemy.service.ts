@@ -32,8 +32,6 @@ export class AlchemyService {
     // );
 
     const handleData = async (data) => {
-      console.log(data);
-
       const claim = await this.claimsService.findOne({
         nftTxId: data.transactionHash,
       });
