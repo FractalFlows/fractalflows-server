@@ -1,9 +1,15 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { join } from 'path';
+import {
+  GraphqlInterceptor,
+  SentryInterceptor,
+  SentryModule,
+} from '@ntegral/nestjs-sentry';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -45,6 +51,15 @@ import typeormConfig from '../ormconfig';
     }),
     TypeOrmModule.forRoot(typeormConfig),
     ScheduleModule.forRoot(),
+    SentryModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (cfg: ConfigService) => ({
+        dsn: cfg.get('SENTRY_DSN'),
+        debug: true,
+        environment: cfg.get('APP_ENV'),
+      }),
+      inject: [ConfigService],
+    }),
     UsersModule,
     AuthModule,
     ClaimsModule,
@@ -60,6 +75,16 @@ import typeormConfig from '../ormconfig';
     AlchemyModule,
     IPFSModule,
     FrontendModule,
+  ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useFactory: () => new GraphqlInterceptor(),
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useFactory: () => new SentryInterceptor(),
+    },
   ],
 })
 export class AppModule implements NestModule {
