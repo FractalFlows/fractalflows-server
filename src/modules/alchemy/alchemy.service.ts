@@ -32,6 +32,8 @@ export class AlchemyService {
     // );
 
     const handleData = async (data) => {
+      console.log('nft mints data');
+
       console.log(data);
 
       const claim = await this.claimsService.findOne({

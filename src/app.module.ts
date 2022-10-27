@@ -55,7 +55,6 @@ import typeormConfig from '../ormconfig';
       imports: [ConfigModule],
       useFactory: async (cfg: ConfigService) => ({
         dsn: cfg.get('SENTRY_DSN'),
-        debug: true,
         environment: cfg.get('APP_ENV'),
       }),
       inject: [ConfigService],
