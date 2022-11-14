@@ -31,16 +31,6 @@ export class AuthService {
     return fields;
   }
 
-  async sendSignInCode({ email, signInCode }) {
-    return await sendMail({
-      subject: `Your sign in code: ${signInCode}`,
-      to: email,
-      html: `
-        Here is your sign in code. Enter it in your open browser window to sign in: <strong>${signInCode}</strong>
-      `,
-    });
-  }
-
   async signOut(session) {
     await session.destroy();
     return true;
