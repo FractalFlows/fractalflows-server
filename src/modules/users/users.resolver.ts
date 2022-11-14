@@ -127,31 +127,6 @@ export class UsersResolver {
     }
   }
 
-  @Mutation(() => User)
-  @UseGuards(SessionGuard)
-  async connectEthereumWallet(
-    @Args('address') address: string,
-    @CurrentUser() user: User,
-    @Context() context,
-  ) {
-    const isEthAddressAlreadyInUse = await this.usersService.findOne({
-      where: { ethAddress: address, id: Not(user.id) },
-    });
-
-    if (isEthAddressAlreadyInUse) {
-      throw new Error('Ethereum address already in use');
-    } else {
-      const userWithUpdatedEthereumAddress = this.usersService.save({
-        id: user.id,
-        ethAddress: address,
-      });
-
-      if (context.req.session) context.req.session.user.ethAddress = address;
-
-      return userWithUpdatedEthereumAddress;
-    }
-  }
-
   @Query(() => Profile, { name: 'profile', nullable: true })
   async getProfile(@Args('username') username: string) {
     const user = await this.usersService.findOne({ where: { username } });

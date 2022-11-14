@@ -329,7 +329,6 @@ export interface KnowledgeBitVote {
 
 export interface IMutation {
     addFollowerToClaim(id: string): boolean | Promise<boolean>;
-    connectEthereumWallet(address: string): User | Promise<User>;
     createAPIKey(): APIKey | Promise<APIKey>;
     createArgument(claimSlug: string, createArgumentInput: CreateArgumentInput): Argument | Promise<Argument>;
     createArgumentComment(createArgumentCommentInput: CreateArgumentCommentInput): ArgumentComment | Promise<ArgumentComment>;

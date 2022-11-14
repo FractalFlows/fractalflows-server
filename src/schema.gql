@@ -286,7 +286,6 @@ enum KnowledgeBitVoteTypes {
 
 type Mutation {
   addFollowerToClaim(id: String!): Boolean!
-  connectEthereumWallet(address: String!): User!
   createAPIKey: APIKey!
   createArgument(claimSlug: String!, createArgumentInput: CreateArgumentInput!): Argument!
   createArgumentComment(createArgumentCommentInput: CreateArgumentCommentInput!): ArgumentComment!
