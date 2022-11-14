@@ -85,64 +85,6 @@ export class AuthResolver {
   }
 
   @Mutation(() => Boolean)
-  async sendSignInCode(@Args('email') email: string, @Context() context) {
-    const signInCode = new Date().getTime().toString().substring(7);
-
-    await this.authService.sendSignInCode({
-      email,
-      signInCode,
-    });
-
-    const user = await this.usersService.findOne({
-      where: { email },
-    });
-
-    if (!user) {
-      await this.usersService.create({
-        email,
-        username: email,
-        usernameSource: UsernameSource.CUSTOM,
-        avatar: getGravatarURL(email),
-        avatarSource: AvatarSource.GRAVATAR,
-      });
-    }
-
-    if (context.req.session) {
-      context.req.session.signInWithEmail = {
-        email,
-        code: signInCode,
-      };
-    }
-
-    return true;
-  }
-
-  @Mutation(() => User)
-  async verifySignInCode(
-    @Args('signInCode') signInCode: string,
-    @Context() context,
-  ) {
-    const { email, code: expectedSignInCode } =
-      context.req.session.signInWithEmail || {};
-
-    if (!expectedSignInCode) {
-      throw new Error('Unable to check sign in code');
-    } else if (expectedSignInCode !== signInCode.trim()) {
-      throw new Error('Invalid sign in code');
-    }
-
-    const user = await this.usersService.findOne({
-      where: { email },
-    });
-
-    if (context.req.session) {
-      context.req.session.user = user;
-    }
-
-    return user;
-  }
-
-  @Mutation(() => Boolean)
   @UseGuards(SessionGuard)
   async signOut(@Context() context) {
     return await this.authService.signOut(context.req.session);

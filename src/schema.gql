@@ -286,7 +286,6 @@ enum KnowledgeBitVoteTypes {
 
 type Mutation {
   addFollowerToClaim(id: String!): Boolean!
-  connectEthereumWallet(address: String!): User!
   createAPIKey: APIKey!
   createArgument(claimSlug: String!, createArgumentInput: CreateArgumentInput!): Argument!
   createArgumentComment(createArgumentCommentInput: CreateArgumentCommentInput!): ArgumentComment!
@@ -310,7 +309,6 @@ type Mutation {
   saveClaimTxId(id: String!, txId: String!): Boolean!
   saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
   saveOpinion(saveOpinionInput: SaveOpinionInput!): Opinion!
-  sendSignInCode(email: String!): Boolean!
   sendUpdateEmailVerificationCode(email: String!): Boolean!
   signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput!): User!
   signOut: Boolean!
@@ -321,7 +319,6 @@ type Mutation {
   updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput!): KnowledgeBit!
   updateProfile(updateProfileInput: UpdateProfileInput!): User!
   validateTwitterOAuth(oauthToken: String!, oauthVerifier: String!): String!
-  verifySignInCode(signInCode: String!): User!
 }
 
 type Opinion {
