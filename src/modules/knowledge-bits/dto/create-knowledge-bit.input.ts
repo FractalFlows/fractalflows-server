@@ -1,8 +1,16 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { SaveAttributionInput } from 'src/modules/attributions/dto/save-attribution.input';
+import { default as GraphQLUpload } from 'graphql-upload/GraphQLUpload.js';
+import { Stream } from 'stream';
 
+export interface FileUpload {
+  filename: string;
+  mimetype: string;
+  encoding: string;
+  createReadStream: () => Stream;
+}
+
+import { SaveAttributionInput } from 'src/modules/attributions/dto/save-attribution.input';
 import {
-  KnowledgeBitLocations,
   KnowledgeBitSides,
   KnowledgeBitTypes,
 } from '../entities/knowledge-bit.entity';
@@ -24,14 +32,8 @@ export class CreateKnowledgeBitInput {
   @Field(() => String, { nullable: true })
   customType?: string;
 
-  @Field(() => KnowledgeBitLocations)
-  location: KnowledgeBitLocations;
-
-  @Field(() => String, { nullable: true })
-  customLocation?: string;
-
-  @Field(() => String)
-  url: string;
+  @Field(() => GraphQLUpload)
+  file: Promise<FileUpload>;
 
   @Field(() => [SaveAttributionInput], { nullable: true })
   attributions: SaveAttributionInput[];

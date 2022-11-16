@@ -35,6 +35,8 @@ export class KnowledgeBitsResolver {
     createKnowledgeBitInput: CreateKnowledgeBitInput,
     @CurrentUser() user: User,
   ) {
+    console.log(createKnowledgeBitInput);
+    return;
     const claim = await this.claimsService.findOne({
       where: { slug: claimSlug },
     });

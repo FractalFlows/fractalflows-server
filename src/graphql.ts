@@ -7,6 +7,7 @@
 
 /* tslint:disable */
 /* eslint-disable */
+
 export enum ArgumentSides {
     CON = "CON",
     PRO = "PRO"
@@ -26,41 +27,6 @@ export enum ClaimNFTStatuses {
 export enum ClaimOrigins {
     FRACTALFLOWS = "FRACTALFLOWS",
     TWITTER = "TWITTER"
-}
-
-export enum KnowledgeBitLocations {
-    ACADEMIA_EDU = "ACADEMIA_EDU",
-    ARXIV = "ARXIV",
-    BIT_TORRENT = "BIT_TORRENT",
-    BLOG = "BLOG",
-    BOX = "BOX",
-    DAT = "DAT",
-    DATABASE = "DATABASE",
-    DROPBOX = "DROPBOX",
-    EMAIL = "EMAIL",
-    ETHEREUM_SWARM = "ETHEREUM_SWARM",
-    FIGSHARE = "FIGSHARE",
-    GIT = "GIT",
-    GOOGLE_DRIVE = "GOOGLE_DRIVE",
-    HAL_ARCHIVES = "HAL_ARCHIVES",
-    IPFS = "IPFS",
-    JUPYTER = "JUPYTER",
-    KAGGLE = "KAGGLE",
-    ONEDRIVE = "ONEDRIVE",
-    OPENAIRE = "OPENAIRE",
-    OTHER = "OTHER",
-    PDF = "PDF",
-    PUBPEER = "PUBPEER",
-    RE3DATA = "RE3DATA",
-    RESEARCH_GATE = "RESEARCH_GATE",
-    RESEARCH_ID = "RESEARCH_ID",
-    SCIENTIFIC_PUBLISHER = "SCIENTIFIC_PUBLISHER",
-    SLIDESHARE = "SLIDESHARE",
-    STACK_OVERFLOW = "STACK_OVERFLOW",
-    WEBSITE = "WEBSITE",
-    WIKIPEDIA = "WIKIPEDIA",
-    YOUTUBE = "YOUTUBE",
-    ZENODO = "ZENODO"
 }
 
 export enum KnowledgeBitSides {
@@ -126,14 +92,12 @@ export interface CreateClaimInput {
 
 export interface CreateKnowledgeBitInput {
     attributions?: Nullable<SaveAttributionInput[]>;
-    customLocation?: Nullable<string>;
     customType?: Nullable<string>;
-    location: KnowledgeBitLocations;
+    file: Upload;
     name: string;
     side: KnowledgeBitSides;
     summary?: Nullable<string>;
     type: KnowledgeBitTypes;
-    url: string;
 }
 
 export interface IDInput {
@@ -174,18 +138,17 @@ export interface SaveTagInput {
 export interface SignInWithEthereumInput {
     avatar?: Nullable<string>;
     ens?: Nullable<string>;
+    signature: string;
     siweMessage: SiweMessageInput;
 }
 
 export interface SiweMessageInput {
     address: string;
-    chainId: string;
+    chainId: number;
     domain: string;
     issuedAt: string;
     nonce: string;
-    signature: string;
     statement: string;
-    type: string;
     uri: string;
     version: string;
 }
@@ -214,15 +177,13 @@ export interface UpdateClaimInput {
 
 export interface UpdateKnowledgeBitInput {
     attributions?: Nullable<SaveAttributionInput[]>;
-    customLocation?: Nullable<string>;
     customType?: Nullable<string>;
+    file: Upload;
     id: string;
-    location: KnowledgeBitLocations;
     name: string;
     side: KnowledgeBitSides;
     summary?: Nullable<string>;
     type: KnowledgeBitTypes;
-    url: string;
 }
 
 export interface UpdateProfileInput {
@@ -302,11 +263,9 @@ export interface KnowledgeBit {
     attributions?: Nullable<Attribution[]>;
     claim: Claim;
     createdAt: string;
-    customLocation?: Nullable<string>;
     customType?: Nullable<string>;
     downvotesCount?: Nullable<number>;
     id: string;
-    location: KnowledgeBitLocations;
     name: string;
     side: KnowledgeBitSides;
     summary?: Nullable<string>;
@@ -471,4 +430,5 @@ export interface User {
     usernameSource?: Nullable<UsernameSource>;
 }
 
+export type Upload = any;
 type Nullable<T> = T | null;

@@ -10,6 +10,7 @@ import {
   SentryModule,
 } from '@ntegral/nestjs-sentry';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -32,7 +33,8 @@ import typeormConfig from '../ormconfig';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    GraphQLModule.forRoot({
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
       definitions: {

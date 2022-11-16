@@ -15,14 +15,21 @@ export class AuthService {
     signInWithEthereumInput: SignInWithEthereumInput,
     nonce: string,
   ) {
+    console.log(signInWithEthereumInput);
+
     const siweMessage = new SiweMessage(
-      signInWithEthereumInput.siweMessage as SiweMessage,
+      signInWithEthereumInput.siweMessage as any,
     );
 
-    const infuraProvider = InfuraService.getProvider(siweMessage.chainId);
-    await infuraProvider.ready;
+    // const infuraProvider = InfuraService.getProvider(
+    //   siweMessage.chainId as unknown as string,
+    // );
+    // await infuraProvider.ready;
 
-    const fields: SiweMessage = await siweMessage.validate(infuraProvider);
+    const fields: SiweMessage = await siweMessage.validate(
+      signInWithEthereumInput.signature,
+    );
+    console.log(fields);
 
     if (fields.nonce !== nonce) {
       throw new Error('Invalid nonce');

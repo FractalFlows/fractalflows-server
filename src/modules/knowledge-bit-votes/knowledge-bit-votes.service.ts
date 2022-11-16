@@ -33,6 +33,6 @@ export class KnowledgeBitVotesService {
     return this.knowledgeBitVoteRepository.count({
       knowledgeBit: knowledgeBitId,
       type,
-    });
+    } as any);
   }
 }
