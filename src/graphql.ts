@@ -178,7 +178,7 @@ export interface UpdateClaimInput {
 export interface UpdateKnowledgeBitInput {
     attributions?: Nullable<SaveAttributionInput[]>;
     customType?: Nullable<string>;
-    file: Upload;
+    file?: Nullable<Upload>;
     id: string;
     name: string;
     side: KnowledgeBitSides;

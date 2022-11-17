@@ -37,8 +37,6 @@ export class KnowledgeBitsResolver {
     createKnowledgeBitInput: CreateKnowledgeBitInput,
     @CurrentUser() user: User,
   ) {
-    console.log(createKnowledgeBitInput);
-
     return await new Promise(async (resolve, reject) => {
       const { createReadStream, filename } = await createKnowledgeBitInput.file;
       const readStream = createReadStream();
@@ -180,29 +178,60 @@ export class KnowledgeBitsResolver {
     @Args('updateKnowledgeBitInput')
     updateKnowledgeBitInput: UpdateKnowledgeBitInput,
   ) {
-    const knowledgeBit = await this.knowledgeBitsService.findOne({
-      where: { id: updateKnowledgeBitInput.id },
-      relations: ['claim', 'attributions'],
-    });
+    const updateKnowledgeBit = async (
+      updateKnowledgeBitFile: {
+        filename: string;
+        fileCID: string;
+      } = {} as any,
+    ) => {
+      const knowledgeBit = await this.knowledgeBitsService.findOne({
+        where: { id: updateKnowledgeBitInput.id },
+        relations: ['claim', 'attributions'],
+      });
 
-    await this.attributionsService.save(updateKnowledgeBitInput.attributions);
-    await this.knowledgeBitsService.update(
-      updateKnowledgeBitInput.id,
-      // @ts-ignore
-      updateKnowledgeBitInput,
-    );
+      await this.attributionsService.save(updateKnowledgeBitInput.attributions);
+      await this.knowledgeBitsService.update(updateKnowledgeBitInput.id, {
+        ...updateKnowledgeBitInput,
+        ...updateKnowledgeBitFile,
+      });
 
-    const updatedKnowledgeBit = await this.findOne(updateKnowledgeBitInput.id);
+      const updatedKnowledgeBit = await this.findOne(
+        updateKnowledgeBitInput.id,
+      );
 
-    this.knowledgeBitsService.notifyNewlyAddedAttributions({
-      attributions: updatedKnowledgeBit.attributions,
-      existing: knowledgeBit.attributions,
-      claimSlug: knowledgeBit.claim.slug,
-      claimTitle: knowledgeBit.claim.title,
-      name: knowledgeBit.name,
-    });
+      this.knowledgeBitsService.notifyNewlyAddedAttributions({
+        attributions: updatedKnowledgeBit.attributions,
+        existing: knowledgeBit.attributions,
+        claimSlug: knowledgeBit.claim.slug,
+        claimTitle: knowledgeBit.claim.title,
+        name: knowledgeBit.name,
+      });
 
-    return updatedKnowledgeBit;
+      return updatedKnowledgeBit;
+    };
+
+    if (updateKnowledgeBitInput.file) {
+      return await new Promise(async (resolve, reject) => {
+        const { createReadStream, filename } =
+          await updateKnowledgeBitInput.file;
+        const readStream = createReadStream();
+
+        const handleStreamConcatComplete = async (buffer) => {
+          const fileCID = await IPFS.uploadFile(buffer, filename);
+
+          resolve(await updateKnowledgeBit({ fileCID, filename }));
+        };
+
+        const readStreamConcat = concatStream(handleStreamConcatComplete);
+
+        readStream.on('error', (error) => {
+          console.error(error);
+        });
+        readStream.pipe(readStreamConcat);
+      });
+    } else {
+      return updateKnowledgeBit();
+    }
   }
 
   @Mutation(() => Boolean)

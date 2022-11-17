@@ -1,13 +1,6 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { default as GraphQLUpload } from 'graphql-upload/GraphQLUpload.js';
-import { Stream } from 'stream';
-
-export interface FileUpload {
-  filename: string;
-  mimetype: string;
-  encoding: string;
-  createReadStream: () => Stream;
-}
+import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
+import { FileUpload } from 'src/common/interfaces';
 
 import { SaveAttributionInput } from 'src/modules/attributions/dto/save-attribution.input';
 import {

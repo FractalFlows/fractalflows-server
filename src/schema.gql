@@ -513,7 +513,7 @@ input UpdateClaimInput {
 input UpdateKnowledgeBitInput {
   attributions: [SaveAttributionInput!]
   customType: String
-  file: Upload!
+  file: Upload
   id: String!
   name: String!
   side: KnowledgeBitSides!
