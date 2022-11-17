@@ -1,4 +1,5 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import concatStream from 'concat-stream';
 
 import { KnowledgeBitsService } from './knowledge-bits.service';
 import {
@@ -17,6 +18,7 @@ import { KnowledgeBitVotesService } from '../knowledge-bit-votes/knowledge-bit-v
 import { KnowledgeBitVoteTypes } from '../knowledge-bit-votes/entities/knowledge-bit-vote.entity';
 import { getClaimURL } from 'src/common/utils/claim';
 import { Attribution } from '../attributions/entities/attribution.entity';
+import { IPFS } from 'src/common/services/ipfs';
 
 @Resolver(() => KnowledgeBit)
 export class KnowledgeBitsResolver {
@@ -36,56 +38,76 @@ export class KnowledgeBitsResolver {
     @CurrentUser() user: User,
   ) {
     console.log(createKnowledgeBitInput);
-    return;
-    const claim = await this.claimsService.findOne({
-      where: { slug: claimSlug },
-    });
 
-    await this.attributionsService.upsert(createKnowledgeBitInput.attributions);
-    const createKnowledgeBit = await this.knowledgeBitsService.create({
-      ...createKnowledgeBitInput,
-      claim: await this.claimsService.findOne({
-        where: { slug: claimSlug },
-      }),
-      user,
-    });
+    return await new Promise(async (resolve, reject) => {
+      const { createReadStream, filename } = await createKnowledgeBitInput.file;
+      const readStream = createReadStream();
 
-    this.claimsService.notifyFollowers({
-      id: claim.id,
-      subject: 'A claim you follow has a new knowledge bit',
-      html: `
+      const handleStreamConcatComplete = async (buffer) => {
+        const fileCID = await IPFS.uploadFile(buffer, filename);
+
+        const claim = await this.claimsService.findOne({
+          where: { slug: claimSlug },
+        });
+
+        await this.attributionsService.upsert(
+          createKnowledgeBitInput.attributions,
+        );
+        const createKnowledgeBit = await this.knowledgeBitsService.create({
+          ...createKnowledgeBitInput,
+          filename,
+          fileCID,
+          claim: await this.claimsService.findOne({
+            where: { slug: claimSlug },
+          }),
+          user,
+        });
+
+        this.claimsService.notifyFollowers({
+          id: claim.id,
+          subject: 'A claim you follow has a new knowledge bit',
+          html: `
       The claim <a href="${getClaimURL(claim.slug)}">${
-        claim.title
-      }</a> that you are following has a new ${
-        createKnowledgeBit.side === KnowledgeBitSides.REFUTING
-          ? 'refuting'
-          : 'supporting'
-      } knowledge bit: "${createKnowledgeBit.name}"
+            claim.title
+          }</a> that you are following has a new ${
+            createKnowledgeBit.side === KnowledgeBitSides.REFUTING
+              ? 'refuting'
+              : 'supporting'
+          } knowledge bit: "${createKnowledgeBit.name}"
       `,
-      triggeredBy: user,
-    });
-    this.claimsService.notifyOwner({
-      id: claim.id,
-      subject: 'Your claim has a new knowledge bit',
-      html: `
+          triggeredBy: user,
+        });
+        this.claimsService.notifyOwner({
+          id: claim.id,
+          subject: 'Your claim has a new knowledge bit',
+          html: `
       Your claim <a href="${getClaimURL(claim.slug)}">${
-        claim.title
-      }</a> has a new ${
-        createKnowledgeBit.side === KnowledgeBitSides.REFUTING
-          ? 'refuting'
-          : 'supporting'
-      } knowledge bit: "${createKnowledgeBit.name}"
+            claim.title
+          }</a> has a new ${
+            createKnowledgeBit.side === KnowledgeBitSides.REFUTING
+              ? 'refuting'
+              : 'supporting'
+          } knowledge bit: "${createKnowledgeBit.name}"
       `,
-      triggeredBy: user,
-    });
-    this.knowledgeBitsService.notifyNewlyAddedAttributions({
-      attributions: createKnowledgeBitInput.attributions as Attribution[],
-      claimSlug: claim.slug,
-      claimTitle: claim.title,
-      name: createKnowledgeBit.name,
-    });
+          triggeredBy: user,
+        });
+        this.knowledgeBitsService.notifyNewlyAddedAttributions({
+          attributions: createKnowledgeBitInput.attributions as Attribution[],
+          claimSlug: claim.slug,
+          claimTitle: claim.title,
+          name: createKnowledgeBit.name,
+        });
 
-    return await this.findOne(createKnowledgeBit.id);
+        resolve(await this.findOne(createKnowledgeBit.id));
+      };
+
+      const readStreamConcat = concatStream(handleStreamConcatComplete);
+
+      readStream.on('error', (error) => {
+        console.error(error);
+      });
+      readStream.pipe(readStreamConcat);
+    });
   }
 
   @Query(() => KnowledgeBit, { name: 'knowledgeBit' })
@@ -166,6 +188,7 @@ export class KnowledgeBitsResolver {
     await this.attributionsService.save(updateKnowledgeBitInput.attributions);
     await this.knowledgeBitsService.update(
       updateKnowledgeBitInput.id,
+      // @ts-ignore
       updateKnowledgeBitInput,
     );
 

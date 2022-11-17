@@ -265,6 +265,8 @@ export interface KnowledgeBit {
     createdAt: string;
     customType?: Nullable<string>;
     downvotesCount?: Nullable<number>;
+    fileCID: string;
+    filename: string;
     id: string;
     name: string;
     side: KnowledgeBitSides;
@@ -272,7 +274,6 @@ export interface KnowledgeBit {
     type: KnowledgeBitTypes;
     updatedAt: string;
     upvotesCount?: Nullable<number>;
-    url: string;
     user: User;
     votes?: Nullable<KnowledgeBitVote[]>;
 }

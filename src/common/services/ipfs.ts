@@ -1,12 +1,18 @@
 import { NFTStorage, File } from 'nft.storage';
+import { Web3Storage, File as Web3StorageFile } from 'web3.storage';
 
 export const IPFS = {
-  getNFTStorageClient() {
+  _getNFTStorageClient() {
     const client = new NFTStorage({ token: process.env.NFTSTORAGE_API_KEY });
     return client;
   },
+  _getWeb3StorageClient() {
+    const client = new Web3Storage({ token: process.env.WEB3STORAGE_API_KEY });
+    return client;
+  },
+
   async uploadClaimMetadata(claim) {
-    const client = this.getNFTStorageClient();
+    const client = this._getNFTStorageClient();
     const metadata = await client.store({
       name: claim.title,
       description: claim.summary,
@@ -19,7 +25,13 @@ export const IPFS = {
       external_uri: `${process.env.HOST}/claim/${claim.slug}`,
     });
 
-    console.log(metadata);
     return metadata.url;
+  },
+  async uploadFile(buffer, filename) {
+    const client = this._getWeb3StorageClient();
+    const file = new Web3StorageFile([buffer], filename);
+    const cid = await client.put([file]);
+
+    return cid;
   },
 };

@@ -76,7 +76,11 @@ export class KnowledgeBit extends BaseEntity {
 
   @Field(() => String)
   @Column()
-  url: string;
+  filename: string;
+
+  @Field(() => String)
+  @Column()
+  fileCID: string;
 
   @Field(() => [Attribution], { nullable: true })
   @ManyToMany(() => Attribution, (attribution) => attribution.knowledgeBits)

@@ -192,6 +192,8 @@ type KnowledgeBit {
   createdAt: String!
   customType: String
   downvotesCount: Int
+  fileCID: String!
+  filename: String!
   id: String!
   name: String!
   side: KnowledgeBitSides!
@@ -201,7 +203,6 @@ type KnowledgeBit {
   """Updated at"""
   updatedAt: String!
   upvotesCount: Int
-  url: String!
   user: User!
   votes: [KnowledgeBitVote!]
 }

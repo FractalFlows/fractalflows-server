@@ -27,7 +27,8 @@ async function bootstrap() {
   };
   app.use(session(sessionOptions));
 
-  app.use(graphqlUploadExpress({ maxFileSize: 1000000, maxFiles: 10 }));
+  // maxFileSize 30mb
+  app.use(graphqlUploadExpress({ maxFileSize: 31457280, maxFiles: 10 }));
 
   sendgrid.setApiKey(configService.get('SENDGRID_API_KEY'));
 
