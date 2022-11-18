@@ -196,6 +196,7 @@ type KnowledgeBit {
   filename: String!
   id: String!
   name: String!
+  nftMetadataURI: String
   side: KnowledgeBitSides!
   summary: String
   type: KnowledgeBitTypes!

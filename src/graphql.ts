@@ -269,6 +269,7 @@ export interface KnowledgeBit {
     filename: string;
     id: string;
     name: string;
+    nftMetadataURI?: Nullable<string>;
     side: KnowledgeBitSides;
     summary?: Nullable<string>;
     type: KnowledgeBitTypes;

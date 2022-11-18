@@ -24,6 +24,7 @@ export class KnowledgeBitsService {
     createKnowledgeBitInput: CreateKnowledgeBitInput & {
       filename: string;
       fileCID: string;
+      nftMetadataURI: string;
       claim: Claim;
       user: User;
     },

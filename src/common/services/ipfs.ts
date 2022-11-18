@@ -27,6 +27,23 @@ export const IPFS = {
 
     return metadata.url;
   },
+  async uploadKnowledgeBitMetadata(knowledgeBit) {
+    const client = this._getNFTStorageClient();
+    const metadata = await client.store({
+      name: knowledgeBit.name,
+      description: knowledgeBit.summary,
+      image: new File([''], 'default.jpg', { type: 'image/jpg' }),
+      properties: {
+        tags: knowledgeBit.side,
+        sources: knowledgeBit.type,
+        customType: knowledgeBit.customType,
+        file: `ipfs://${knowledgeBit.fileCID}`,
+        attributions: knowledgeBit.attributions,
+      },
+    });
+
+    return metadata.url;
+  },
   async uploadFile(buffer, filename) {
     const client = this._getWeb3StorageClient();
     const file = new Web3StorageFile([buffer], filename);

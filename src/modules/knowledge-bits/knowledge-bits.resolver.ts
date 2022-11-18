@@ -44,6 +44,11 @@ export class KnowledgeBitsResolver {
       const handleStreamConcatComplete = async (buffer) => {
         const fileCID = await IPFS.uploadFile(buffer, filename);
 
+        const nftMetadataURI = await IPFS.uploadKnowledgeBitMetadata({
+          ...createKnowledgeBitInput,
+          fileCID,
+        });
+
         const claim = await this.claimsService.findOne({
           where: { slug: claimSlug },
         });
@@ -55,6 +60,7 @@ export class KnowledgeBitsResolver {
           ...createKnowledgeBitInput,
           filename,
           fileCID,
+          nftMetadataURI: nftMetadataURI,
           claim: await this.claimsService.findOne({
             where: { slug: claimSlug },
           }),
