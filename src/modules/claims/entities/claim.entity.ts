@@ -26,16 +26,6 @@ registerEnumType(ClaimOrigins, {
   name: 'ClaimOrigins',
 });
 
-export enum ClaimNFTStatuses {
-  NOTMINTED,
-  MINTING,
-  MINTED,
-}
-
-registerEnumType(ClaimNFTStatuses, {
-  name: 'ClaimNFTStatuses',
-});
-
 @Entity()
 @ObjectType()
 export class Claim extends BaseEntity {
@@ -118,17 +108,9 @@ export class Claim extends BaseEntity {
   })
   origin: ClaimOrigins;
 
-  @Field(() => ClaimNFTStatuses)
-  @Column({
-    type: 'enum',
-    enum: ClaimNFTStatuses,
-    default: ClaimNFTStatuses.NOTMINTED,
-  })
-  nftStatus: ClaimNFTStatuses;
-
   @Field(() => String, { nullable: true })
   @Column({ nullable: true })
-  nftTxId?: string;
+  nftTxHash?: string;
 
   @Field(() => String, {
     nullable: true,

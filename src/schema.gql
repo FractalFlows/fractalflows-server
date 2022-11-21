@@ -82,9 +82,8 @@ type Claim {
   nftFractionalizationContractAddress: String
   nftMetadataURI: String
   nftMetadataURICreatedAt: String
-  nftStatus: ClaimNFTStatuses!
   nftTokenId: String
-  nftTxId: String
+  nftTxHash: String
   opinions: [Opinion!]
   origin: ClaimOrigins!
   ownershipRequestedAt: String
@@ -124,12 +123,6 @@ input ClaimInput {
   id: String!
 }
 
-enum ClaimNFTStatuses {
-  MINTED
-  MINTING
-  NOTMINTED
-}
-
 enum ClaimOrigins {
   FRACTALFLOWS
   TWITTER
@@ -149,6 +142,10 @@ input CreateArgumentInput {
 input CreateClaimInput {
   """Attributions"""
   attributions: [SaveAttributionInput!]
+  nftFractionalizationContractAddress: String
+  nftMetadataURI: String
+  nftTokenId: String
+  nftTxHash: String
 
   """Sources"""
   sources: [SaveSourceInput!]
@@ -268,8 +265,8 @@ type Mutation {
   removeSource(id: Int!): Source!
   requestClaimOwnership(id: String!): Boolean!
   requestTwitterOAuthUrl(callbackUrl: String!): String!
-  saveClaimMetadataOnIPFS(id: String!): String!
-  saveClaimTxId(id: String!, txId: String!): Boolean!
+  saveClaimOnIPFS(claim: CreateClaimInput!): String!
+  saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: CreateKnowledgeBitInput!): String!
   saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
   saveOpinion(saveOpinionInput: SaveOpinionInput!): Opinion!
   sendUpdateEmailVerificationCode(email: String!): Boolean!
@@ -497,6 +494,10 @@ input UpdateClaimInput {
   """Attributions"""
   attributions: [SaveAttributionInput!]
   id: String!
+  nftFractionalizationContractAddress: String
+  nftMetadataURI: String
+  nftTokenId: String
+  nftTxHash: String
 
   """Sources"""
   sources: [SaveSourceInput!]

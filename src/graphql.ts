@@ -18,12 +18,6 @@ export enum AvatarSource {
     GRAVATAR = "GRAVATAR"
 }
 
-export enum ClaimNFTStatuses {
-    MINTED = "MINTED",
-    MINTING = "MINTING",
-    NOTMINTED = "NOTMINTED"
-}
-
 export enum ClaimOrigins {
     FRACTALFLOWS = "FRACTALFLOWS",
     TWITTER = "TWITTER"
@@ -84,6 +78,10 @@ export interface CreateArgumentInput {
 
 export interface CreateClaimInput {
     attributions?: Nullable<SaveAttributionInput[]>;
+    nftFractionalizationContractAddress?: Nullable<string>;
+    nftMetadataURI?: Nullable<string>;
+    nftTokenId?: Nullable<string>;
+    nftTxHash?: Nullable<string>;
     sources?: Nullable<SaveSourceInput[]>;
     summary: string;
     tags?: Nullable<SaveTagInput[]>;
@@ -169,6 +167,10 @@ export interface UpdateArgumentInput {
 export interface UpdateClaimInput {
     attributions?: Nullable<SaveAttributionInput[]>;
     id: string;
+    nftFractionalizationContractAddress?: Nullable<string>;
+    nftMetadataURI?: Nullable<string>;
+    nftTokenId?: Nullable<string>;
+    nftTxHash?: Nullable<string>;
     sources?: Nullable<SaveSourceInput[]>;
     summary?: Nullable<string>;
     tags?: Nullable<SaveTagInput[]>;
@@ -241,9 +243,8 @@ export interface Claim {
     nftFractionalizationContractAddress?: Nullable<string>;
     nftMetadataURI?: Nullable<string>;
     nftMetadataURICreatedAt?: Nullable<string>;
-    nftStatus: ClaimNFTStatuses;
     nftTokenId?: Nullable<string>;
-    nftTxId?: Nullable<string>;
+    nftTxHash?: Nullable<string>;
     opinions?: Nullable<Opinion[]>;
     origin: ClaimOrigins;
     ownershipRequestedAt?: Nullable<string>;
@@ -309,8 +310,8 @@ export interface IMutation {
     removeSource(id: number): Source | Promise<Source>;
     requestClaimOwnership(id: string): boolean | Promise<boolean>;
     requestTwitterOAuthUrl(callbackUrl: string): string | Promise<string>;
-    saveClaimMetadataOnIPFS(id: string): string | Promise<string>;
-    saveClaimTxId(id: string, txId: string): boolean | Promise<boolean>;
+    saveClaimOnIPFS(claim: CreateClaimInput): string | Promise<string>;
+    saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: CreateKnowledgeBitInput): string | Promise<string>;
     saveKnowledgeBitVote(knowledgeBitId: string, type: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
     saveOpinion(saveOpinionInput: SaveOpinionInput): Opinion | Promise<Opinion>;
     sendUpdateEmailVerificationCode(email: string): boolean | Promise<boolean>;

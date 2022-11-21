@@ -29,6 +29,36 @@ export class KnowledgeBitsResolver {
     private readonly claimsService: ClaimsService,
   ) {}
 
+  @Mutation(() => String)
+  @UseGuards(SessionGuard)
+  async saveKnowledgeBitOnIPFS(
+    @Args('saveKnowledgeBitOnIPFSInput')
+    saveKnowledgeBitOnIPFSInput: CreateKnowledgeBitInput,
+  ) {
+    return await new Promise(async (resolve, reject) => {
+      const { createReadStream, filename } =
+        await saveKnowledgeBitOnIPFSInput.file;
+      const readStream = createReadStream();
+
+      const handleStreamConcatComplete = async (buffer) => {
+        const fileCID = await IPFS.uploadFile(buffer, filename);
+        const metadataURI = await IPFS.uploadKnowledgeBitMetadata({
+          ...saveKnowledgeBitOnIPFSInput,
+          fileCID,
+        });
+
+        resolve(metadataURI);
+      };
+
+      const readStreamConcat = concatStream(handleStreamConcatComplete);
+
+      readStream.on('error', (error) => {
+        reject(error);
+      });
+      readStream.pipe(readStreamConcat);
+    });
+  }
+
   @Mutation(() => KnowledgeBit)
   @UseGuards(SessionGuard)
   async createKnowledgeBit(

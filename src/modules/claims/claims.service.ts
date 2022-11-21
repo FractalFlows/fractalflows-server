@@ -41,9 +41,7 @@ export class ClaimsService {
     do {
       slug = `${baseSlug}${slugIndex > 0 ? `-${slugIndex}` : ''}`;
       slugIndex++;
-    } while (
-      (await this.claimsRepository.findOne({ where: { slug } })) !== undefined
-    );
+    } while (!!(await this.claimsRepository.findOne({ where: { slug } })));
 
     return await this.claimsRepository.save({ ...createClaimInput, slug });
   }

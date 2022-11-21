@@ -4,7 +4,7 @@ import { SaveAttributionInput } from 'src/modules/attributions/dto/save-attribut
 import { SaveSourceInput } from 'src/modules/sources/dto/save-source.input';
 import { SaveTagInput } from 'src/modules/tags/dto/save-tag.input';
 import { Tag } from 'src/modules/tags/entities/tag.entity';
-import { ClaimNFTStatuses, ClaimOrigins } from '../entities/claim.entity';
+import { ClaimOrigins } from '../entities/claim.entity';
 
 @InputType()
 export class CreateClaimInput {
@@ -26,12 +26,14 @@ export class CreateClaimInput {
   })
   attributions?: SaveAttributionInput[];
 
-  nftTokenId?: string;
-  nftStatus?: ClaimNFTStatuses;
-  nftTxId?: string;
-  nftFractionalizationContractAddress?: string;
-  nftMetadataURI?: string;
-  nftMetadataURICreatedAt?: Date;
+  @Field(() => String, { nullable: true })
+  nftTokenId: string;
+  @Field(() => String, { nullable: true })
+  nftTxHash: string;
+  @Field(() => String, { nullable: true })
+  nftFractionalizationContractAddress: string;
+  @Field(() => String, { nullable: true })
+  nftMetadataURI: string;
   tweetId?: string;
   tweetOwner?: string;
   origin?: ClaimOrigins;
