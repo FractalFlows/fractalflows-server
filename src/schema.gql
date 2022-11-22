@@ -81,7 +81,6 @@ type Claim {
   knowledgeBits: [KnowledgeBit!]
   nftFractionalizationContractAddress: String
   nftMetadataURI: String
-  nftMetadataURICreatedAt: String
   nftTokenId: String
   nftTxHash: String
   opinions: [Opinion!]
@@ -163,8 +162,11 @@ input CreateClaimInput {
 input CreateKnowledgeBitInput {
   attributions: [SaveAttributionInput!]
   customType: String
-  file: Upload!
+  fileURI: String!
   name: String!
+  nftMetadataURI: String!
+  nftTokenId: String!
+  nftTxHash: String!
   side: KnowledgeBitSides!
   summary: String
   type: KnowledgeBitTypes!
@@ -189,11 +191,12 @@ type KnowledgeBit {
   createdAt: String!
   customType: String
   downvotesCount: Int
-  fileCID: String!
-  filename: String!
+  fileURI: String!
   id: String!
   name: String!
-  nftMetadataURI: String
+  nftMetadataURI: String!
+  nftTokenId: String!
+  nftTxHash: String!
   side: KnowledgeBitSides!
   summary: String
   type: KnowledgeBitTypes!
@@ -266,7 +269,7 @@ type Mutation {
   requestClaimOwnership(id: String!): Boolean!
   requestTwitterOAuthUrl(callbackUrl: String!): String!
   saveClaimOnIPFS(claim: CreateClaimInput!): String!
-  saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: CreateKnowledgeBitInput!): String!
+  saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput!): SaveKnowledgeBitOnIPFSOutput!
   saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
   saveOpinion(saveOpinionInput: SaveOpinionInput!): Opinion!
   sendUpdateEmailVerificationCode(email: String!): Boolean!
@@ -344,6 +347,21 @@ input SaveAttributionInput {
 
   """Origin"""
   origin: String!
+}
+
+input SaveKnowledgeBitOnIPFSInput {
+  attributions: [SaveAttributionInput!]
+  customType: String
+  file: Upload!
+  name: String!
+  side: KnowledgeBitSides!
+  summary: String
+  type: KnowledgeBitTypes!
+}
+
+type SaveKnowledgeBitOnIPFSOutput {
+  fileURI: String!
+  metadataURI: String!
 }
 
 input SaveOpinionInput {
@@ -516,8 +534,12 @@ input UpdateKnowledgeBitInput {
   attributions: [SaveAttributionInput!]
   customType: String
   file: Upload
+  fileURI: String!
   id: String!
   name: String!
+  nftMetadataURI: String!
+  nftTokenId: String!
+  nftTxHash: String!
   side: KnowledgeBitSides!
   summary: String
   type: KnowledgeBitTypes!

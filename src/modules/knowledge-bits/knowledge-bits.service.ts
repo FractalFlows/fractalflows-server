@@ -22,9 +22,6 @@ export class KnowledgeBitsService {
 
   async create(
     createKnowledgeBitInput: CreateKnowledgeBitInput & {
-      filename: string;
-      fileCID: string;
-      nftMetadataURI: string;
       claim: Claim;
       user: User;
     },

@@ -76,41 +76,19 @@ export class KnowledgeBit extends BaseEntity {
 
   @Field(() => String)
   @Column()
-  filename: string;
+  fileURI: string;
 
   @Field(() => String)
   @Column()
-  fileCID: string;
+  nftTxHash: string;
 
-  // @Field(() => ClaimNFTStatuses)
-  // @Column({
-  //   type: 'enum',
-  //   enum: ClaimNFTStatuses,
-  //   default: ClaimNFTStatuses.NOTMINTED,
-  // })
-  // nftStatus: ClaimNFTStatuses;
+  @Field(() => String)
+  @Column()
+  nftTokenId: string;
 
-  // @Field(() => String, { nullable: true })
-  // @Column({ nullable: true })
-  // nftTxId?: string;
-
-  // @Field(() => String, {
-  //   nullable: true,
-  // })
-  // @Column({ nullable: true })
-  // nftTokenId?: string;
-
-  @Field(() => String, {
-    nullable: true,
-  })
-  @Column({ nullable: true })
-  nftMetadataURI?: string;
-
-  // @Field(() => String, {
-  //   nullable: true,
-  // })
-  // @Column({ type: 'timestamp', nullable: true })
-  // nftMetadataURICreatedAt?: Date;
+  @Field(() => String)
+  @Column()
+  nftMetadataURI: string;
 
   @Field(() => [Attribution], { nullable: true })
   @ManyToMany(() => Attribution, (attribution) => attribution.knowledgeBits)

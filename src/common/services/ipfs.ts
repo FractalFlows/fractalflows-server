@@ -49,6 +49,6 @@ export const IPFS = {
     const file = new Web3StorageFile([buffer], filename);
     const cid = await client.put([file]);
 
-    return cid;
+    return `ipfs://${cid}/${filename}`;
   },
 };

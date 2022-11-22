@@ -1,15 +1,15 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
-import { FileUpload } from 'src/common/interfaces';
 
-import { SaveAttributionInput } from 'src/modules/attributions/dto/save-attribution.input';
 import {
   KnowledgeBitSides,
   KnowledgeBitTypes,
 } from '../entities/knowledge-bit.entity';
+import { FileUpload } from 'src/common/interfaces';
+import { SaveAttributionInput } from 'src/modules/attributions/dto/save-attribution.input';
 
 @InputType()
-export class CreateKnowledgeBitInput {
+export class SaveKnowledgeBitOnIPFSInput {
   @Field(() => String)
   name: string;
 
@@ -25,18 +25,9 @@ export class CreateKnowledgeBitInput {
   @Field(() => String, { nullable: true })
   customType?: string;
 
+  @Field(() => GraphQLUpload)
+  file: Promise<FileUpload>;
+
   @Field(() => [SaveAttributionInput], { nullable: true })
   attributions: SaveAttributionInput[];
-
-  @Field(() => String)
-  fileURI: string;
-
-  @Field(() => String)
-  nftTxHash: string;
-
-  @Field(() => String)
-  nftTokenId: string;
-
-  @Field(() => String)
-  nftMetadataURI: string;
 }

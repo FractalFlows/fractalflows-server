@@ -91,8 +91,11 @@ export interface CreateClaimInput {
 export interface CreateKnowledgeBitInput {
     attributions?: Nullable<SaveAttributionInput[]>;
     customType?: Nullable<string>;
-    file: Upload;
+    fileURI: string;
     name: string;
+    nftMetadataURI: string;
+    nftTokenId: string;
+    nftTxHash: string;
     side: KnowledgeBitSides;
     summary?: Nullable<string>;
     type: KnowledgeBitTypes;
@@ -112,6 +115,16 @@ export interface SaveAttributionInput {
     id?: Nullable<string>;
     identifier: string;
     origin: string;
+}
+
+export interface SaveKnowledgeBitOnIPFSInput {
+    attributions?: Nullable<SaveAttributionInput[]>;
+    customType?: Nullable<string>;
+    file: Upload;
+    name: string;
+    side: KnowledgeBitSides;
+    summary?: Nullable<string>;
+    type: KnowledgeBitTypes;
 }
 
 export interface SaveOpinionInput {
@@ -181,8 +194,12 @@ export interface UpdateKnowledgeBitInput {
     attributions?: Nullable<SaveAttributionInput[]>;
     customType?: Nullable<string>;
     file?: Nullable<Upload>;
+    fileURI: string;
     id: string;
     name: string;
+    nftMetadataURI: string;
+    nftTokenId: string;
+    nftTxHash: string;
     side: KnowledgeBitSides;
     summary?: Nullable<string>;
     type: KnowledgeBitTypes;
@@ -242,7 +259,6 @@ export interface Claim {
     knowledgeBits?: Nullable<KnowledgeBit[]>;
     nftFractionalizationContractAddress?: Nullable<string>;
     nftMetadataURI?: Nullable<string>;
-    nftMetadataURICreatedAt?: Nullable<string>;
     nftTokenId?: Nullable<string>;
     nftTxHash?: Nullable<string>;
     opinions?: Nullable<Opinion[]>;
@@ -266,11 +282,12 @@ export interface KnowledgeBit {
     createdAt: string;
     customType?: Nullable<string>;
     downvotesCount?: Nullable<number>;
-    fileCID: string;
-    filename: string;
+    fileURI: string;
     id: string;
     name: string;
-    nftMetadataURI?: Nullable<string>;
+    nftMetadataURI: string;
+    nftTokenId: string;
+    nftTxHash: string;
     side: KnowledgeBitSides;
     summary?: Nullable<string>;
     type: KnowledgeBitTypes;
@@ -311,7 +328,7 @@ export interface IMutation {
     requestClaimOwnership(id: string): boolean | Promise<boolean>;
     requestTwitterOAuthUrl(callbackUrl: string): string | Promise<string>;
     saveClaimOnIPFS(claim: CreateClaimInput): string | Promise<string>;
-    saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: CreateKnowledgeBitInput): string | Promise<string>;
+    saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput): SaveKnowledgeBitOnIPFSOutput | Promise<SaveKnowledgeBitOnIPFSOutput>;
     saveKnowledgeBitVote(knowledgeBitId: string, type: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
     saveOpinion(saveOpinionInput: SaveOpinionInput): Opinion | Promise<Opinion>;
     sendUpdateEmailVerificationCode(email: string): boolean | Promise<boolean>;
@@ -375,6 +392,11 @@ export interface IQuery {
     userFollowingClaims(username: string): Claim[] | Promise<Claim[]>;
     userKnowledgeBitVotes(claimSlug: string): Nullable<KnowledgeBitVote[]> | Promise<Nullable<KnowledgeBitVote[]>>;
     userOpinion(claimSlug: string): Nullable<Opinion> | Promise<Nullable<Opinion>>;
+}
+
+export interface SaveKnowledgeBitOnIPFSOutput {
+    fileURI: string;
+    metadataURI: string;
 }
 
 export interface Session {

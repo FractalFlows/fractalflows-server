@@ -19,6 +19,9 @@ import { KnowledgeBitVoteTypes } from '../knowledge-bit-votes/entities/knowledge
 import { getClaimURL } from 'src/common/utils/claim';
 import { Attribution } from '../attributions/entities/attribution.entity';
 import { IPFS } from 'src/common/services/ipfs';
+import { SaveKnowledgeBitOnIPFSInput } from './dto/save-knowledge-bit-on-ipfs.input';
+import { getCIDAndFilenameFromIPFSURI } from 'src/common/utils/ipfs';
+import { SaveKnowledgeBitOnIPFSOutput } from './dto/save-knowledge-bit-on-ipfs.output copy';
 
 @Resolver(() => KnowledgeBit)
 export class KnowledgeBitsResolver {
@@ -29,11 +32,11 @@ export class KnowledgeBitsResolver {
     private readonly claimsService: ClaimsService,
   ) {}
 
-  @Mutation(() => String)
+  @Mutation(() => SaveKnowledgeBitOnIPFSOutput)
   @UseGuards(SessionGuard)
   async saveKnowledgeBitOnIPFS(
     @Args('saveKnowledgeBitOnIPFSInput')
-    saveKnowledgeBitOnIPFSInput: CreateKnowledgeBitInput,
+    saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput,
   ) {
     return await new Promise(async (resolve, reject) => {
       const { createReadStream, filename } =
@@ -41,13 +44,16 @@ export class KnowledgeBitsResolver {
       const readStream = createReadStream();
 
       const handleStreamConcatComplete = async (buffer) => {
-        const fileCID = await IPFS.uploadFile(buffer, filename);
+        const fileURI = await IPFS.uploadFile(buffer, filename);
         const metadataURI = await IPFS.uploadKnowledgeBitMetadata({
           ...saveKnowledgeBitOnIPFSInput,
-          fileCID,
+          file: getCIDAndFilenameFromIPFSURI(fileURI),
         });
 
-        resolve(metadataURI);
+        resolve({
+          metadataURI,
+          fileURI,
+        });
       };
 
       const readStreamConcat = concatStream(handleStreamConcatComplete);
@@ -67,80 +73,64 @@ export class KnowledgeBitsResolver {
     createKnowledgeBitInput: CreateKnowledgeBitInput,
     @CurrentUser() user: User,
   ) {
-    return await new Promise(async (resolve, reject) => {
-      const { createReadStream, filename } = await createKnowledgeBitInput.file;
-      const readStream = createReadStream();
+    const claim = await this.claimsService.findOne({
+      where: { slug: claimSlug },
+    });
 
-      const handleStreamConcatComplete = async (buffer) => {
-        const fileCID = await IPFS.uploadFile(buffer, filename);
+    await this.attributionsService.upsert(createKnowledgeBitInput.attributions);
+    const createKnowledgeBit = await this.knowledgeBitsService.create({
+      ...createKnowledgeBitInput,
 
-        const nftMetadataURI = await IPFS.uploadKnowledgeBitMetadata({
-          ...createKnowledgeBitInput,
-          fileCID,
-        });
+      claim: await this.claimsService.findOne({
+        where: { slug: claimSlug },
+      }),
+      user,
+    });
 
-        const claim = await this.claimsService.findOne({
-          where: { slug: claimSlug },
-        });
-
-        await this.attributionsService.upsert(
-          createKnowledgeBitInput.attributions,
-        );
-        const createKnowledgeBit = await this.knowledgeBitsService.create({
-          ...createKnowledgeBitInput,
-          filename,
-          fileCID,
-          nftMetadataURI: nftMetadataURI,
-          claim: await this.claimsService.findOne({
-            where: { slug: claimSlug },
-          }),
-          user,
-        });
-
-        this.claimsService.notifyFollowers({
-          id: claim.id,
-          subject: 'A claim you follow has a new knowledge bit',
-          html: `
+    this.claimsService.notifyFollowers({
+      id: claim.id,
+      subject: 'A claim you follow has a new knowledge bit',
+      html: `
       The claim <a href="${getClaimURL(claim.slug)}">${
-            claim.title
-          }</a> that you are following has a new ${
-            createKnowledgeBit.side === KnowledgeBitSides.REFUTING
-              ? 'refuting'
-              : 'supporting'
-          } knowledge bit: "${createKnowledgeBit.name}"
+        claim.title
+      }</a> that you are following has a new ${
+        createKnowledgeBit.side === KnowledgeBitSides.REFUTING
+          ? 'refuting'
+          : 'supporting'
+      } knowledge bit: "${createKnowledgeBit.name}"
       `,
-          triggeredBy: user,
-        });
-        this.claimsService.notifyOwner({
-          id: claim.id,
-          subject: 'Your claim has a new knowledge bit',
-          html: `
+      triggeredBy: user,
+    });
+    this.claimsService.notifyOwner({
+      id: claim.id,
+      subject: 'Your claim has a new knowledge bit',
+      html: `
       Your claim <a href="${getClaimURL(claim.slug)}">${
-            claim.title
-          }</a> has a new ${
-            createKnowledgeBit.side === KnowledgeBitSides.REFUTING
-              ? 'refuting'
-              : 'supporting'
-          } knowledge bit: "${createKnowledgeBit.name}"
+        claim.title
+      }</a> has a new ${
+        createKnowledgeBit.side === KnowledgeBitSides.REFUTING
+          ? 'refuting'
+          : 'supporting'
+      } knowledge bit: "${createKnowledgeBit.name}"
       `,
-          triggeredBy: user,
-        });
-        this.knowledgeBitsService.notifyNewlyAddedAttributions({
-          attributions: createKnowledgeBitInput.attributions as Attribution[],
-          claimSlug: claim.slug,
-          claimTitle: claim.title,
-          name: createKnowledgeBit.name,
-        });
+      triggeredBy: user,
+    });
+    this.knowledgeBitsService.notifyNewlyAddedAttributions({
+      attributions: createKnowledgeBitInput.attributions as Attribution[],
+      claimSlug: claim.slug,
+      claimTitle: claim.title,
+      name: createKnowledgeBit.name,
+    });
 
-        resolve(await this.findOne(createKnowledgeBit.id));
-      };
+    console.log(
+      await this.knowledgeBitsService.findOne({
+        where: { id: createKnowledgeBit.id },
+      }),
+    );
 
-      const readStreamConcat = concatStream(handleStreamConcatComplete);
-
-      readStream.on('error', (error) => {
-        console.error(error);
-      });
-      readStream.pipe(readStreamConcat);
+    return await this.knowledgeBitsService.findOne({
+      where: { id: createKnowledgeBit.id },
+      relations: ['user'],
     });
   }
 
