@@ -37,7 +37,7 @@ export const IPFS = {
         tags: knowledgeBit.side,
         sources: knowledgeBit.type,
         customType: knowledgeBit.customType,
-        file: `ipfs://${knowledgeBit.fileCID}`,
+        file: knowledgeBit.fileURI,
         attributions: knowledgeBit.attributions,
       },
     });

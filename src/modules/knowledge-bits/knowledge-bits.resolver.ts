@@ -20,7 +20,6 @@ import { getClaimURL } from 'src/common/utils/claim';
 import { Attribution } from '../attributions/entities/attribution.entity';
 import { IPFS } from 'src/common/services/ipfs';
 import { SaveKnowledgeBitOnIPFSInput } from './dto/save-knowledge-bit-on-ipfs.input';
-import { getCIDAndFilenameFromIPFSURI } from 'src/common/utils/ipfs';
 import { SaveKnowledgeBitOnIPFSOutput } from './dto/save-knowledge-bit-on-ipfs.output copy';
 
 @Resolver(() => KnowledgeBit)
@@ -47,7 +46,7 @@ export class KnowledgeBitsResolver {
         const fileURI = await IPFS.uploadFile(buffer, filename);
         const metadataURI = await IPFS.uploadKnowledgeBitMetadata({
           ...saveKnowledgeBitOnIPFSInput,
-          file: getCIDAndFilenameFromIPFSURI(fileURI),
+          fileURI,
         });
 
         resolve({
@@ -130,7 +129,7 @@ export class KnowledgeBitsResolver {
 
     return await this.knowledgeBitsService.findOne({
       where: { id: createKnowledgeBit.id },
-      relations: ['user'],
+      relations: ['user', 'attributions'],
     });
   }
 

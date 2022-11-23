@@ -62,7 +62,11 @@ export enum UsernameSource {
 }
 
 export interface ClaimInput {
-    id: string;
+    attributions?: Nullable<SaveAttributionInput[]>;
+    sources?: Nullable<SaveSourceInput[]>;
+    summary: string;
+    tags?: Nullable<SaveTagInput[]>;
+    title: string;
 }
 
 export interface CreateArgumentCommentInput {
@@ -78,10 +82,10 @@ export interface CreateArgumentInput {
 
 export interface CreateClaimInput {
     attributions?: Nullable<SaveAttributionInput[]>;
-    nftFractionalizationContractAddress?: Nullable<string>;
-    nftMetadataURI?: Nullable<string>;
-    nftTokenId?: Nullable<string>;
-    nftTxHash?: Nullable<string>;
+    nftFractionalizationContractAddress: string;
+    nftMetadataURI: string;
+    nftTokenId: string;
+    nftTxHash: string;
     sources?: Nullable<SaveSourceInput[]>;
     summary: string;
     tags?: Nullable<SaveTagInput[]>;
@@ -127,10 +131,14 @@ export interface SaveKnowledgeBitOnIPFSInput {
     type: KnowledgeBitTypes;
 }
 
+export interface SaveOpinionClaimInput {
+    id: string;
+}
+
 export interface SaveOpinionInput {
     acceptance: number;
     arguments: IDInput[];
-    claim: ClaimInput;
+    claim: SaveOpinionClaimInput;
     id?: Nullable<string>;
 }
 
@@ -181,13 +189,13 @@ export interface UpdateClaimInput {
     attributions?: Nullable<SaveAttributionInput[]>;
     id: string;
     nftFractionalizationContractAddress?: Nullable<string>;
-    nftMetadataURI?: Nullable<string>;
+    nftMetadataURI: string;
     nftTokenId?: Nullable<string>;
     nftTxHash?: Nullable<string>;
     sources?: Nullable<SaveSourceInput[]>;
-    summary?: Nullable<string>;
+    summary: string;
     tags?: Nullable<SaveTagInput[]>;
-    title?: Nullable<string>;
+    title: string;
 }
 
 export interface UpdateKnowledgeBitInput {
@@ -327,7 +335,7 @@ export interface IMutation {
     removeSource(id: number): Source | Promise<Source>;
     requestClaimOwnership(id: string): boolean | Promise<boolean>;
     requestTwitterOAuthUrl(callbackUrl: string): string | Promise<string>;
-    saveClaimOnIPFS(claim: CreateClaimInput): string | Promise<string>;
+    saveClaimOnIPFS(claim: ClaimInput): string | Promise<string>;
     saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput): SaveKnowledgeBitOnIPFSOutput | Promise<SaveKnowledgeBitOnIPFSOutput>;
     saveKnowledgeBitVote(knowledgeBitId: string, type: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
     saveOpinion(saveOpinionInput: SaveOpinionInput): Opinion | Promise<Opinion>;

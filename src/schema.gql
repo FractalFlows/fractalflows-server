@@ -119,7 +119,20 @@ type Claim {
 }
 
 input ClaimInput {
-  id: String!
+  """Attributions"""
+  attributions: [SaveAttributionInput!]
+
+  """Sources"""
+  sources: [SaveSourceInput!]
+
+  """Summary"""
+  summary: String!
+
+  """Tags"""
+  tags: [SaveTagInput!]
+
+  """Title"""
+  title: String!
 }
 
 enum ClaimOrigins {
@@ -141,10 +154,10 @@ input CreateArgumentInput {
 input CreateClaimInput {
   """Attributions"""
   attributions: [SaveAttributionInput!]
-  nftFractionalizationContractAddress: String
-  nftMetadataURI: String
-  nftTokenId: String
-  nftTxHash: String
+  nftFractionalizationContractAddress: String!
+  nftMetadataURI: String!
+  nftTokenId: String!
+  nftTxHash: String!
 
   """Sources"""
   sources: [SaveSourceInput!]
@@ -268,7 +281,7 @@ type Mutation {
   removeSource(id: Int!): Source!
   requestClaimOwnership(id: String!): Boolean!
   requestTwitterOAuthUrl(callbackUrl: String!): String!
-  saveClaimOnIPFS(claim: CreateClaimInput!): String!
+  saveClaimOnIPFS(claim: ClaimInput!): String!
   saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput!): SaveKnowledgeBitOnIPFSOutput!
   saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
   saveOpinion(saveOpinionInput: SaveOpinionInput!): Opinion!
@@ -364,10 +377,14 @@ type SaveKnowledgeBitOnIPFSOutput {
   metadataURI: String!
 }
 
+input SaveOpinionClaimInput {
+  id: String!
+}
+
 input SaveOpinionInput {
   acceptance: Float!
   arguments: [IDInput!]!
-  claim: ClaimInput!
+  claim: SaveOpinionClaimInput!
   id: String
 }
 
@@ -513,7 +530,7 @@ input UpdateClaimInput {
   attributions: [SaveAttributionInput!]
   id: String!
   nftFractionalizationContractAddress: String
-  nftMetadataURI: String
+  nftMetadataURI: String!
   nftTokenId: String
   nftTxHash: String
 
@@ -521,13 +538,13 @@ input UpdateClaimInput {
   sources: [SaveSourceInput!]
 
   """Summary"""
-  summary: String
+  summary: String!
 
   """Tags"""
   tags: [SaveTagInput!]
 
   """Title"""
-  title: String
+  title: String!
 }
 
 input UpdateKnowledgeBitInput {

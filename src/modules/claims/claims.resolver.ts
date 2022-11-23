@@ -17,6 +17,7 @@ import { InviteFriendsInput } from './dto/invite-friends.input';
 import { PaginatedClaims } from './dto/paginated-claims.output';
 import { getClaimURL } from 'src/common/utils/claim';
 import { IPFS } from 'src/common/services/ipfs';
+import { ClaimInput } from './dto/claim.input';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -55,7 +56,7 @@ export class ClaimsResolver {
 
   @Mutation(() => String)
   @UseGuards(SessionGuard)
-  async saveClaimOnIPFS(@Args('claim') claim: CreateClaimInput) {
+  async saveClaimOnIPFS(@Args('claim') claim: ClaimInput) {
     const metadataURI = await IPFS.uploadClaimMetadata(claim);
     return metadataURI;
   }
