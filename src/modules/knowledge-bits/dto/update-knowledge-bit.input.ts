@@ -1,14 +1,16 @@
-import { InputType, Field } from '@nestjs/graphql';
-import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
+import { InputType, Field, OmitType } from '@nestjs/graphql';
 
-import { FileUpload } from 'src/common/interfaces';
 import { CreateKnowledgeBitInput } from './create-knowledge-bit.input';
 
 @InputType()
-export class UpdateKnowledgeBitInput extends CreateKnowledgeBitInput {
+export class UpdateKnowledgeBitInput extends OmitType(CreateKnowledgeBitInput, [
+  'nftTokenId',
+  'nftTxHash',
+  'fileURI',
+]) {
   @Field(() => String)
   id: string;
 
-  @Field(() => GraphQLUpload, { nullable: true })
-  file: Promise<FileUpload>;
+  @Field(() => String, { nullable: true })
+  fileURI?: string;
 }

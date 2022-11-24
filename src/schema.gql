@@ -365,7 +365,7 @@ input SaveAttributionInput {
 input SaveKnowledgeBitOnIPFSInput {
   attributions: [SaveAttributionInput!]
   customType: String
-  file: Upload!
+  file: Upload
   name: String!
   side: KnowledgeBitSides!
   summary: String
@@ -373,7 +373,7 @@ input SaveKnowledgeBitOnIPFSInput {
 }
 
 type SaveKnowledgeBitOnIPFSOutput {
-  fileURI: String!
+  fileURI: String
   metadataURI: String!
 }
 
@@ -550,13 +550,10 @@ input UpdateClaimInput {
 input UpdateKnowledgeBitInput {
   attributions: [SaveAttributionInput!]
   customType: String
-  file: Upload
-  fileURI: String!
+  fileURI: String
   id: String!
   name: String!
   nftMetadataURI: String!
-  nftTokenId: String!
-  nftTxHash: String!
   side: KnowledgeBitSides!
   summary: String
   type: KnowledgeBitTypes!

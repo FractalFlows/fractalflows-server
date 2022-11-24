@@ -5,6 +5,6 @@ export class SaveKnowledgeBitOnIPFSOutput {
   @Field(() => String)
   metadataURI: string;
 
-  @Field(() => String)
-  fileURI: string;
+  @Field(() => String, { nullable: true })
+  fileURI?: string;
 }

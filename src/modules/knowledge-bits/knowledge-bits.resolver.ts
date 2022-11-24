@@ -37,31 +37,41 @@ export class KnowledgeBitsResolver {
     @Args('saveKnowledgeBitOnIPFSInput')
     saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput,
   ) {
-    return await new Promise(async (resolve, reject) => {
-      const { createReadStream, filename } =
-        await saveKnowledgeBitOnIPFSInput.file;
-      const readStream = createReadStream();
+    if (saveKnowledgeBitOnIPFSInput.file) {
+      return await new Promise(async (resolve, reject) => {
+        const { createReadStream, filename } =
+          await saveKnowledgeBitOnIPFSInput.file;
+        const readStream = createReadStream();
 
-      const handleStreamConcatComplete = async (buffer) => {
-        const fileURI = await IPFS.uploadFile(buffer, filename);
-        const metadataURI = await IPFS.uploadKnowledgeBitMetadata({
-          ...saveKnowledgeBitOnIPFSInput,
-          fileURI,
+        const handleStreamConcatComplete = async (buffer) => {
+          const fileURI = await IPFS.uploadFile(buffer, filename);
+          const metadataURI = await IPFS.uploadKnowledgeBitMetadata({
+            ...saveKnowledgeBitOnIPFSInput,
+            fileURI,
+          });
+
+          resolve({
+            metadataURI,
+            fileURI,
+          });
+        };
+
+        const readStreamConcat = concatStream(handleStreamConcatComplete);
+
+        readStream.on('error', (error) => {
+          reject(error);
         });
-
-        resolve({
-          metadataURI,
-          fileURI,
-        });
-      };
-
-      const readStreamConcat = concatStream(handleStreamConcatComplete);
-
-      readStream.on('error', (error) => {
-        reject(error);
+        readStream.pipe(readStreamConcat);
       });
-      readStream.pipe(readStreamConcat);
-    });
+    } else {
+      const metadataURI = await IPFS.uploadKnowledgeBitMetadata(
+        saveKnowledgeBitOnIPFSInput,
+      );
+
+      return {
+        metadataURI,
+      };
+    }
   }
 
   @Mutation(() => KnowledgeBit)
@@ -203,60 +213,28 @@ export class KnowledgeBitsResolver {
     @Args('updateKnowledgeBitInput')
     updateKnowledgeBitInput: UpdateKnowledgeBitInput,
   ) {
-    const updateKnowledgeBit = async (
-      updateKnowledgeBitFile: {
-        filename: string;
-        fileCID: string;
-      } = {} as any,
-    ) => {
-      const knowledgeBit = await this.knowledgeBitsService.findOne({
-        where: { id: updateKnowledgeBitInput.id },
-        relations: ['claim', 'attributions'],
-      });
+    const knowledgeBit = await this.knowledgeBitsService.findOne({
+      where: { id: updateKnowledgeBitInput.id },
+      relations: ['claim', 'attributions'],
+    });
 
-      await this.attributionsService.save(updateKnowledgeBitInput.attributions);
-      await this.knowledgeBitsService.update(updateKnowledgeBitInput.id, {
-        ...updateKnowledgeBitInput,
-        ...updateKnowledgeBitFile,
-      });
+    await this.attributionsService.save(updateKnowledgeBitInput.attributions);
+    await this.knowledgeBitsService.update(
+      updateKnowledgeBitInput.id,
+      updateKnowledgeBitInput,
+    );
 
-      const updatedKnowledgeBit = await this.findOne(
-        updateKnowledgeBitInput.id,
-      );
+    const updatedKnowledgeBit = await this.findOne(updateKnowledgeBitInput.id);
 
-      this.knowledgeBitsService.notifyNewlyAddedAttributions({
-        attributions: updatedKnowledgeBit.attributions,
-        existing: knowledgeBit.attributions,
-        claimSlug: knowledgeBit.claim.slug,
-        claimTitle: knowledgeBit.claim.title,
-        name: knowledgeBit.name,
-      });
+    this.knowledgeBitsService.notifyNewlyAddedAttributions({
+      attributions: updatedKnowledgeBit.attributions,
+      existing: knowledgeBit.attributions,
+      claimSlug: knowledgeBit.claim.slug,
+      claimTitle: knowledgeBit.claim.title,
+      name: knowledgeBit.name,
+    });
 
-      return updatedKnowledgeBit;
-    };
-
-    if (updateKnowledgeBitInput.file) {
-      return await new Promise(async (resolve, reject) => {
-        const { createReadStream, filename } =
-          await updateKnowledgeBitInput.file;
-        const readStream = createReadStream();
-
-        const handleStreamConcatComplete = async (buffer) => {
-          const fileCID = await IPFS.uploadFile(buffer, filename);
-
-          resolve(await updateKnowledgeBit({ fileCID, filename }));
-        };
-
-        const readStreamConcat = concatStream(handleStreamConcatComplete);
-
-        readStream.on('error', (error) => {
-          console.error(error);
-        });
-        readStream.pipe(readStreamConcat);
-      });
-    } else {
-      return updateKnowledgeBit();
-    }
+    return updatedKnowledgeBit;
   }
 
   @Mutation(() => Boolean)

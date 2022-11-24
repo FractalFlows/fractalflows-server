@@ -124,7 +124,7 @@ export interface SaveAttributionInput {
 export interface SaveKnowledgeBitOnIPFSInput {
     attributions?: Nullable<SaveAttributionInput[]>;
     customType?: Nullable<string>;
-    file: Upload;
+    file?: Nullable<Upload>;
     name: string;
     side: KnowledgeBitSides;
     summary?: Nullable<string>;
@@ -201,13 +201,10 @@ export interface UpdateClaimInput {
 export interface UpdateKnowledgeBitInput {
     attributions?: Nullable<SaveAttributionInput[]>;
     customType?: Nullable<string>;
-    file?: Nullable<Upload>;
-    fileURI: string;
+    fileURI?: Nullable<string>;
     id: string;
     name: string;
     nftMetadataURI: string;
-    nftTokenId: string;
-    nftTxHash: string;
     side: KnowledgeBitSides;
     summary?: Nullable<string>;
     type: KnowledgeBitTypes;
@@ -403,7 +400,7 @@ export interface IQuery {
 }
 
 export interface SaveKnowledgeBitOnIPFSOutput {
-    fileURI: string;
+    fileURI?: Nullable<string>;
     metadataURI: string;
 }
 

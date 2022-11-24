@@ -1,33 +1,9 @@
 import { InputType, Field } from '@nestjs/graphql';
-import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
-import { FileUpload } from 'src/common/interfaces';
 
-import { SaveAttributionInput } from 'src/modules/attributions/dto/save-attribution.input';
-import {
-  KnowledgeBitSides,
-  KnowledgeBitTypes,
-} from '../entities/knowledge-bit.entity';
+import { KnowledgeBitInput } from './knowledge-bit.inputs';
 
 @InputType()
-export class CreateKnowledgeBitInput {
-  @Field(() => String)
-  name: string;
-
-  @Field(() => String, { nullable: true })
-  summary?: string;
-
-  @Field(() => KnowledgeBitSides)
-  side: KnowledgeBitSides;
-
-  @Field(() => KnowledgeBitTypes)
-  type: KnowledgeBitTypes;
-
-  @Field(() => String, { nullable: true })
-  customType?: string;
-
-  @Field(() => [SaveAttributionInput], { nullable: true })
-  attributions: SaveAttributionInput[];
-
+export class CreateKnowledgeBitInput extends KnowledgeBitInput {
   @Field(() => String)
   fileURI: string;
 
