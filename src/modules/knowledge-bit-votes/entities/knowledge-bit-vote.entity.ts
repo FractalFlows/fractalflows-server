@@ -8,6 +8,7 @@ import { User } from 'src/modules/users/entities/user.entity';
 export enum KnowledgeBitVoteTypes {
   UPVOTE,
   DOWNVOTE,
+  UNVOTE,
 }
 
 registerEnumType(KnowledgeBitVoteTypes, {

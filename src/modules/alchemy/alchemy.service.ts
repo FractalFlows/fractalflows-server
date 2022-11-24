@@ -10,7 +10,6 @@ import claimABI from '../../common/abi/Claim.json';
 import { AttributionsService } from '../attributions/attributions.service';
 import { ClaimMetadataInput } from '../claims/dto/claim-metadata.input';
 import { UsernameSource } from '../users/entities/user.entity';
-import { ClaimNFTStatuses } from '../claims/entities/claim.entity';
 
 @Injectable()
 export class AlchemyService {
@@ -33,7 +32,7 @@ export class AlchemyService {
 
     const handleData = async (data) => {
       const claim = await this.claimsService.findOne({
-        nftTxId: data.transactionHash,
+        nftTxHash: data.transactionHash,
       });
       const nftFractionalizationContractAddress = `0x${data.topics[2].slice(
         -40,
@@ -60,13 +59,11 @@ export class AlchemyService {
           await this.claimsService.update(claim.id, {
             nftTokenId: '',
             nftFractionalizationContractAddress: '',
-            nftStatus: ClaimNFTStatuses.NOTMINTED,
           });
         } else {
           await this.claimsService.update(claim.id, {
             nftTokenId,
             nftFractionalizationContractAddress,
-            nftStatus: ClaimNFTStatuses.MINTED,
           });
 
           // const sources = await this.sourcesService.save(

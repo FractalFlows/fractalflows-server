@@ -31,8 +31,7 @@ export class TagsService {
         slug = `${baseSlug}${slugIndex > 0 ? `-${slugIndex}` : ''}`;
         slugIndex++;
       } while (
-        (await this.tagsRepository.findOne({ where: { slug } })) !==
-          undefined ||
+        !!(await this.tagsRepository.findOne({ where: { slug } })) ||
         acc.find((tag) => tag.slug === slug) !== undefined
       );
 

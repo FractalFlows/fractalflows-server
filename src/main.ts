@@ -4,6 +4,7 @@ import session from 'express-session';
 import sessionFileStore from 'session-file-store';
 import path from 'path';
 import sendgrid from '@sendgrid/mail';
+import { default as graphqlUploadExpress } from 'graphql-upload/graphqlUploadExpress.js';
 
 import { AppModule } from './app.module';
 
@@ -26,8 +27,12 @@ async function bootstrap() {
   };
   app.use(session(sessionOptions));
 
+  // maxFileSize 30mb
+  app.use(graphqlUploadExpress({ maxFileSize: 31457280, maxFiles: 10 }));
+
   sendgrid.setApiKey(configService.get('SENDGRID_API_KEY'));
 
   await app.listen(configService.get('PORT'));
 }
+
 bootstrap();

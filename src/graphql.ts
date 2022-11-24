@@ -7,6 +7,7 @@
 
 /* tslint:disable */
 /* eslint-disable */
+
 export enum ArgumentSides {
     CON = "CON",
     PRO = "PRO"
@@ -17,50 +18,9 @@ export enum AvatarSource {
     GRAVATAR = "GRAVATAR"
 }
 
-export enum ClaimNFTStatuses {
-    MINTED = "MINTED",
-    MINTING = "MINTING",
-    NOTMINTED = "NOTMINTED"
-}
-
 export enum ClaimOrigins {
     FRACTALFLOWS = "FRACTALFLOWS",
     TWITTER = "TWITTER"
-}
-
-export enum KnowledgeBitLocations {
-    ACADEMIA_EDU = "ACADEMIA_EDU",
-    ARXIV = "ARXIV",
-    BIT_TORRENT = "BIT_TORRENT",
-    BLOG = "BLOG",
-    BOX = "BOX",
-    DAT = "DAT",
-    DATABASE = "DATABASE",
-    DROPBOX = "DROPBOX",
-    EMAIL = "EMAIL",
-    ETHEREUM_SWARM = "ETHEREUM_SWARM",
-    FIGSHARE = "FIGSHARE",
-    GIT = "GIT",
-    GOOGLE_DRIVE = "GOOGLE_DRIVE",
-    HAL_ARCHIVES = "HAL_ARCHIVES",
-    IPFS = "IPFS",
-    JUPYTER = "JUPYTER",
-    KAGGLE = "KAGGLE",
-    ONEDRIVE = "ONEDRIVE",
-    OPENAIRE = "OPENAIRE",
-    OTHER = "OTHER",
-    PDF = "PDF",
-    PUBPEER = "PUBPEER",
-    RE3DATA = "RE3DATA",
-    RESEARCH_GATE = "RESEARCH_GATE",
-    RESEARCH_ID = "RESEARCH_ID",
-    SCIENTIFIC_PUBLISHER = "SCIENTIFIC_PUBLISHER",
-    SLIDESHARE = "SLIDESHARE",
-    STACK_OVERFLOW = "STACK_OVERFLOW",
-    WEBSITE = "WEBSITE",
-    WIKIPEDIA = "WIKIPEDIA",
-    YOUTUBE = "YOUTUBE",
-    ZENODO = "ZENODO"
 }
 
 export enum KnowledgeBitSides {
@@ -87,6 +47,7 @@ export enum KnowledgeBitTypes {
 
 export enum KnowledgeBitVoteTypes {
     DOWNVOTE = "DOWNVOTE",
+    UNVOTE = "UNVOTE",
     UPVOTE = "UPVOTE"
 }
 
@@ -102,7 +63,11 @@ export enum UsernameSource {
 }
 
 export interface ClaimInput {
-    id: string;
+    attributions?: Nullable<SaveAttributionInput[]>;
+    sources?: Nullable<SaveSourceInput[]>;
+    summary: string;
+    tags?: Nullable<SaveTagInput[]>;
+    title: string;
 }
 
 export interface CreateArgumentCommentInput {
@@ -118,6 +83,10 @@ export interface CreateArgumentInput {
 
 export interface CreateClaimInput {
     attributions?: Nullable<SaveAttributionInput[]>;
+    nftFractionalizationContractAddress: string;
+    nftMetadataURI: string;
+    nftTokenId: string;
+    nftTxHash: string;
     sources?: Nullable<SaveSourceInput[]>;
     summary: string;
     tags?: Nullable<SaveTagInput[]>;
@@ -126,14 +95,15 @@ export interface CreateClaimInput {
 
 export interface CreateKnowledgeBitInput {
     attributions?: Nullable<SaveAttributionInput[]>;
-    customLocation?: Nullable<string>;
     customType?: Nullable<string>;
-    location: KnowledgeBitLocations;
+    fileURI: string;
     name: string;
+    nftMetadataURI: string;
+    nftTokenId: string;
+    nftTxHash: string;
     side: KnowledgeBitSides;
     summary?: Nullable<string>;
     type: KnowledgeBitTypes;
-    url: string;
 }
 
 export interface IDInput {
@@ -152,10 +122,24 @@ export interface SaveAttributionInput {
     origin: string;
 }
 
+export interface SaveKnowledgeBitOnIPFSInput {
+    attributions?: Nullable<SaveAttributionInput[]>;
+    customType?: Nullable<string>;
+    file?: Nullable<Upload>;
+    name: string;
+    side: KnowledgeBitSides;
+    summary?: Nullable<string>;
+    type: KnowledgeBitTypes;
+}
+
+export interface SaveOpinionClaimInput {
+    id: string;
+}
+
 export interface SaveOpinionInput {
     acceptance: number;
     arguments: IDInput[];
-    claim: ClaimInput;
+    claim: SaveOpinionClaimInput;
     id?: Nullable<string>;
 }
 
@@ -174,18 +158,17 @@ export interface SaveTagInput {
 export interface SignInWithEthereumInput {
     avatar?: Nullable<string>;
     ens?: Nullable<string>;
+    signature: string;
     siweMessage: SiweMessageInput;
 }
 
 export interface SiweMessageInput {
     address: string;
-    chainId: string;
+    chainId: number;
     domain: string;
     issuedAt: string;
     nonce: string;
-    signature: string;
     statement: string;
-    type: string;
     uri: string;
     version: string;
 }
@@ -206,23 +189,26 @@ export interface UpdateArgumentInput {
 export interface UpdateClaimInput {
     attributions?: Nullable<SaveAttributionInput[]>;
     id: string;
+    nftFractionalizationContractAddress?: Nullable<string>;
+    nftMetadataURI: string;
+    nftTokenId?: Nullable<string>;
+    nftTxHash?: Nullable<string>;
     sources?: Nullable<SaveSourceInput[]>;
-    summary?: Nullable<string>;
+    summary: string;
     tags?: Nullable<SaveTagInput[]>;
-    title?: Nullable<string>;
+    title: string;
 }
 
 export interface UpdateKnowledgeBitInput {
     attributions?: Nullable<SaveAttributionInput[]>;
-    customLocation?: Nullable<string>;
     customType?: Nullable<string>;
+    fileURI?: Nullable<string>;
     id: string;
-    location: KnowledgeBitLocations;
     name: string;
+    nftMetadataURI: string;
     side: KnowledgeBitSides;
     summary?: Nullable<string>;
     type: KnowledgeBitTypes;
-    url: string;
 }
 
 export interface UpdateProfileInput {
@@ -279,10 +265,8 @@ export interface Claim {
     knowledgeBits?: Nullable<KnowledgeBit[]>;
     nftFractionalizationContractAddress?: Nullable<string>;
     nftMetadataURI?: Nullable<string>;
-    nftMetadataURICreatedAt?: Nullable<string>;
-    nftStatus: ClaimNFTStatuses;
     nftTokenId?: Nullable<string>;
-    nftTxId?: Nullable<string>;
+    nftTxHash?: Nullable<string>;
     opinions?: Nullable<Opinion[]>;
     origin: ClaimOrigins;
     ownershipRequestedAt?: Nullable<string>;
@@ -302,18 +286,19 @@ export interface KnowledgeBit {
     attributions?: Nullable<Attribution[]>;
     claim: Claim;
     createdAt: string;
-    customLocation?: Nullable<string>;
     customType?: Nullable<string>;
     downvotesCount?: Nullable<number>;
+    fileURI: string;
     id: string;
-    location: KnowledgeBitLocations;
     name: string;
+    nftMetadataURI: string;
+    nftTokenId: string;
+    nftTxHash: string;
     side: KnowledgeBitSides;
     summary?: Nullable<string>;
     type: KnowledgeBitTypes;
     updatedAt: string;
     upvotesCount?: Nullable<number>;
-    url: string;
     user: User;
     votes?: Nullable<KnowledgeBitVote[]>;
 }
@@ -348,9 +333,9 @@ export interface IMutation {
     removeSource(id: number): Source | Promise<Source>;
     requestClaimOwnership(id: string): boolean | Promise<boolean>;
     requestTwitterOAuthUrl(callbackUrl: string): string | Promise<string>;
-    saveClaimMetadataOnIPFS(id: string): string | Promise<string>;
-    saveClaimTxId(id: string, txId: string): boolean | Promise<boolean>;
-    saveKnowledgeBitVote(knowledgeBitId: string, type: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
+    saveClaimOnIPFS(claim: ClaimInput): string | Promise<string>;
+    saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput): SaveKnowledgeBitOnIPFSOutput | Promise<SaveKnowledgeBitOnIPFSOutput>;
+    saveKnowledgeBitVote(knowledgeBitId: string, voteType: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
     saveOpinion(saveOpinionInput: SaveOpinionInput): Opinion | Promise<Opinion>;
     sendUpdateEmailVerificationCode(email: string): boolean | Promise<boolean>;
     signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput): User | Promise<User>;
@@ -415,6 +400,11 @@ export interface IQuery {
     userOpinion(claimSlug: string): Nullable<Opinion> | Promise<Nullable<Opinion>>;
 }
 
+export interface SaveKnowledgeBitOnIPFSOutput {
+    fileURI?: Nullable<string>;
+    metadataURI: string;
+}
+
 export interface Session {
     siweMessage?: Nullable<SiweMessage>;
     user: User;
@@ -471,4 +461,5 @@ export interface User {
     usernameSource?: Nullable<UsernameSource>;
 }
 
+export type Upload = any;
 type Nullable<T> = T | null;

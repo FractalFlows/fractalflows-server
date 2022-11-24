@@ -5,8 +5,8 @@ export class SiweMessageInput {
   @Field(() => String, { description: 'ETH address' })
   address: string;
 
-  @Field(() => String, { description: '' })
-  chainId: string;
+  @Field(() => Number, { description: '' })
+  chainId: number;
 
   @Field(() => String, { description: 'Dapp domain' })
   domain: string;
@@ -17,14 +17,8 @@ export class SiweMessageInput {
   @Field(() => String, { description: 'Signature unique identifier' })
   nonce: string;
 
-  @Field(() => String, { description: 'Message signature' })
-  signature: string;
-
   @Field(() => String, { description: '' })
   statement: string;
-
-  @Field(() => String, { description: 'Signature type' })
-  type: string;
 
   @Field(() => String, { description: 'Dapp URI' })
   uri: string;
@@ -37,6 +31,9 @@ export class SiweMessageInput {
 export class SignInWithEthereumInput {
   @Field(() => SiweMessageInput, { description: ' ' })
   siweMessage: SiweMessageInput;
+
+  @Field(() => String, { description: 'Message signature' })
+  signature: string;
 
   @Field(() => String, { nullable: true })
   ens?: string;

@@ -1,5 +1,6 @@
 import { Resolver, Mutation, Query, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { In } from 'typeorm';
 
 import { KnowledgeBitVotesService } from './knowledge-bit-votes.service';
 import {
@@ -10,7 +11,6 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { SessionGuard } from '../auth/auth.guard';
 import { ClaimsService } from '../claims/claims.service';
-import { In } from 'typeorm';
 
 @Resolver(() => KnowledgeBitVote)
 export class KnowledgeBitVotesResolver {
@@ -23,30 +23,32 @@ export class KnowledgeBitVotesResolver {
   @UseGuards(SessionGuard)
   async saveKnowledgeBitVote(
     @Args('knowledgeBitId') knowledgeBitId: string,
-    @Args('type', { type: () => KnowledgeBitVoteTypes })
-    type: KnowledgeBitVoteTypes,
+    @Args('voteType', { type: () => KnowledgeBitVoteTypes })
+    voteType: KnowledgeBitVoteTypes,
     @CurrentUser() user: User,
   ) {
     const knowledgeBitVote = await this.knowledgeBitVotesService.findOne({
       where: {
-        knowledgeBit: knowledgeBitId,
-        user,
+        knowledgeBit: {
+          id: knowledgeBitId,
+        },
+        user: { id: user.id },
       },
     });
 
     if (knowledgeBitVote) {
-      if (knowledgeBitVote.type === type) {
-        await this.knowledgeBitVotesService.delete(knowledgeBitVote.id);
-      } else {
-        await this.knowledgeBitVotesService.save({
-          id: knowledgeBitVote.id,
-          type,
-        });
-      }
-    } else {
+      await this.knowledgeBitVotesService.delete({
+        id: knowledgeBitVote.id,
+      });
+    }
+
+    if (
+      voteType === KnowledgeBitVoteTypes.UPVOTE ||
+      voteType === KnowledgeBitVoteTypes.DOWNVOTE
+    ) {
       await this.knowledgeBitVotesService.save({
-        knowledgeBit: knowledgeBitId,
-        type,
+        type: voteType,
+        knowledgeBit: knowledgeBitId as any,
         user,
       });
     }
@@ -71,13 +73,13 @@ export class KnowledgeBitVotesResolver {
 
       return await this.knowledgeBitVotesService.find({
         where: {
-          knowledgeBit: In(knowledgeBitsIds),
-          user,
+          knowledgeBit: { id: In(knowledgeBitsIds) },
+          user: { id: user.id },
         },
-        relations: ['knowledgeBit'],
+        relations: ['knowledgeBit', 'user'],
       });
     } else {
-      return Promise.resolve();
+      return null;
     }
   }
 }

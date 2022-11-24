@@ -14,38 +14,38 @@ export class FrontendService {
 
   private readonly logger = new Logger(FrontendService.name);
 
-  @Cron('0 */5 * * * *')
-  async warmVercelServerlessFunctions() {
-    if (process.env.APP_ENV === 'development') return;
+  // @Cron('0 */5 * * * *')
+  // async warmVercelServerlessFunctions() {
+  //   if (process.env.APP_ENV === 'development') return;
 
-    this.logger.log('Called warmVercelServerlessFunctions cron');
+  //   this.logger.log('Called warmVercelServerlessFunctions cron');
 
-    const claim = await this.claimsService.findOne({});
-    const user = await this.usersService.findOne({});
+  //   const claim = await this.claimsService.findOne({});
+  //   const user = await this.usersService.findOne({});
 
-    // home
-    request(`${process.env.FRONTEND_HOST}`, (error) => {
-      if (error)
-        this.logger.error('Error on warmVercelServerlessFunctions', error);
-    });
+  //   // home
+  //   request(`${process.env.FRONTEND_HOST}`, (error) => {
+  //     if (error)
+  //       this.logger.error('Error on warmVercelServerlessFunctions', error);
+  //   });
 
-    // claim page
-    if (claim) {
-      request(`${process.env.FRONTEND_HOST}/claim/${claim.slug}`, (error) => {
-        if (error)
-          this.logger.error('Error on warmVercelServerlessFunctions', error);
-      });
-    }
+  //   // claim page
+  //   if (claim) {
+  //     request(`${process.env.FRONTEND_HOST}/claim/${claim.slug}`, (error) => {
+  //       if (error)
+  //         this.logger.error('Error on warmVercelServerlessFunctions', error);
+  //     });
+  //   }
 
-    // user profile page
-    if (user) {
-      request(
-        `${process.env.FRONTEND_HOST}/profile/${user.username}`,
-        (error) => {
-          if (error)
-            this.logger.error('Error on warmVercelServerlessFunctions', error);
-        },
-      );
-    }
-  }
+  //   // user profile page
+  //   if (user) {
+  //     request(
+  //       `${process.env.FRONTEND_HOST}/profile/${user.username}`,
+  //       (error) => {
+  //         if (error)
+  //           this.logger.error('Error on warmVercelServerlessFunctions', error);
+  //       },
+  //     );
+  //   }
+  // }
 }

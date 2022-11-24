@@ -2,7 +2,7 @@ import { InputType, Field, Float } from '@nestjs/graphql';
 import { IDInput } from 'src/common/dto/id.input';
 
 @InputType()
-class ClaimInput {
+class SaveOpinionClaimInput {
   @Field(() => String)
   id: string;
 }
@@ -18,6 +18,6 @@ export class SaveOpinionInput {
   @Field(() => [IDInput])
   arguments: IDInput[];
 
-  @Field(() => ClaimInput)
-  claim: ClaimInput;
+  @Field(() => SaveOpinionClaimInput)
+  claim: SaveOpinionClaimInput;
 }

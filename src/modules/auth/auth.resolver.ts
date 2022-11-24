@@ -54,7 +54,9 @@ export class AuthResolver {
         session.nonce,
       );
       const user = await this.usersService.findOne({
-        ethAddress: signInWithEthereumInput.siweMessage.address,
+        where: {
+          ethAddress: signInWithEthereumInput.siweMessage.address,
+        },
       });
 
       if (user) {
