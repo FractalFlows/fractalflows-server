@@ -257,6 +257,7 @@ type KnowledgeBitVote {
 
 enum KnowledgeBitVoteTypes {
   DOWNVOTE
+  UNVOTE
   UPVOTE
 }
 
@@ -283,7 +284,7 @@ type Mutation {
   requestTwitterOAuthUrl(callbackUrl: String!): String!
   saveClaimOnIPFS(claim: ClaimInput!): String!
   saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput!): SaveKnowledgeBitOnIPFSOutput!
-  saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
+  saveKnowledgeBitVote(knowledgeBitId: String!, voteType: KnowledgeBitVoteTypes!): Boolean!
   saveOpinion(saveOpinionInput: SaveOpinionInput!): Opinion!
   sendUpdateEmailVerificationCode(email: String!): Boolean!
   signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput!): User!

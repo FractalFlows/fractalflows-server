@@ -47,6 +47,7 @@ export enum KnowledgeBitTypes {
 
 export enum KnowledgeBitVoteTypes {
     DOWNVOTE = "DOWNVOTE",
+    UNVOTE = "UNVOTE",
     UPVOTE = "UPVOTE"
 }
 
@@ -334,7 +335,7 @@ export interface IMutation {
     requestTwitterOAuthUrl(callbackUrl: string): string | Promise<string>;
     saveClaimOnIPFS(claim: ClaimInput): string | Promise<string>;
     saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput): SaveKnowledgeBitOnIPFSOutput | Promise<SaveKnowledgeBitOnIPFSOutput>;
-    saveKnowledgeBitVote(knowledgeBitId: string, type: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
+    saveKnowledgeBitVote(knowledgeBitId: string, voteType: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
     saveOpinion(saveOpinionInput: SaveOpinionInput): Opinion | Promise<Opinion>;
     sendUpdateEmailVerificationCode(email: string): boolean | Promise<boolean>;
     signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput): User | Promise<User>;

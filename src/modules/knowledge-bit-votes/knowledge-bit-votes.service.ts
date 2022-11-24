@@ -11,7 +11,9 @@ export class KnowledgeBitVotesService {
     private knowledgeBitVoteRepository: Repository<KnowledgeBitVote>,
   ) {}
 
-  async save(saveKnowledgeBitVoteInput: any) {
+  async save(
+    saveKnowledgeBitVoteInput: Omit<KnowledgeBitVote, 'id' | 'createdAt'>,
+  ) {
     return await this.knowledgeBitVoteRepository.save(
       saveKnowledgeBitVoteInput,
     );
@@ -31,8 +33,10 @@ export class KnowledgeBitVotesService {
 
   async countVotes({ knowledgeBitId, type }) {
     return this.knowledgeBitVoteRepository.count({
-      knowledgeBit: knowledgeBitId,
-      type,
-    } as any);
+      where: {
+        knowledgeBit: { id: knowledgeBitId },
+        type,
+      },
+    });
   }
 }
