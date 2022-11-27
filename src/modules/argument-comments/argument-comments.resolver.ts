@@ -8,12 +8,26 @@ import { UpdateArgumentCommentInput } from './dto/update-argument-comment.input'
 import { SessionGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../users/entities/user.entity';
+import { IPFS } from 'src/common/services/ipfs';
+import { ArgumentCommentInput } from './dto/argument-comment.input';
 
 @Resolver(() => ArgumentComment)
 export class ArgumentCommentsResolver {
   constructor(
     private readonly argumentCommentsService: ArgumentCommentsService,
   ) {}
+
+  @Mutation(() => String)
+  @UseGuards(SessionGuard)
+  async saveArgumentCommentOnIPFS(
+    @Args('saveArgumentCommentOnIPFSInput')
+    argumentComment: ArgumentCommentInput,
+  ) {
+    const metadataURI = await IPFS.uploadArgumentCommentMetadata(
+      argumentComment,
+    );
+    return metadataURI;
+  }
 
   @Mutation(() => ArgumentComment)
   @UseGuards(SessionGuard)

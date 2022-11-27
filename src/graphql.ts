@@ -62,6 +62,15 @@ export enum UsernameSource {
     ENS = "ENS"
 }
 
+export interface ArgumentCommentInput {
+    content: string;
+}
+
+export interface ArgumentInput {
+    side: ArgumentSides;
+    summary: string;
+}
+
 export interface ClaimInput {
     attributions?: Nullable<SaveAttributionInput[]>;
     sources?: Nullable<SaveSourceInput[]>;
@@ -73,10 +82,16 @@ export interface ClaimInput {
 export interface CreateArgumentCommentInput {
     argument: IDInput;
     content: string;
+    nftIndex: string;
+    nftMetadataURI: string;
+    nftTxHash: string;
 }
 
 export interface CreateArgumentInput {
     evidences?: Nullable<IDInput[]>;
+    nftMetadataURI: string;
+    nftTokenId: string;
+    nftTxHash: string;
     side: ArgumentSides;
     summary: string;
 }
@@ -177,11 +192,17 @@ export interface UpdateArgumentCommentInput {
     argument: IDInput;
     content: string;
     id: string;
+    nftIndex: string;
+    nftMetadataURI: string;
+    nftTxHash: string;
 }
 
 export interface UpdateArgumentInput {
     evidences?: Nullable<IDInput[]>;
     id: number;
+    nftMetadataURI?: Nullable<string>;
+    nftTokenId?: Nullable<string>;
+    nftTxHash?: Nullable<string>;
     side?: Nullable<ArgumentSides>;
     summary?: Nullable<string>;
 }
@@ -229,6 +250,9 @@ export interface Argument {
     createdAt: string;
     evidences?: Nullable<KnowledgeBit[]>;
     id: string;
+    nftMetadataURI: string;
+    nftTokenId: string;
+    nftTxHash: string;
     opinions?: Nullable<Opinion[]>;
     side: ArgumentSides;
     summary: string;
@@ -241,6 +265,9 @@ export interface ArgumentComment {
     content: string;
     createdAt: string;
     id: string;
+    nftIndex: string;
+    nftMetadataURI: string;
+    nftTxHash: string;
     updatedAt: string;
     user: User;
 }
@@ -333,6 +360,8 @@ export interface IMutation {
     removeSource(id: number): Source | Promise<Source>;
     requestClaimOwnership(id: string): boolean | Promise<boolean>;
     requestTwitterOAuthUrl(callbackUrl: string): string | Promise<string>;
+    saveArgumentCommentOnIPFS(saveArgumentCommentOnIPFSInput: ArgumentCommentInput): string | Promise<string>;
+    saveArgumentOnIPFS(saveArgumentOnIPFSInput: ArgumentInput): string | Promise<string>;
     saveClaimOnIPFS(claim: ClaimInput): string | Promise<string>;
     saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput): SaveKnowledgeBitOnIPFSOutput | Promise<SaveKnowledgeBitOnIPFSOutput>;
     saveKnowledgeBitVote(knowledgeBitId: string, voteType: KnowledgeBitVoteTypes): boolean | Promise<boolean>;

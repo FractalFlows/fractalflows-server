@@ -8,6 +8,8 @@ import { SessionGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { ClaimsService } from '../claims/claims.service';
+import { IPFS } from 'src/common/services/ipfs';
+import { ArgumentInput } from './dto/argument.input';
 
 @Resolver(() => Argument)
 export class ArgumentsResolver {
@@ -15,6 +17,15 @@ export class ArgumentsResolver {
     private readonly argumentsService: ArgumentsService,
     private readonly claimsService: ClaimsService,
   ) {}
+
+  @Mutation(() => String)
+  @UseGuards(SessionGuard)
+  async saveArgumentOnIPFS(
+    @Args('saveArgumentOnIPFSInput') argument: ArgumentInput,
+  ) {
+    const metadataURI = await IPFS.uploadArgumentMetadata(argument);
+    return metadataURI;
+  }
 
   @Mutation(() => Argument)
   @UseGuards(SessionGuard)

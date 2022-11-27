@@ -15,6 +15,9 @@ type Argument {
   createdAt: String!
   evidences: [KnowledgeBit!]
   id: String!
+  nftMetadataURI: String!
+  nftTokenId: String!
+  nftTxHash: String!
   opinions: [Opinion!]
   side: ArgumentSides!
   summary: String!
@@ -31,10 +34,22 @@ type ArgumentComment {
   """Created at"""
   createdAt: String!
   id: String!
+  nftIndex: String!
+  nftMetadataURI: String!
+  nftTxHash: String!
 
   """Updated at"""
   updatedAt: String!
   user: User!
+}
+
+input ArgumentCommentInput {
+  content: String!
+}
+
+input ArgumentInput {
+  side: ArgumentSides!
+  summary: String!
 }
 
 enum ArgumentSides {
@@ -143,10 +158,16 @@ enum ClaimOrigins {
 input CreateArgumentCommentInput {
   argument: IDInput!
   content: String!
+  nftIndex: String!
+  nftMetadataURI: String!
+  nftTxHash: String!
 }
 
 input CreateArgumentInput {
   evidences: [IDInput!]
+  nftMetadataURI: String!
+  nftTokenId: String!
+  nftTxHash: String!
   side: ArgumentSides!
   summary: String!
 }
@@ -282,6 +303,8 @@ type Mutation {
   removeSource(id: Int!): Source!
   requestClaimOwnership(id: String!): Boolean!
   requestTwitterOAuthUrl(callbackUrl: String!): String!
+  saveArgumentCommentOnIPFS(saveArgumentCommentOnIPFSInput: ArgumentCommentInput!): String!
+  saveArgumentOnIPFS(saveArgumentOnIPFSInput: ArgumentInput!): String!
   saveClaimOnIPFS(claim: ClaimInput!): String!
   saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput!): SaveKnowledgeBitOnIPFSOutput!
   saveKnowledgeBitVote(knowledgeBitId: String!, voteType: KnowledgeBitVoteTypes!): Boolean!
@@ -517,11 +540,17 @@ input UpdateArgumentCommentInput {
   argument: IDInput!
   content: String!
   id: String!
+  nftIndex: String!
+  nftMetadataURI: String!
+  nftTxHash: String!
 }
 
 input UpdateArgumentInput {
   evidences: [IDInput!]
   id: Int!
+  nftMetadataURI: String
+  nftTokenId: String
+  nftTxHash: String
   side: ArgumentSides
   summary: String
 }

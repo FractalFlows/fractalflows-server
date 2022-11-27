@@ -44,6 +44,29 @@ export const IPFS = {
 
     return metadata.url;
   },
+  async uploadArgumentMetadata(argument) {
+    const client = this._getNFTStorageClient();
+    const metadata = await client.store({
+      name: `Argument`,
+      description: argument.summary,
+      image: new File([''], 'default.jpg', { type: 'image/jpg' }),
+      properties: {
+        side: argument.side,
+      },
+    });
+
+    return metadata.url;
+  },
+  async uploadArgumentCommentMetadata(argumentComment) {
+    const client = this._getNFTStorageClient();
+    const metadata = await client.store({
+      name: `Argument Comment`,
+      description: argumentComment.content,
+      image: new File([''], 'default.jpg', { type: 'image/jpg' }),
+    });
+
+    return metadata.url;
+  },
   async uploadFile(buffer, filename) {
     const client = this._getWeb3StorageClient();
     const file = new Web3StorageFile([buffer], filename);
