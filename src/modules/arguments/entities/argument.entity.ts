@@ -61,4 +61,16 @@ export class Argument extends BaseEntity {
   @Field(() => [Opinion], { nullable: true })
   @ManyToMany(() => Opinion, (opinion) => opinion.arguments)
   opinions: Opinion[];
+
+  @Field(() => String)
+  @Column()
+  nftTxHash?: string;
+
+  @Field(() => String)
+  @Column()
+  nftTokenId?: string;
+
+  @Field(() => String)
+  @Column()
+  nftMetadataURI?: string;
 }

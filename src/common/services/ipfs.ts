@@ -1,4 +1,5 @@
 import { NFTStorage, File } from 'nft.storage';
+import { Opinion } from 'src/modules/opinions/entities/opinion.entity';
 import { Web3Storage, File as Web3StorageFile } from 'web3.storage';
 
 export const IPFS = {
@@ -39,6 +40,42 @@ export const IPFS = {
         customType: knowledgeBit.customType,
         file: knowledgeBit.fileURI,
         attributions: knowledgeBit.attributions,
+      },
+    });
+
+    return metadata.url;
+  },
+  async uploadArgumentMetadata(argument) {
+    const client = this._getNFTStorageClient();
+    const metadata = await client.store({
+      name: `Argument`,
+      description: argument.summary,
+      image: new File([''], 'default.jpg', { type: 'image/jpg' }),
+      properties: {
+        side: argument.side,
+      },
+    });
+
+    return metadata.url;
+  },
+  async uploadArgumentCommentMetadata(argumentComment) {
+    const client = this._getNFTStorageClient();
+    const metadata = await client.store({
+      name: `Argument Comment`,
+      description: argumentComment.content,
+      image: new File([''], 'default.jpg', { type: 'image/jpg' }),
+    });
+
+    return metadata.url;
+  },
+  async uploadOpinionMetadata(opinion) {
+    const client = this._getNFTStorageClient();
+    const metadata = await client.store({
+      name: 'Opinion',
+      description: 'Opinion',
+      image: new File([''], 'default.jpg', { type: 'image/jpg' }),
+      properties: {
+        acceptance: opinion.acceptance,
       },
     });
 

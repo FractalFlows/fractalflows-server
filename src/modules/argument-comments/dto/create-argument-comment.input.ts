@@ -8,4 +8,13 @@ export class CreateArgumentCommentInput {
 
   @Field(() => IDInput)
   argument: IDInput;
+
+  @Field(() => String)
+  nftIndex: string;
+
+  @Field(() => String)
+  nftTxHash: string;
+
+  @Field(() => String)
+  nftMetadataURI: string;
 }

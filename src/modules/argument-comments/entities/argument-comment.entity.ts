@@ -19,4 +19,16 @@ export class ArgumentComment extends BaseEntity {
   @Field(() => User)
   @ManyToOne(() => User)
   user: User;
+
+  @Field(() => String)
+  @Column()
+  nftTxHash?: string;
+
+  @Field(() => String)
+  @Column()
+  nftIndex?: string;
+
+  @Field(() => String)
+  @Column()
+  nftMetadataURI?: string;
 }

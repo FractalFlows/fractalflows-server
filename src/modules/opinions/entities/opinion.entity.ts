@@ -25,4 +25,16 @@ export class Opinion extends BaseEntity {
   @Field(() => Claim)
   @ManyToOne(() => Claim, (claim) => claim.arguments)
   claim: Claim;
+
+  @Field(() => String)
+  @Column()
+  nftTxHash?: string;
+
+  @Field(() => String)
+  @Column()
+  nftTokenId?: string;
+
+  @Field(() => String)
+  @Column()
+  nftMetadataURI?: string;
 }
