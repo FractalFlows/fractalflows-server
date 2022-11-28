@@ -147,15 +147,18 @@ export interface SaveKnowledgeBitOnIPFSInput {
     type: KnowledgeBitTypes;
 }
 
-export interface SaveOpinionClaimInput {
-    id: string;
-}
-
 export interface SaveOpinionInput {
     acceptance: number;
     arguments: IDInput[];
-    claim: SaveOpinionClaimInput;
+    claim: IDInput;
     id?: Nullable<string>;
+    nftMetadataURI?: Nullable<string>;
+    nftTokenId: string;
+    nftTxHash?: Nullable<string>;
+}
+
+export interface SaveOpinionOnIPFSInput {
+    acceptance: number;
 }
 
 export interface SaveSourceInput {
@@ -366,6 +369,7 @@ export interface IMutation {
     saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput): SaveKnowledgeBitOnIPFSOutput | Promise<SaveKnowledgeBitOnIPFSOutput>;
     saveKnowledgeBitVote(knowledgeBitId: string, voteType: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
     saveOpinion(saveOpinionInput: SaveOpinionInput): Opinion | Promise<Opinion>;
+    saveOpinionOnIPFS(saveOpinionOnIPFSInput: SaveOpinionOnIPFSInput): string | Promise<string>;
     sendUpdateEmailVerificationCode(email: string): boolean | Promise<boolean>;
     signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput): User | Promise<User>;
     signOut(): boolean | Promise<boolean>;
@@ -384,6 +388,9 @@ export interface Opinion {
     claim: Claim;
     createdAt: string;
     id: string;
+    nftMetadataURI: string;
+    nftTokenId: string;
+    nftTxHash: string;
     updatedAt: string;
     user: User;
 }

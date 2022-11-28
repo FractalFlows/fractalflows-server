@@ -309,6 +309,7 @@ type Mutation {
   saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput!): SaveKnowledgeBitOnIPFSOutput!
   saveKnowledgeBitVote(knowledgeBitId: String!, voteType: KnowledgeBitVoteTypes!): Boolean!
   saveOpinion(saveOpinionInput: SaveOpinionInput!): Opinion!
+  saveOpinionOnIPFS(saveOpinionOnIPFSInput: SaveOpinionOnIPFSInput!): String!
   sendUpdateEmailVerificationCode(email: String!): Boolean!
   signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput!): User!
   signOut: Boolean!
@@ -329,6 +330,9 @@ type Opinion {
   """Created at"""
   createdAt: String!
   id: String!
+  nftMetadataURI: String!
+  nftTokenId: String!
+  nftTxHash: String!
 
   """Updated at"""
   updatedAt: String!
@@ -401,15 +405,18 @@ type SaveKnowledgeBitOnIPFSOutput {
   metadataURI: String!
 }
 
-input SaveOpinionClaimInput {
-  id: String!
-}
-
 input SaveOpinionInput {
   acceptance: Float!
   arguments: [IDInput!]!
-  claim: SaveOpinionClaimInput!
+  claim: IDInput!
   id: String
+  nftMetadataURI: String
+  nftTokenId: String!
+  nftTxHash: String
+}
+
+input SaveOpinionOnIPFSInput {
+  acceptance: Float!
 }
 
 input SaveSourceInput {

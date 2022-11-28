@@ -9,6 +9,8 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { ClaimsService } from '../claims/claims.service';
 import { getClaimURL } from 'src/common/utils/claim';
+import { IPFS } from 'src/common/services/ipfs';
+import { SaveOpinionOnIPFSInput } from './dto/save-opinion-on-ipfs.input';
 
 @Resolver(() => Opinion)
 export class OpinionsResolver {
@@ -17,6 +19,15 @@ export class OpinionsResolver {
     private readonly claimsService: ClaimsService,
   ) {}
 
+  @Mutation(() => String)
+  @UseGuards(SessionGuard)
+  async saveOpinionOnIPFS(
+    @Args('saveOpinionOnIPFSInput') opinion: SaveOpinionOnIPFSInput,
+  ) {
+    const metadataURI = await IPFS.uploadOpinionMetadata(opinion);
+    return metadataURI;
+  }
+
   @Mutation(() => Opinion)
   @UseGuards(SessionGuard)
   async saveOpinion(
@@ -24,7 +35,9 @@ export class OpinionsResolver {
     saveOpinionInput: SaveOpinionInput,
     @CurrentUser() user: User,
   ) {
-    const claim = await this.claimsService.findOne(saveOpinionInput.claim.id);
+    const claim = await this.claimsService.findOne({
+      where: { id: saveOpinionInput.claim.id },
+    });
     const opinion = await this.opinionsService.save({
       ...saveOpinionInput,
       user,
@@ -81,7 +94,7 @@ export class OpinionsResolver {
         where: { slug: claimSlug },
       });
       const opinion = await this.opinionsService.findOne({
-        where: { claim, user },
+        where: { claim: { id: claim.id }, user: { id: user.id } },
         relations: ['arguments', 'arguments.comments', 'claim', 'user'],
       });
       return opinion;
