@@ -94,10 +94,11 @@ type Claim {
   followers: [User!]
   id: String!
   knowledgeBits: [KnowledgeBit!]
-  nftFractionalizationContractAddress: String
-  nftMetadataURI: String
-  nftTokenId: String
-  nftTxHash: String
+  nftFractionalizationContractAddress: String!
+  nftMetadataURI: String!
+  nftTokenId: String!
+  nftTxHash: String!
+  oceanDid: String!
   opinions: [Opinion!]
   origin: ClaimOrigins!
   ownershipRequestedAt: String
@@ -179,6 +180,7 @@ input CreateClaimInput {
   nftMetadataURI: String!
   nftTokenId: String!
   nftTxHash: String!
+  oceanDid: String!
 
   """Sources"""
   sources: [SaveSourceInput!]
@@ -570,6 +572,7 @@ input UpdateClaimInput {
   nftMetadataURI: String!
   nftTokenId: String
   nftTxHash: String
+  oceanDid: String
 
   """Sources"""
   sources: [SaveSourceInput!]

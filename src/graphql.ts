@@ -102,6 +102,7 @@ export interface CreateClaimInput {
     nftMetadataURI: string;
     nftTokenId: string;
     nftTxHash: string;
+    oceanDid: string;
     sources?: Nullable<SaveSourceInput[]>;
     summary: string;
     tags?: Nullable<SaveTagInput[]>;
@@ -217,6 +218,7 @@ export interface UpdateClaimInput {
     nftMetadataURI: string;
     nftTokenId?: Nullable<string>;
     nftTxHash?: Nullable<string>;
+    oceanDid?: Nullable<string>;
     sources?: Nullable<SaveSourceInput[]>;
     summary: string;
     tags?: Nullable<SaveTagInput[]>;
@@ -293,10 +295,11 @@ export interface Claim {
     followers?: Nullable<User[]>;
     id: string;
     knowledgeBits?: Nullable<KnowledgeBit[]>;
-    nftFractionalizationContractAddress?: Nullable<string>;
-    nftMetadataURI?: Nullable<string>;
-    nftTokenId?: Nullable<string>;
-    nftTxHash?: Nullable<string>;
+    nftFractionalizationContractAddress: string;
+    nftMetadataURI: string;
+    nftTokenId: string;
+    nftTxHash: string;
+    oceanDid: string;
     opinions?: Nullable<Opinion[]>;
     origin: ClaimOrigins;
     ownershipRequestedAt?: Nullable<string>;

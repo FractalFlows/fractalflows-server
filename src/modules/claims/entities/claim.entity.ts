@@ -108,27 +108,25 @@ export class Claim extends BaseEntity {
   })
   origin: ClaimOrigins;
 
-  @Field(() => String, { nullable: true })
-  @Column({ nullable: true })
-  nftTxHash?: string;
+  @Field(() => String)
+  @Column()
+  nftTxHash: string;
 
-  @Field(() => String, {
-    nullable: true,
-  })
-  @Column({ nullable: true })
-  nftTokenId?: string;
+  @Field(() => String)
+  @Column()
+  nftTokenId: string;
 
-  @Field(() => String, {
-    nullable: true,
-  })
-  @Column({ nullable: true })
-  nftFractionalizationContractAddress?: string;
+  @Field(() => String)
+  @Column()
+  nftFractionalizationContractAddress: string;
 
-  @Field(() => String, {
-    nullable: true,
-  })
-  @Column({ nullable: true })
-  nftMetadataURI?: string;
+  @Field(() => String)
+  @Column()
+  nftMetadataURI: string;
+
+  @Field(() => String)
+  @Column()
+  oceanDid: string;
 
   @Field(() => String, { nullable: true })
   @Column({ type: 'timestamp', nullable: true })
