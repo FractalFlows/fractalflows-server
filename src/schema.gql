@@ -307,7 +307,7 @@ type Mutation {
   requestTwitterOAuthUrl(callbackUrl: String!): String!
   saveArgumentCommentOnIPFS(saveArgumentCommentOnIPFSInput: ArgumentCommentInput!): String!
   saveArgumentOnIPFS(saveArgumentOnIPFSInput: ArgumentInput!): String!
-  saveClaimOnIPFS(claim: ClaimInput!): String!
+  saveClaimOnIPFS(claim: ClaimInput!): SaveClaimOnIPFSOutput!
   saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput!): SaveKnowledgeBitOnIPFSOutput!
   saveKnowledgeBitVote(knowledgeBitId: String!, voteType: KnowledgeBitVoteTypes!): Boolean!
   saveOpinion(saveOpinionInput: SaveOpinionInput!): Opinion!
@@ -390,6 +390,11 @@ input SaveAttributionInput {
 
   """Origin"""
   origin: String!
+}
+
+type SaveClaimOnIPFSOutput {
+  ipnsName: String!
+  metadataURI: String!
 }
 
 input SaveKnowledgeBitOnIPFSInput {

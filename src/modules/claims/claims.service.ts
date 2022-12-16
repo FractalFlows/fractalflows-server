@@ -29,7 +29,11 @@ export class ClaimsService {
   ) {}
 
   async create(
-    createClaimInput: CreateClaimInput & { user: User },
+    createClaimInput: CreateClaimInput & {
+      user: User;
+      ipnsKey: Buffer;
+      ipnsName: String;
+    },
   ): Promise<Claim> {
     const baseSlug = slugify(createClaimInput.title, {
       lower: true,

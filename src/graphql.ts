@@ -368,7 +368,7 @@ export interface IMutation {
     requestTwitterOAuthUrl(callbackUrl: string): string | Promise<string>;
     saveArgumentCommentOnIPFS(saveArgumentCommentOnIPFSInput: ArgumentCommentInput): string | Promise<string>;
     saveArgumentOnIPFS(saveArgumentOnIPFSInput: ArgumentInput): string | Promise<string>;
-    saveClaimOnIPFS(claim: ClaimInput): string | Promise<string>;
+    saveClaimOnIPFS(claim: ClaimInput): SaveClaimOnIPFSOutput | Promise<SaveClaimOnIPFSOutput>;
     saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput): SaveKnowledgeBitOnIPFSOutput | Promise<SaveKnowledgeBitOnIPFSOutput>;
     saveKnowledgeBitVote(knowledgeBitId: string, voteType: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
     saveOpinion(saveOpinionInput: SaveOpinionInput): Opinion | Promise<Opinion>;
@@ -437,6 +437,11 @@ export interface IQuery {
     userFollowingClaims(username: string): Claim[] | Promise<Claim[]>;
     userKnowledgeBitVotes(claimSlug: string): Nullable<KnowledgeBitVote[]> | Promise<Nullable<KnowledgeBitVote[]>>;
     userOpinion(claimSlug: string): Nullable<Opinion> | Promise<Nullable<Opinion>>;
+}
+
+export interface SaveClaimOnIPFSOutput {
+    ipnsName: string;
+    metadataURI: string;
 }
 
 export interface SaveKnowledgeBitOnIPFSOutput {

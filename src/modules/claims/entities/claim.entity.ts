@@ -128,6 +128,17 @@ export class Claim extends BaseEntity {
   @Column()
   oceanDid: string;
 
+  @Column({
+    type: 'bytea',
+    nullable: true,
+  })
+  ipnsKey?: Buffer;
+
+  @Column({
+    nullable: true,
+  })
+  ipnsName?: String;
+
   @Field(() => String, { nullable: true })
   @Column({ type: 'timestamp', nullable: true })
   ownershipRequestedAt?: Date;

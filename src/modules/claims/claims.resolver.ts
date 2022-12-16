@@ -1,6 +1,7 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { In } from 'typeorm';
+import * as W3Name from 'w3name';
 
 import { ClaimsService, CLAIM_CORE_RELATIONS } from './claims.service';
 import { Claim } from './entities/claim.entity';
@@ -18,6 +19,11 @@ import { PaginatedClaims } from './dto/paginated-claims.output';
 import { getClaimURL } from 'src/common/utils/claim';
 import { IPFS } from 'src/common/services/ipfs';
 import { ClaimInput } from './dto/claim.input';
+import {
+  getCIDFromIPFSURI,
+  removeProtocolFromIPFSURI,
+} from 'src/common/utils/ipfs';
+import { SaveClaimOnIPFSOutput } from './dto/save-claim-on-ipfs.output';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -34,6 +40,7 @@ export class ClaimsResolver {
   async createClaim(
     @Args('createClaimInput') createClaimInput: CreateClaimInput,
     @CurrentUser() user: User,
+    @Context() context,
   ) {
     await this.sourcesService.save(createClaimInput.sources);
     await this.attributionsService.upsert(createClaimInput.attributions);
@@ -43,6 +50,8 @@ export class ClaimsResolver {
       ...createClaimInput,
       tags: upsertedTags.identifiers,
       user,
+      ipnsKey: context.req.session.ipnsKey,
+      ipnsName: context.req.session.ipnsName,
     });
 
     this.claimsService.notifyNewlyAddedAttributions({
@@ -54,11 +63,35 @@ export class ClaimsResolver {
     return claim;
   }
 
-  @Mutation(() => String)
+  @Mutation(() => SaveClaimOnIPFSOutput)
   @UseGuards(SessionGuard)
-  async saveClaimOnIPFS(@Args('claim') claim: ClaimInput) {
-    const metadataURI = await IPFS.uploadClaimMetadata(claim);
-    return metadataURI;
+  async saveClaimOnIPFS(@Args('claim') claim: ClaimInput, @Context() context) {
+    const metadataURI = await IPFS.uploadNFTMetadata({
+      name: claim.title,
+      description: claim.summary,
+      properties: {
+        tags: claim.tags,
+        sources: claim.sources,
+        attributions: claim.attributions,
+      },
+    });
+
+    const ipnsName = await W3Name.create();
+    const ipnsRevision = await W3Name.v0(
+      ipnsName,
+      `/ipfs/${removeProtocolFromIPFSURI(metadataURI)}`,
+    );
+
+    await W3Name.publish(ipnsRevision, ipnsName.key);
+
+    const { session } = context.req;
+    session.ipnsKey = ipnsName.key.bytes;
+    session.ipnsName = ipnsName.toString();
+
+    return {
+      metadataURI,
+      ipnsName: ipnsName.toString(),
+    };
   }
 
   @Query(() => Claim, { name: 'claim' })
