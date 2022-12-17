@@ -43,9 +43,6 @@ export class ClaimsResolver {
     await this.attributionsService.upsert(createClaimInput.attributions);
     const upsertedTags = await this.tagsService.save(createClaimInput.tags);
 
-    console.log('2', context.req.session.oceanIpnsKey);
-    console.log(Buffer.from(context.req.session.oceanIpnsKey.data));
-
     const claim = await this.claimsService.create({
       ...createClaimInput,
       tags: upsertedTags.identifiers,
@@ -85,7 +82,6 @@ export class ClaimsResolver {
 
     await W3Name.publish(ipnsRevision, ipnsName.key);
 
-    console.log('1', ipnsName.key.bytes);
     const { session } = context.req;
     session.oceanIpnsKey = ipnsName.key.bytes;
     session.oceanIpnsName = ipnsName.toString();

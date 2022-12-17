@@ -325,7 +325,6 @@ export class ClaimsService {
   */
   // @Cron('0 0 0 * * *', {
   //   name: 'zipFilesAndUpdateIPNSName',
-  //   timeZone: 'Europe/London',
   // })
   @Timeout(0)
   async zipFilesAndUpdateIPNSName() {
@@ -369,6 +368,9 @@ export class ClaimsService {
             knowledgeBit.nftMetadataURI,
           );
           const knowledgeBitFile = await fetchIPFSFile(knowledgeBit.fileURI);
+          const knowledgeBitFileType = await FileType.fromBuffer(
+            knowledgeBitFile,
+          );
           const knowledgeBitFilename = getUniqueFilename(
             knowledgeBit.name,
             acc.filenames,
@@ -379,8 +381,8 @@ export class ClaimsService {
             files: {
               ...(acc.files || {}),
               [`${knowledgeBitFilename}.json`]: knowledgeBitMetadataFile,
-              [`${knowledgeBitFilename}_file.${
-                (await FileType.fromBuffer(knowledgeBitFile)).ext
+              [`${knowledgeBitFilename}_file${
+                knowledgeBitFileType ? `.${knowledgeBitFileType.ext}` : ''
               }`]: knowledgeBitFile,
             },
           };
@@ -467,17 +469,25 @@ export class ClaimsService {
       return opinionsFiles;
     };
 
-    const writeFilesToFolder = (folder, { files = {}, folders = {} } = {}) => {
+    const writeFilesToFolder = (
+      getFolder,
+      { files = {}, folders = {} } = {},
+    ) => {
       const filesKeys = Object.keys(files);
       const foldersKeys = Object.keys(folders);
 
-      if (filesKeys.length === 0 || foldersKeys.length === 0) return;
+      if (filesKeys.length === 0 && foldersKeys.length === 0) return;
+
+      const folder = getFolder();
 
       filesKeys.map((filename) => {
         folder.file(filename, files[filename]);
       });
       foldersKeys.map((foldername) => {
-        writeFilesToFolder(folder.folder(foldername), folders[foldername]);
+        writeFilesToFolder(
+          () => folder.folder(foldername),
+          folders[foldername],
+        );
       });
     };
 
@@ -490,61 +500,63 @@ export class ClaimsService {
       ],
     });
 
-    claims.map(async (claim) => {
-      // stop if claim doesn't have new data to be zipped
-      if (claim.updatedAt < (claim.oceanIpnsNameUpdatedAt ?? 0)) {
-        return;
-      }
+    claims.reduce(async (acc, claim) => {
+      return acc.then(async () => {
+        // stop if claim doesn't have new data to be zipped
+        if (claim.updatedAt < (claim.oceanIpnsNameUpdatedAt ?? 0)) {
+          return;
+        }
 
-      const zip = new JSZip();
+        const zip = new JSZip();
 
-      const claimFile = await fetchIPFSFile(claim.nftMetadataURI);
-      const refutingKnowledgeBitFiles = await getKnowledgeBitFiles(
-        claim.knowledgeBits.filter(
-          ({ side }) => side === KnowledgeBitSides.REFUTING,
-        ),
-      );
-      const supportingKnowledgeBitFiles = await getKnowledgeBitFiles(
-        claim.knowledgeBits.filter(
-          ({ side }) => side === KnowledgeBitSides.SUPPORTING,
-        ),
-      );
-      const argumentsFiles = await getArgumentsFiles(claim.arguments);
-      const opinionsFiles = await getOpinionsFiles(claim.opinions);
+        const claimFile = await fetchIPFSFile(claim.nftMetadataURI);
+        const refutingKnowledgeBitFiles = await getKnowledgeBitFiles(
+          claim.knowledgeBits.filter(
+            ({ side }) => side === KnowledgeBitSides.REFUTING,
+          ),
+        );
+        const supportingKnowledgeBitFiles = await getKnowledgeBitFiles(
+          claim.knowledgeBits.filter(
+            ({ side }) => side === KnowledgeBitSides.SUPPORTING,
+          ),
+        );
+        const argumentsFiles = await getArgumentsFiles(claim.arguments);
+        const opinionsFiles = await getOpinionsFiles(claim.opinions);
 
-      zip.file(`${getUniqueFilename(claim.title, [])}.json`, claimFile);
+        zip.file(`${getUniqueFilename(claim.title, [])}.json`, claimFile);
 
-      writeFilesToFolder(
-        zip.folder('refuting_knowledge_bits'),
-        refutingKnowledgeBitFiles,
-      );
-      writeFilesToFolder(
-        zip.folder('supporting_knowledge_bits'),
-        supportingKnowledgeBitFiles,
-      );
-      writeFilesToFolder(zip.folder('arguments'), argumentsFiles);
-      writeFilesToFolder(zip.folder('opinions'), opinionsFiles);
+        writeFilesToFolder(
+          () => zip.folder('refuting_knowledge_bits'),
+          refutingKnowledgeBitFiles,
+        );
+        writeFilesToFolder(
+          () => zip.folder('supporting_knowledge_bits'),
+          supportingKnowledgeBitFiles,
+        );
+        writeFilesToFolder(() => zip.folder('arguments'), argumentsFiles);
+        writeFilesToFolder(() => zip.folder('opinions'), opinionsFiles);
 
-      const file = await zip.generateAsync({ type: 'blob' });
-      const fileURI = await IPFS.uploadFile(file, 'data.zip');
+        const file = await zip.generateAsync({ type: 'blob' });
+        const fileURI = await IPFS.uploadFile(file, 'data.zip');
 
-      const ipnsName = await W3Name.from(claim.oceanIpnsKey);
-      const ipnsRevision = await W3Name.resolve(ipnsName);
-      const ipnsNextRevision = await W3Name.increment(
-        ipnsRevision,
-        `/ipfs/${getCIDAndPathfromIPFSURI(fileURI)}`,
-      );
+        const ipnsName = await W3Name.from(claim.oceanIpnsKey);
+        const ipnsRevision = await W3Name.resolve(ipnsName);
+        const ipnsNextRevision = await W3Name.increment(
+          ipnsRevision,
+          `/ipfs/${getCIDAndPathfromIPFSURI(fileURI)}`,
+        );
 
-      await W3Name.publish(ipnsNextRevision, ipnsName.key);
+        await W3Name.publish(ipnsNextRevision, ipnsName.key);
 
-      const updatedAt = new Date();
+        const updatedAt = new Date();
 
-      await this.save({
-        id: claim.id,
-        updatedAt,
-        oceanFileURI: fileURI,
-        oceanIpnsNameUpdatedAt: new Date(updatedAt.getTime() + 1),
+        await this.save({
+          id: claim.id,
+          updatedAt,
+          oceanFileURI: fileURI,
+          oceanIpnsNameUpdatedAt: new Date(updatedAt.getTime() + 1),
+        });
       });
-    });
+    }, Promise.resolve());
   }
 }
