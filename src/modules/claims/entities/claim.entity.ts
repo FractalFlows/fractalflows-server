@@ -137,7 +137,7 @@ export class Claim extends BaseEntity {
   @Column({
     nullable: true,
   })
-  ipnsName?: String;
+  ipnsName?: string;
 
   @Field(() => String, { nullable: true })
   @Column({ type: 'timestamp', nullable: true })

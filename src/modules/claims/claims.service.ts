@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
 import { In, Repository } from 'typeorm';
+import JSZip from 'jszip';
+import FileType from 'file-type';
+import fs from 'fs';
 
 import { sendMail } from 'src/common/services/mail';
 import { User } from '../users/entities/user.entity';
@@ -12,6 +15,10 @@ import { Claim } from './entities/claim.entity';
 import { Attribution } from '../attributions/entities/attribution.entity';
 import { getClaimURL } from 'src/common/utils/claim';
 import { AttributionsService } from '../attributions/attributions.service';
+import { Cron, Timeout } from '@nestjs/schedule';
+import { getIPFSGatewayURIFromIPFSURI } from 'src/common/utils/ipfs';
+import { IPFS } from 'src/common/services/ipfs';
+import { KnowledgeBitSides } from '../knowledge-bits/entities/knowledge-bit.entity';
 
 export const CLAIM_CORE_RELATIONS = [
   'user',
@@ -32,7 +39,7 @@ export class ClaimsService {
     createClaimInput: CreateClaimInput & {
       user: User;
       ipnsKey: Buffer;
-      ipnsName: String;
+      ipnsName: string;
     },
   ): Promise<Claim> {
     const baseSlug = slugify(createClaimInput.title, {
@@ -307,5 +314,213 @@ export class ClaimsService {
     });
 
     return true;
+  }
+
+  /*
+    Zips files and updates Ocean listing
+  */
+  // @Cron('0 0 0 * * *', {
+  //   name: 'zipFilesAndUpdateIPNSName',
+  //   timeZone: 'Europe/London',
+  // })
+  @Timeout(0)
+  async zipFilesAndUpdateIPNSName() {
+    const fetchIPFSFile = async (ipfsURI: string) => {
+      const gatewayURI = getIPFSGatewayURIFromIPFSURI(ipfsURI);
+
+      try {
+        const response = await fetch(gatewayURI);
+        const file = await response.arrayBuffer();
+
+        return file;
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    const getUniqueFilename = (name: string, existingNames: string[] = []) => {
+      const baseFilename = slugify(name.substring(0, 50), {
+        lower: true,
+        strict: true,
+      });
+      let filename;
+      let filenameIndex = 0;
+
+      do {
+        filename = `${baseFilename}${
+          filenameIndex > 0 ? `_${filenameIndex}` : ''
+        }`;
+        filenameIndex++;
+      } while (existingNames.includes(filename));
+
+      return filename;
+    };
+
+    const getKnowledgeBitFiles = async (knowledgeBits: any) => {
+      const knowledgeBitsFiles = await knowledgeBits.reduce(
+        async (acc, knowledgeBit) => {
+          acc = await acc;
+
+          const knowledgeBitMetadataFile = await fetchIPFSFile(
+            knowledgeBit.nftMetadataURI,
+          );
+          const knowledgeBitFile = await fetchIPFSFile(knowledgeBit.fileURI);
+          const knowledgeBitFilename = getUniqueFilename(
+            knowledgeBit.name,
+            acc.filenames,
+          );
+
+          return {
+            filenames: [...(acc.filenames || []), knowledgeBitFilename],
+            files: {
+              ...(acc.files || {}),
+              [`${knowledgeBitFilename}.json`]: knowledgeBitMetadataFile,
+              [`${knowledgeBitFilename}_file.${
+                (await FileType.fromBuffer(knowledgeBitFile)).ext
+              }`]: knowledgeBitFile,
+            },
+          };
+        },
+        {},
+      );
+
+      return knowledgeBitsFiles;
+    };
+
+    const getArgumentCommentsFiles = async (argumentsComments: any) => {
+      const argumentsFiles = await argumentsComments.reduce(
+        async (acc, argumentsComment) => {
+          acc = await acc;
+
+          const argumentCommentMetadataFile = await fetchIPFSFile(
+            argumentsComment.nftMetadataURI,
+          );
+          const argumentCommentFilename = getUniqueFilename(
+            argumentsComment.content,
+            acc.filenames,
+          );
+
+          return {
+            filenames: [...(acc.filenames || []), argumentCommentFilename],
+            files: {
+              ...(acc.files || {}),
+              [`${argumentCommentFilename}.json`]: argumentCommentMetadataFile,
+            },
+          };
+        },
+        {},
+      );
+
+      return argumentsFiles;
+    };
+
+    const getArgumentsFiles = async (arguments_: any) => {
+      const argumentsFiles = await arguments_.reduce(async (acc, argument) => {
+        acc = await acc;
+
+        const argumentMetadataFile = await fetchIPFSFile(
+          argument.nftMetadataURI,
+        );
+        const argumentCommentsMetadataFiles = await getArgumentCommentsFiles(
+          argument.comments,
+        );
+        const argumentFilename = getUniqueFilename(
+          argument.summary,
+          acc.filenames,
+        );
+
+        return {
+          filenames: [...(acc.filenames || []), argumentFilename],
+          files: {
+            ...(acc.files || {}),
+            [`${argumentFilename}.json`]: argumentMetadataFile,
+          },
+          folders: {
+            [`${argumentFilename}_comments`]: argumentCommentsMetadataFiles,
+          },
+        };
+      }, {});
+
+      return argumentsFiles;
+    };
+
+    const getOpinionsFiles = async (opinions: any) => {
+      const opinionsFiles = await opinions.reduce(async (acc, opinion, i) => {
+        acc = await acc;
+
+        const opinionMetadataFile = await fetchIPFSFile(opinion.nftMetadataURI);
+        const opinionFilename = `opinion_${i}`;
+
+        return {
+          filenames: [...(acc.filenames || [])],
+          files: {
+            ...(acc.files || {}),
+            [`${opinionFilename}.json`]: opinionMetadataFile,
+          },
+        };
+      }, {});
+
+      return opinionsFiles;
+    };
+
+    const writeFilesToFolder = (folder, { files = {}, folders = {} } = {}) => {
+      Object.keys(files).map((filename) => {
+        folder.file(filename, files[filename]);
+      });
+      Object.keys(folders).map((foldername) => {
+        writeFilesToFolder(folder.folder(foldername), folders[foldername]);
+      });
+    };
+
+    const claims = await this.claimsRepository.find({
+      relations: [
+        'arguments',
+        'arguments.comments',
+        'knowledgeBits',
+        'opinions',
+      ],
+    });
+
+    claims.map(async (claim) => {
+      const zip = new JSZip();
+
+      const claimFile = await fetchIPFSFile(claim.nftMetadataURI);
+      const refutingKnowledgeBitFiles = await getKnowledgeBitFiles(
+        claim.knowledgeBits.filter(
+          ({ side }) => side === KnowledgeBitSides.REFUTING,
+        ),
+      );
+      const supportingKnowledgeBitFiles = await getKnowledgeBitFiles(
+        claim.knowledgeBits.filter(
+          ({ side }) => side === KnowledgeBitSides.SUPPORTING,
+        ),
+      );
+      const argumentsFiles = await getArgumentsFiles(claim.arguments);
+      const opinionsFiles = await getOpinionsFiles(claim.opinions);
+
+      zip.file(`${getUniqueFilename(claim.title, [])}.json`, claimFile);
+
+      writeFilesToFolder(
+        zip.folder('refuting_knowledge_bits'),
+        refutingKnowledgeBitFiles,
+      );
+      writeFilesToFolder(
+        zip.folder('supporting_knowledge_bits'),
+        supportingKnowledgeBitFiles,
+      );
+      writeFilesToFolder(zip.folder('arguments'), argumentsFiles);
+      writeFilesToFolder(zip.folder('opinions'), opinionsFiles);
+
+      // zip
+      //   .generateNodeStream({ type: 'nodebuffer', streamFiles: true })
+      //   .pipe(fs.createWriteStream('example.zip'))
+      //   .on('finish', () => {
+      //     console.log('saved example.zip');
+      //   });
+      // zip.generateAsync({ type: 'blob' }).then(async (dataZip: Blob) => {
+      // //     console.log(dataZip);
+      // //     // const x = await IPFS.uploadFile(file, 'data.zip');
+      // //   });
+    });
   }
 }

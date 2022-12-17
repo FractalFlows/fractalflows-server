@@ -19,10 +19,7 @@ import { PaginatedClaims } from './dto/paginated-claims.output';
 import { getClaimURL } from 'src/common/utils/claim';
 import { IPFS } from 'src/common/services/ipfs';
 import { ClaimInput } from './dto/claim.input';
-import {
-  getCIDFromIPFSURI,
-  removeProtocolFromIPFSURI,
-} from 'src/common/utils/ipfs';
+import { getCIDAndPathfromIPFSURI } from 'src/common/utils/ipfs';
 import { SaveClaimOnIPFSOutput } from './dto/save-claim-on-ipfs.output';
 
 @Resolver(() => Claim)
@@ -79,7 +76,7 @@ export class ClaimsResolver {
     const ipnsName = await W3Name.create();
     const ipnsRevision = await W3Name.v0(
       ipnsName,
-      `/ipfs/${removeProtocolFromIPFSURI(metadataURI)}`,
+      `/ipfs/${getCIDAndPathfromIPFSURI(metadataURI)}`,
     );
 
     await W3Name.publish(ipnsRevision, ipnsName.key);
