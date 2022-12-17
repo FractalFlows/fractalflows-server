@@ -42,6 +42,7 @@ export class OpinionsResolver {
       ...saveOpinionInput,
       user,
     });
+
     if (saveOpinionInput.id === undefined) {
       this.claimsService.notifyFollowers({
         id: claim.id,
@@ -62,6 +63,11 @@ export class OpinionsResolver {
         triggeredBy: user,
       });
     }
+
+    this.claimsService.save({
+      id: claim.id,
+      updatedAt: new Date(),
+    });
 
     return await this.opinionsService.findOne({
       where: { id: opinion.id },

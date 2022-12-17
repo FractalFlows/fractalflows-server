@@ -4,7 +4,7 @@ import slugify from 'slugify';
 import { In, Repository } from 'typeorm';
 import JSZip from 'jszip';
 import FileType from 'file-type';
-import fs from 'fs';
+import * as W3Name from 'w3name';
 
 import { sendMail } from 'src/common/services/mail';
 import { User } from '../users/entities/user.entity';
@@ -16,7 +16,10 @@ import { Attribution } from '../attributions/entities/attribution.entity';
 import { getClaimURL } from 'src/common/utils/claim';
 import { AttributionsService } from '../attributions/attributions.service';
 import { Cron, Timeout } from '@nestjs/schedule';
-import { getIPFSGatewayURIFromIPFSURI } from 'src/common/utils/ipfs';
+import {
+  getCIDAndPathfromIPFSURI,
+  getIPFSGatewayURIFromIPFSURI,
+} from 'src/common/utils/ipfs';
 import { IPFS } from 'src/common/services/ipfs';
 import { KnowledgeBitSides } from '../knowledge-bits/entities/knowledge-bit.entity';
 
@@ -38,8 +41,9 @@ export class ClaimsService {
   async create(
     createClaimInput: CreateClaimInput & {
       user: User;
-      ipnsKey: Buffer;
-      ipnsName: string;
+      oceanFileURI: string;
+      oceanIpnsKey: Buffer;
+      oceanIpnsName: string;
     },
   ): Promise<Claim> {
     const baseSlug = slugify(createClaimInput.title, {
@@ -464,10 +468,15 @@ export class ClaimsService {
     };
 
     const writeFilesToFolder = (folder, { files = {}, folders = {} } = {}) => {
-      Object.keys(files).map((filename) => {
+      const filesKeys = Object.keys(files);
+      const foldersKeys = Object.keys(folders);
+
+      if (filesKeys.length === 0 || foldersKeys.length === 0) return;
+
+      filesKeys.map((filename) => {
         folder.file(filename, files[filename]);
       });
-      Object.keys(folders).map((foldername) => {
+      foldersKeys.map((foldername) => {
         writeFilesToFolder(folder.folder(foldername), folders[foldername]);
       });
     };
@@ -482,6 +491,11 @@ export class ClaimsService {
     });
 
     claims.map(async (claim) => {
+      // stop if claim doesn't have new data to be zipped
+      if (claim.updatedAt < (claim.oceanIpnsNameUpdatedAt ?? 0)) {
+        return;
+      }
+
       const zip = new JSZip();
 
       const claimFile = await fetchIPFSFile(claim.nftMetadataURI);
@@ -511,16 +525,26 @@ export class ClaimsService {
       writeFilesToFolder(zip.folder('arguments'), argumentsFiles);
       writeFilesToFolder(zip.folder('opinions'), opinionsFiles);
 
-      // zip
-      //   .generateNodeStream({ type: 'nodebuffer', streamFiles: true })
-      //   .pipe(fs.createWriteStream('example.zip'))
-      //   .on('finish', () => {
-      //     console.log('saved example.zip');
-      //   });
-      // zip.generateAsync({ type: 'blob' }).then(async (dataZip: Blob) => {
-      // //     console.log(dataZip);
-      // //     // const x = await IPFS.uploadFile(file, 'data.zip');
-      // //   });
+      const file = await zip.generateAsync({ type: 'blob' });
+      const fileURI = await IPFS.uploadFile(file, 'data.zip');
+
+      const ipnsName = await W3Name.from(claim.oceanIpnsKey);
+      const ipnsRevision = await W3Name.resolve(ipnsName);
+      const ipnsNextRevision = await W3Name.increment(
+        ipnsRevision,
+        `/ipfs/${getCIDAndPathfromIPFSURI(fileURI)}`,
+      );
+
+      await W3Name.publish(ipnsNextRevision, ipnsName.key);
+
+      const updatedAt = new Date();
+
+      await this.save({
+        id: claim.id,
+        updatedAt,
+        oceanFileURI: fileURI,
+        oceanIpnsNameUpdatedAt: new Date(updatedAt.getTime() + 1),
+      });
     });
   }
 }
