@@ -94,10 +94,11 @@ type Claim {
   followers: [User!]
   id: String!
   knowledgeBits: [KnowledgeBit!]
-  nftFractionalizationContractAddress: String
-  nftMetadataURI: String
-  nftTokenId: String
-  nftTxHash: String
+  nftFractionalizationContractAddress: String!
+  nftMetadataURI: String!
+  nftTokenId: String!
+  nftTxHash: String!
+  oceanDid: String!
   opinions: [Opinion!]
   origin: ClaimOrigins!
   ownershipRequestedAt: String
@@ -179,6 +180,7 @@ input CreateClaimInput {
   nftMetadataURI: String!
   nftTokenId: String!
   nftTxHash: String!
+  oceanDid: String!
 
   """Sources"""
   sources: [SaveSourceInput!]
@@ -305,7 +307,7 @@ type Mutation {
   requestTwitterOAuthUrl(callbackUrl: String!): String!
   saveArgumentCommentOnIPFS(saveArgumentCommentOnIPFSInput: ArgumentCommentInput!): String!
   saveArgumentOnIPFS(saveArgumentOnIPFSInput: ArgumentInput!): String!
-  saveClaimOnIPFS(claim: ClaimInput!): String!
+  saveClaimOnIPFS(claim: ClaimInput!): SaveClaimOnIPFSOutput!
   saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput!): SaveKnowledgeBitOnIPFSOutput!
   saveKnowledgeBitVote(knowledgeBitId: String!, voteType: KnowledgeBitVoteTypes!): Boolean!
   saveOpinion(saveOpinionInput: SaveOpinionInput!): Opinion!
@@ -388,6 +390,11 @@ input SaveAttributionInput {
 
   """Origin"""
   origin: String!
+}
+
+type SaveClaimOnIPFSOutput {
+  ipnsName: String!
+  metadataURI: String!
 }
 
 input SaveKnowledgeBitOnIPFSInput {
@@ -570,6 +577,7 @@ input UpdateClaimInput {
   nftMetadataURI: String!
   nftTokenId: String
   nftTxHash: String
+  oceanDid: String
 
   """Sources"""
   sources: [SaveSourceInput!]

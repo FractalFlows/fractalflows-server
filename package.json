@@ -48,8 +48,10 @@
     "crypto": "^1.0.1",
     "ethers": "^5.7.2",
     "express-session": "^1.17.2",
+    "file-type": "16.5.3",
     "graphql": "16.6.0",
     "graphql-upload": "14",
+    "jszip": "^3.10.1",
     "nft.storage": "^7.0.0",
     "nodemailer": "^6.8.0",
     "pg": "^8.8.0",
@@ -63,6 +65,7 @@
     "twit": "^2.2.11",
     "twitter-api-v2": "^1.12.9",
     "typeorm": "^0.3.10",
+    "w3name": "^1.0.7",
     "web3.storage": "^4.4.0"
   },
   "devDependencies": {

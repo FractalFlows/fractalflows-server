@@ -17,6 +17,9 @@ export class CreateClaimInput extends ClaimInput {
   @Field(() => String)
   nftMetadataURI: string;
 
+  @Field(() => String)
+  oceanDid: string;
+
   tweetId?: string;
   tweetOwner?: string;
   origin?: ClaimOrigins;

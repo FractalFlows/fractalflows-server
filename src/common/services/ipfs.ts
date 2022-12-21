@@ -1,5 +1,4 @@
 import { NFTStorage, File } from 'nft.storage';
-import { Opinion } from 'src/modules/opinions/entities/opinion.entity';
 import { Web3Storage, File as Web3StorageFile } from 'web3.storage';
 
 export const IPFS = {
@@ -12,12 +11,22 @@ export const IPFS = {
     return client;
   },
 
+  async uploadNFTMetadata(metadata: any) {
+    const client = this._getNFTStorageClient();
+    const result = await client.store({
+      ...metadata,
+      image: new File([''], 'default.jpg', { type: 'image/jpg' }),
+    });
+
+    return result.url;
+  },
+
   async uploadClaimMetadata(claim) {
     const client = this._getNFTStorageClient();
     const metadata = await client.store({
       name: claim.title,
       description: claim.summary,
-      image: new File([''], 'default.jpg', { type: 'image/jpg' }),
+
       properties: {
         tags: claim.tags,
         sources: claim.sources,
@@ -25,7 +34,6 @@ export const IPFS = {
       },
       external_uri: `${process.env.HOST}/claim/${claim.slug}`,
     });
-
     return metadata.url;
   },
   async uploadKnowledgeBitMetadata(knowledgeBit) {

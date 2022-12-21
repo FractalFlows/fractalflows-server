@@ -8,5 +8,6 @@ import { ClaimsModule } from '../claims/claims.module';
 @Module({
   imports: [TypeOrmModule.forFeature([Argument]), ClaimsModule],
   providers: [ArgumentsResolver, ArgumentsService],
+  exports: [ArgumentsService],
 })
 export class ArgumentsModule {}

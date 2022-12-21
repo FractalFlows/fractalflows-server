@@ -38,11 +38,18 @@ export class ArgumentsResolver {
     const claim = await this.claimsService.findOne({
       where: { slug: claimSlug },
     });
-    return await this.argumentsService.create({
+    const argument = await this.argumentsService.create({
       ...createArgumentInput,
       user,
       claim,
     });
+
+    this.claimsService.save({
+      id: claim.id,
+      updatedAt: new Date(),
+    });
+
+    return argument;
   }
 
   @Query(() => Argument, { name: 'argument' })

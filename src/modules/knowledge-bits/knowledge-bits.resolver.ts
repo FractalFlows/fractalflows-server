@@ -96,6 +96,11 @@ export class KnowledgeBitsResolver {
       user,
     });
 
+    this.claimsService.save({
+      id: claim.id,
+      updatedAt: new Date(),
+    });
+
     this.claimsService.notifyFollowers({
       id: claim.id,
       subject: 'A claim you follow has a new knowledge bit',
@@ -130,12 +135,6 @@ export class KnowledgeBitsResolver {
       claimTitle: claim.title,
       name: createKnowledgeBit.name,
     });
-
-    console.log(
-      await this.knowledgeBitsService.findOne({
-        where: { id: createKnowledgeBit.id },
-      }),
-    );
 
     return await this.knowledgeBitsService.findOne({
       where: { id: createKnowledgeBit.id },
@@ -223,6 +222,10 @@ export class KnowledgeBitsResolver {
       updateKnowledgeBitInput.id,
       updateKnowledgeBitInput,
     );
+    this.claimsService.save({
+      id: knowledgeBit.claim.id,
+      updatedAt: new Date(),
+    });
 
     const updatedKnowledgeBit = await this.findOne(updateKnowledgeBitInput.id);
 

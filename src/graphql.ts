@@ -102,6 +102,7 @@ export interface CreateClaimInput {
     nftMetadataURI: string;
     nftTokenId: string;
     nftTxHash: string;
+    oceanDid: string;
     sources?: Nullable<SaveSourceInput[]>;
     summary: string;
     tags?: Nullable<SaveTagInput[]>;
@@ -217,6 +218,7 @@ export interface UpdateClaimInput {
     nftMetadataURI: string;
     nftTokenId?: Nullable<string>;
     nftTxHash?: Nullable<string>;
+    oceanDid?: Nullable<string>;
     sources?: Nullable<SaveSourceInput[]>;
     summary: string;
     tags?: Nullable<SaveTagInput[]>;
@@ -293,10 +295,11 @@ export interface Claim {
     followers?: Nullable<User[]>;
     id: string;
     knowledgeBits?: Nullable<KnowledgeBit[]>;
-    nftFractionalizationContractAddress?: Nullable<string>;
-    nftMetadataURI?: Nullable<string>;
-    nftTokenId?: Nullable<string>;
-    nftTxHash?: Nullable<string>;
+    nftFractionalizationContractAddress: string;
+    nftMetadataURI: string;
+    nftTokenId: string;
+    nftTxHash: string;
+    oceanDid: string;
     opinions?: Nullable<Opinion[]>;
     origin: ClaimOrigins;
     ownershipRequestedAt?: Nullable<string>;
@@ -365,7 +368,7 @@ export interface IMutation {
     requestTwitterOAuthUrl(callbackUrl: string): string | Promise<string>;
     saveArgumentCommentOnIPFS(saveArgumentCommentOnIPFSInput: ArgumentCommentInput): string | Promise<string>;
     saveArgumentOnIPFS(saveArgumentOnIPFSInput: ArgumentInput): string | Promise<string>;
-    saveClaimOnIPFS(claim: ClaimInput): string | Promise<string>;
+    saveClaimOnIPFS(claim: ClaimInput): SaveClaimOnIPFSOutput | Promise<SaveClaimOnIPFSOutput>;
     saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput): SaveKnowledgeBitOnIPFSOutput | Promise<SaveKnowledgeBitOnIPFSOutput>;
     saveKnowledgeBitVote(knowledgeBitId: string, voteType: KnowledgeBitVoteTypes): boolean | Promise<boolean>;
     saveOpinion(saveOpinionInput: SaveOpinionInput): Opinion | Promise<Opinion>;
@@ -434,6 +437,11 @@ export interface IQuery {
     userFollowingClaims(username: string): Claim[] | Promise<Claim[]>;
     userKnowledgeBitVotes(claimSlug: string): Nullable<KnowledgeBitVote[]> | Promise<Nullable<KnowledgeBitVote[]>>;
     userOpinion(claimSlug: string): Nullable<Opinion> | Promise<Nullable<Opinion>>;
+}
+
+export interface SaveClaimOnIPFSOutput {
+    ipnsName: string;
+    metadataURI: string;
 }
 
 export interface SaveKnowledgeBitOnIPFSOutput {
