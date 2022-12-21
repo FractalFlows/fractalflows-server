@@ -323,10 +323,9 @@ export class ClaimsService {
   /*
     Zips files and updates Ocean listing
   */
-  // @Cron('0 0 0 * * *', {
-  //   name: 'zipFilesAndUpdateIPNSName',
-  // })
-  @Timeout(0)
+  @Cron('0 0 0 * * *', {
+    name: 'zipFilesAndUpdateIPNSName',
+  })
   async zipFilesAndUpdateIPNSName() {
     const fetchIPFSFile = async (ipfsURI: string) => {
       const gatewayURI = getIPFSGatewayURIFromIPFSURI(ipfsURI);

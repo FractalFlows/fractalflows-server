@@ -215,7 +215,7 @@ export class ClaimsResolver {
   async findUserClaims(@Args('username') username: string) {
     const user = await this.usersService.findOne({ where: { username } });
     const userClaims = await this.claimsService.find({
-      where: { user },
+      where: { user: { id: user.id } },
       relations: CLAIM_CORE_RELATIONS,
       order: {
         createdAt: 'DESC',
