@@ -27,9 +27,9 @@ const ormConfig: TypeOrmModuleOptions = {
             .readFileSync(join(process.cwd(), 'certs/ca-certificate.crt'))
             .toString(),
         },
-  cli: {
-    migrationsDir: './src/migrations',
-  },
+  // cli: {
+  //   migrationsDir: './src/migrations',
+  // },
 };
 
 export default ormConfig;

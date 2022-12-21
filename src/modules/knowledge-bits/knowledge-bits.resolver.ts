@@ -1,4 +1,5 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import concatStream from 'concat-stream';
 
 import { KnowledgeBitsService } from './knowledge-bits.service';
 import {
@@ -17,6 +18,9 @@ import { KnowledgeBitVotesService } from '../knowledge-bit-votes/knowledge-bit-v
 import { KnowledgeBitVoteTypes } from '../knowledge-bit-votes/entities/knowledge-bit-vote.entity';
 import { getClaimURL } from 'src/common/utils/claim';
 import { Attribution } from '../attributions/entities/attribution.entity';
+import { IPFS } from 'src/common/services/ipfs';
+import { SaveKnowledgeBitOnIPFSInput } from './dto/save-knowledge-bit-on-ipfs.input';
+import { SaveKnowledgeBitOnIPFSOutput } from './dto/save-knowledge-bit-on-ipfs.output copy';
 
 @Resolver(() => KnowledgeBit)
 export class KnowledgeBitsResolver {
@@ -26,6 +30,49 @@ export class KnowledgeBitsResolver {
     private readonly attributionsService: AttributionsService,
     private readonly claimsService: ClaimsService,
   ) {}
+
+  @Mutation(() => SaveKnowledgeBitOnIPFSOutput)
+  @UseGuards(SessionGuard)
+  async saveKnowledgeBitOnIPFS(
+    @Args('saveKnowledgeBitOnIPFSInput')
+    saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput,
+  ) {
+    if (saveKnowledgeBitOnIPFSInput.file) {
+      return await new Promise(async (resolve, reject) => {
+        const { createReadStream, filename } =
+          await saveKnowledgeBitOnIPFSInput.file;
+        const readStream = createReadStream();
+
+        const handleStreamConcatComplete = async (buffer) => {
+          const fileURI = await IPFS.uploadFile(buffer, filename);
+          const metadataURI = await IPFS.uploadKnowledgeBitMetadata({
+            ...saveKnowledgeBitOnIPFSInput,
+            fileURI,
+          });
+
+          resolve({
+            metadataURI,
+            fileURI,
+          });
+        };
+
+        const readStreamConcat = concatStream(handleStreamConcatComplete);
+
+        readStream.on('error', (error) => {
+          reject(error);
+        });
+        readStream.pipe(readStreamConcat);
+      });
+    } else {
+      const metadataURI = await IPFS.uploadKnowledgeBitMetadata(
+        saveKnowledgeBitOnIPFSInput,
+      );
+
+      return {
+        metadataURI,
+      };
+    }
+  }
 
   @Mutation(() => KnowledgeBit)
   @UseGuards(SessionGuard)
@@ -42,10 +89,16 @@ export class KnowledgeBitsResolver {
     await this.attributionsService.upsert(createKnowledgeBitInput.attributions);
     const createKnowledgeBit = await this.knowledgeBitsService.create({
       ...createKnowledgeBitInput,
+
       claim: await this.claimsService.findOne({
         where: { slug: claimSlug },
       }),
       user,
+    });
+
+    this.claimsService.save({
+      id: claim.id,
+      updatedAt: new Date(),
     });
 
     this.claimsService.notifyFollowers({
@@ -83,7 +136,10 @@ export class KnowledgeBitsResolver {
       name: createKnowledgeBit.name,
     });
 
-    return await this.findOne(createKnowledgeBit.id);
+    return await this.knowledgeBitsService.findOne({
+      where: { id: createKnowledgeBit.id },
+      relations: ['user', 'attributions'],
+    });
   }
 
   @Query(() => KnowledgeBit, { name: 'knowledgeBit' })
@@ -166,6 +222,10 @@ export class KnowledgeBitsResolver {
       updateKnowledgeBitInput.id,
       updateKnowledgeBitInput,
     );
+    this.claimsService.save({
+      id: knowledgeBit.claim.id,
+      updatedAt: new Date(),
+    });
 
     const updatedKnowledgeBit = await this.findOne(updateKnowledgeBitInput.id);
 

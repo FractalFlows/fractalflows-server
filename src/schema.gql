@@ -15,6 +15,9 @@ type Argument {
   createdAt: String!
   evidences: [KnowledgeBit!]
   id: String!
+  nftMetadataURI: String!
+  nftTokenId: String!
+  nftTxHash: String!
   opinions: [Opinion!]
   side: ArgumentSides!
   summary: String!
@@ -31,10 +34,22 @@ type ArgumentComment {
   """Created at"""
   createdAt: String!
   id: String!
+  nftIndex: String!
+  nftMetadataURI: String!
+  nftTxHash: String!
 
   """Updated at"""
   updatedAt: String!
   user: User!
+}
+
+input ArgumentCommentInput {
+  content: String!
+}
+
+input ArgumentInput {
+  side: ArgumentSides!
+  summary: String!
 }
 
 enum ArgumentSides {
@@ -79,12 +94,11 @@ type Claim {
   followers: [User!]
   id: String!
   knowledgeBits: [KnowledgeBit!]
-  nftFractionalizationContractAddress: String
-  nftMetadataURI: String
-  nftMetadataURICreatedAt: String
-  nftStatus: ClaimNFTStatuses!
-  nftTokenId: String
-  nftTxId: String
+  nftFractionalizationContractAddress: String!
+  nftMetadataURI: String!
+  nftTokenId: String!
+  nftTxHash: String!
+  oceanDid: String!
   opinions: [Opinion!]
   origin: ClaimOrigins!
   ownershipRequestedAt: String
@@ -121,32 +135,6 @@ type Claim {
 }
 
 input ClaimInput {
-  id: String!
-}
-
-enum ClaimNFTStatuses {
-  MINTED
-  MINTING
-  NOTMINTED
-}
-
-enum ClaimOrigins {
-  FRACTALFLOWS
-  TWITTER
-}
-
-input CreateArgumentCommentInput {
-  argument: IDInput!
-  content: String!
-}
-
-input CreateArgumentInput {
-  evidences: [IDInput!]
-  side: ArgumentSides!
-  summary: String!
-}
-
-input CreateClaimInput {
   """Attributions"""
   attributions: [SaveAttributionInput!]
 
@@ -163,16 +151,61 @@ input CreateClaimInput {
   title: String!
 }
 
+enum ClaimOrigins {
+  FRACTALFLOWS
+  TWITTER
+}
+
+input CreateArgumentCommentInput {
+  argument: IDInput!
+  content: String!
+  nftIndex: String!
+  nftMetadataURI: String!
+  nftTxHash: String!
+}
+
+input CreateArgumentInput {
+  evidences: [IDInput!]
+  nftMetadataURI: String!
+  nftTokenId: String!
+  nftTxHash: String!
+  side: ArgumentSides!
+  summary: String!
+}
+
+input CreateClaimInput {
+  """Attributions"""
+  attributions: [SaveAttributionInput!]
+  nftFractionalizationContractAddress: String!
+  nftMetadataURI: String!
+  nftTokenId: String!
+  nftTxHash: String!
+  oceanDid: String!
+
+  """Sources"""
+  sources: [SaveSourceInput!]
+
+  """Summary"""
+  summary: String!
+
+  """Tags"""
+  tags: [SaveTagInput!]
+
+  """Title"""
+  title: String!
+}
+
 input CreateKnowledgeBitInput {
   attributions: [SaveAttributionInput!]
-  customLocation: String
   customType: String
-  location: KnowledgeBitLocations!
+  fileURI: String!
   name: String!
+  nftMetadataURI: String!
+  nftTokenId: String!
+  nftTxHash: String!
   side: KnowledgeBitSides!
   summary: String
   type: KnowledgeBitTypes!
-  url: String!
 }
 
 input IDInput {
@@ -192,12 +225,14 @@ type KnowledgeBit {
 
   """Created at"""
   createdAt: String!
-  customLocation: String
   customType: String
   downvotesCount: Int
+  fileURI: String!
   id: String!
-  location: KnowledgeBitLocations!
   name: String!
+  nftMetadataURI: String!
+  nftTokenId: String!
+  nftTxHash: String!
   side: KnowledgeBitSides!
   summary: String
   type: KnowledgeBitTypes!
@@ -205,44 +240,8 @@ type KnowledgeBit {
   """Updated at"""
   updatedAt: String!
   upvotesCount: Int
-  url: String!
   user: User!
   votes: [KnowledgeBitVote!]
-}
-
-enum KnowledgeBitLocations {
-  ACADEMIA_EDU
-  ARXIV
-  BIT_TORRENT
-  BLOG
-  BOX
-  DAT
-  DATABASE
-  DROPBOX
-  EMAIL
-  ETHEREUM_SWARM
-  FIGSHARE
-  GIT
-  GOOGLE_DRIVE
-  HAL_ARCHIVES
-  IPFS
-  JUPYTER
-  KAGGLE
-  ONEDRIVE
-  OPENAIRE
-  OTHER
-  PDF
-  PUBPEER
-  RE3DATA
-  RESEARCH_GATE
-  RESEARCH_ID
-  SCIENTIFIC_PUBLISHER
-  SLIDESHARE
-  STACK_OVERFLOW
-  WEBSITE
-  WIKIPEDIA
-  YOUTUBE
-  ZENODO
 }
 
 enum KnowledgeBitSides {
@@ -281,12 +280,12 @@ type KnowledgeBitVote {
 
 enum KnowledgeBitVoteTypes {
   DOWNVOTE
+  UNVOTE
   UPVOTE
 }
 
 type Mutation {
   addFollowerToClaim(id: String!): Boolean!
-  connectEthereumWallet(address: String!): User!
   createAPIKey: APIKey!
   createArgument(claimSlug: String!, createArgumentInput: CreateArgumentInput!): Argument!
   createArgumentComment(createArgumentCommentInput: CreateArgumentCommentInput!): ArgumentComment!
@@ -306,11 +305,13 @@ type Mutation {
   removeSource(id: Int!): Source!
   requestClaimOwnership(id: String!): Boolean!
   requestTwitterOAuthUrl(callbackUrl: String!): String!
-  saveClaimMetadataOnIPFS(id: String!): String!
-  saveClaimTxId(id: String!, txId: String!): Boolean!
-  saveKnowledgeBitVote(knowledgeBitId: String!, type: KnowledgeBitVoteTypes!): Boolean!
+  saveArgumentCommentOnIPFS(saveArgumentCommentOnIPFSInput: ArgumentCommentInput!): String!
+  saveArgumentOnIPFS(saveArgumentOnIPFSInput: ArgumentInput!): String!
+  saveClaimOnIPFS(claim: ClaimInput!): SaveClaimOnIPFSOutput!
+  saveKnowledgeBitOnIPFS(saveKnowledgeBitOnIPFSInput: SaveKnowledgeBitOnIPFSInput!): SaveKnowledgeBitOnIPFSOutput!
+  saveKnowledgeBitVote(knowledgeBitId: String!, voteType: KnowledgeBitVoteTypes!): Boolean!
   saveOpinion(saveOpinionInput: SaveOpinionInput!): Opinion!
-  sendSignInCode(email: String!): Boolean!
+  saveOpinionOnIPFS(saveOpinionOnIPFSInput: SaveOpinionOnIPFSInput!): String!
   sendUpdateEmailVerificationCode(email: String!): Boolean!
   signInWithEthereum(signInWithEthereumInput: SignInWithEthereumInput!): User!
   signOut: Boolean!
@@ -321,7 +322,6 @@ type Mutation {
   updateKnowledgeBit(updateKnowledgeBitInput: UpdateKnowledgeBitInput!): KnowledgeBit!
   updateProfile(updateProfileInput: UpdateProfileInput!): User!
   validateTwitterOAuth(oauthToken: String!, oauthVerifier: String!): String!
-  verifySignInCode(signInCode: String!): User!
 }
 
 type Opinion {
@@ -332,6 +332,9 @@ type Opinion {
   """Created at"""
   createdAt: String!
   id: String!
+  nftMetadataURI: String!
+  nftTokenId: String!
+  nftTxHash: String!
 
   """Updated at"""
   updatedAt: String!
@@ -389,11 +392,38 @@ input SaveAttributionInput {
   origin: String!
 }
 
+type SaveClaimOnIPFSOutput {
+  ipnsName: String!
+  metadataURI: String!
+}
+
+input SaveKnowledgeBitOnIPFSInput {
+  attributions: [SaveAttributionInput!]
+  customType: String
+  file: Upload
+  name: String!
+  side: KnowledgeBitSides!
+  summary: String
+  type: KnowledgeBitTypes!
+}
+
+type SaveKnowledgeBitOnIPFSOutput {
+  fileURI: String
+  metadataURI: String!
+}
+
 input SaveOpinionInput {
   acceptance: Float!
   arguments: [IDInput!]!
-  claim: ClaimInput!
+  claim: IDInput!
   id: String
+  nftMetadataURI: String
+  nftTokenId: String!
+  nftTxHash: String
+}
+
+input SaveOpinionOnIPFSInput {
+  acceptance: Float!
 }
 
 input SaveSourceInput {
@@ -422,7 +452,10 @@ input SignInWithEthereumInput {
   avatar: String
   ens: String
 
-  """ """
+  """Message signature"""
+  signature: String!
+
+  " "
   siweMessage: SiweMessageInput!
 }
 
@@ -463,7 +496,7 @@ input SiweMessageInput {
   address: String!
 
   """"""
-  chainId: String!
+  chainId: Float!
 
   """Dapp domain"""
   domain: String!
@@ -474,14 +507,8 @@ input SiweMessageInput {
   """Signature unique identifier"""
   nonce: String!
 
-  """Message signature"""
-  signature: String!
-
   """"""
   statement: String!
-
-  """Signature type"""
-  type: String!
 
   """Dapp URI"""
   uri: String!
@@ -527,11 +554,17 @@ input UpdateArgumentCommentInput {
   argument: IDInput!
   content: String!
   id: String!
+  nftIndex: String!
+  nftMetadataURI: String!
+  nftTxHash: String!
 }
 
 input UpdateArgumentInput {
   evidences: [IDInput!]
   id: Int!
+  nftMetadataURI: String
+  nftTokenId: String
+  nftTxHash: String
   side: ArgumentSides
   summary: String
 }
@@ -540,31 +573,35 @@ input UpdateClaimInput {
   """Attributions"""
   attributions: [SaveAttributionInput!]
   id: String!
+  nftFractionalizationContractAddress: String
+  nftMetadataURI: String!
+  nftTokenId: String
+  nftTxHash: String
+  oceanDid: String
 
   """Sources"""
   sources: [SaveSourceInput!]
 
   """Summary"""
-  summary: String
+  summary: String!
 
   """Tags"""
   tags: [SaveTagInput!]
 
   """Title"""
-  title: String
+  title: String!
 }
 
 input UpdateKnowledgeBitInput {
   attributions: [SaveAttributionInput!]
-  customLocation: String
   customType: String
+  fileURI: String
   id: String!
-  location: KnowledgeBitLocations!
   name: String!
+  nftMetadataURI: String!
   side: KnowledgeBitSides!
   summary: String
   type: KnowledgeBitTypes!
-  url: String!
 }
 
 input UpdateProfileInput {
@@ -573,6 +610,9 @@ input UpdateProfileInput {
   username: String!
   usernameSource: UsernameSource!
 }
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
 
 type User {
   """API Key"""

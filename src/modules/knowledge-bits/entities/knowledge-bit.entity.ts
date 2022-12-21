@@ -36,45 +36,6 @@ registerEnumType(KnowledgeBitTypes, {
   name: 'KnowledgeBitTypes',
 });
 
-export enum KnowledgeBitLocations {
-  EMAIL,
-  WEBSITE,
-  PDF,
-  DATABASE,
-  GIT,
-  DROPBOX,
-  BOX,
-  GOOGLE_DRIVE,
-  ONEDRIVE,
-  STACK_OVERFLOW,
-  FIGSHARE,
-  SLIDESHARE,
-  KAGGLE,
-  IPFS,
-  DAT,
-  JUPYTER,
-  BLOG,
-  YOUTUBE,
-  SCIENTIFIC_PUBLISHER,
-  PUBPEER,
-  ZENODO,
-  OPENAIRE,
-  RE3DATA,
-  ETHEREUM_SWARM,
-  BIT_TORRENT,
-  RESEARCH_GATE,
-  ACADEMIA_EDU,
-  RESEARCH_ID,
-  HAL_ARCHIVES,
-  ARXIV,
-  WIKIPEDIA,
-  OTHER,
-}
-
-registerEnumType(KnowledgeBitLocations, {
-  name: 'KnowledgeBitLocations',
-});
-
 export enum KnowledgeBitSides {
   REFUTING,
   SUPPORTING,
@@ -113,20 +74,21 @@ export class KnowledgeBit extends BaseEntity {
   @Column({ nullable: true })
   customType?: string;
 
-  @Field(() => KnowledgeBitLocations)
-  @Column({
-    type: 'enum',
-    enum: KnowledgeBitLocations,
-  })
-  location?: KnowledgeBitLocations;
-
-  @Field(() => String, { nullable: true })
-  @Column({ nullable: true })
-  customLocation?: string;
+  @Field(() => String)
+  @Column()
+  fileURI: string;
 
   @Field(() => String)
   @Column()
-  url: string;
+  nftTxHash: string;
+
+  @Field(() => String)
+  @Column()
+  nftTokenId: string;
+
+  @Field(() => String)
+  @Column()
+  nftMetadataURI: string;
 
   @Field(() => [Attribution], { nullable: true })
   @ManyToMany(() => Attribution, (attribution) => attribution.knowledgeBits)

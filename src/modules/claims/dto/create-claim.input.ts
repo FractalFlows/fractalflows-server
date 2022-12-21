@@ -1,37 +1,25 @@
 import { InputType, Field } from '@nestjs/graphql';
 
-import { SaveAttributionInput } from 'src/modules/attributions/dto/save-attribution.input';
-import { SaveSourceInput } from 'src/modules/sources/dto/save-source.input';
-import { SaveTagInput } from 'src/modules/tags/dto/save-tag.input';
-import { Tag } from 'src/modules/tags/entities/tag.entity';
-import { ClaimNFTStatuses, ClaimOrigins } from '../entities/claim.entity';
+import { ClaimOrigins } from '../entities/claim.entity';
+import { ClaimInput } from './claim.input';
 
 @InputType()
-export class CreateClaimInput {
-  @Field(() => String, { description: 'Title' })
-  title: string;
+export class CreateClaimInput extends ClaimInput {
+  @Field(() => String)
+  nftTokenId: string;
 
-  @Field(() => String, { description: 'Summary' })
-  summary: string;
+  @Field(() => String)
+  nftTxHash: string;
 
-  @Field(() => [SaveSourceInput], { description: 'Sources', nullable: true })
-  sources?: SaveSourceInput[];
+  @Field(() => String)
+  nftFractionalizationContractAddress: string;
 
-  @Field(() => [SaveTagInput], { description: 'Tags', nullable: true })
-  tags?: Partial<Tag>[];
+  @Field(() => String)
+  nftMetadataURI: string;
 
-  @Field(() => [SaveAttributionInput], {
-    description: 'Attributions',
-    nullable: true,
-  })
-  attributions?: SaveAttributionInput[];
+  @Field(() => String)
+  oceanDid: string;
 
-  nftTokenId?: string;
-  nftStatus?: ClaimNFTStatuses;
-  nftTxId?: string;
-  nftFractionalizationContractAddress?: string;
-  nftMetadataURI?: string;
-  nftMetadataURICreatedAt?: Date;
   tweetId?: string;
   tweetOwner?: string;
   origin?: ClaimOrigins;

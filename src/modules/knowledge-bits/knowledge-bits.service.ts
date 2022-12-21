@@ -37,7 +37,13 @@ export class KnowledgeBitsService {
     return await this.knowledgeBitRepository.findOne(query);
   }
 
-  async update(id: string, updateKnowledgeBitInput: UpdateKnowledgeBitInput) {
+  async update(
+    id: string,
+    updateKnowledgeBitInput: Omit<UpdateKnowledgeBitInput, 'file'> & {
+      filename?: string;
+      fileCID?: string;
+    },
+  ) {
     return await this.knowledgeBitRepository.save({
       ...updateKnowledgeBitInput,
       id,

@@ -17,6 +17,6 @@ export class TwitterModule {
 
   configure() {
     // this.twitterService.startStream();
-    this.twitterService.startStreamV1();
+    // this.twitterService.startStreamV1();
   }
 }

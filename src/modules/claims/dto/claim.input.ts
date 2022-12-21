@@ -1,16 +1,13 @@
-import { InputType, Field, PartialType } from '@nestjs/graphql';
+import { InputType, Field, ObjectType } from '@nestjs/graphql';
+
 import { SaveAttributionInput } from 'src/modules/attributions/dto/save-attribution.input';
 import { SaveSourceInput } from 'src/modules/sources/dto/save-source.input';
 import { SaveTagInput } from 'src/modules/tags/dto/save-tag.input';
 import { Tag } from 'src/modules/tags/entities/tag.entity';
 
-import { CreateClaimInput } from './create-claim.input';
-
 @InputType()
-export class UpdateClaimInput extends PartialType(CreateClaimInput) {
-  @Field(() => String)
-  id: string;
-
+@ObjectType()
+export class ClaimInput {
   @Field(() => String, { description: 'Title' })
   title: string;
 
@@ -28,9 +25,4 @@ export class UpdateClaimInput extends PartialType(CreateClaimInput) {
     nullable: true,
   })
   attributions?: SaveAttributionInput[];
-
-  @Field(() => String)
-  nftMetadataURI: string;
-
-  disabled?: boolean;
 }

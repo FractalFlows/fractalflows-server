@@ -1,38 +1,18 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { SaveAttributionInput } from 'src/modules/attributions/dto/save-attribution.input';
 
-import {
-  KnowledgeBitLocations,
-  KnowledgeBitSides,
-  KnowledgeBitTypes,
-} from '../entities/knowledge-bit.entity';
+import { KnowledgeBitInput } from './knowledge-bit.inputs';
 
 @InputType()
-export class CreateKnowledgeBitInput {
+export class CreateKnowledgeBitInput extends KnowledgeBitInput {
   @Field(() => String)
-  name: string;
-
-  @Field(() => String, { nullable: true })
-  summary?: string;
-
-  @Field(() => KnowledgeBitSides)
-  side: KnowledgeBitSides;
-
-  @Field(() => KnowledgeBitTypes)
-  type: KnowledgeBitTypes;
-
-  @Field(() => String, { nullable: true })
-  customType?: string;
-
-  @Field(() => KnowledgeBitLocations)
-  location: KnowledgeBitLocations;
-
-  @Field(() => String, { nullable: true })
-  customLocation?: string;
+  fileURI: string;
 
   @Field(() => String)
-  url: string;
+  nftTxHash: string;
 
-  @Field(() => [SaveAttributionInput], { nullable: true })
-  attributions: SaveAttributionInput[];
+  @Field(() => String)
+  nftTokenId: string;
+
+  @Field(() => String)
+  nftMetadataURI: string;
 }

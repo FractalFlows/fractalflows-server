@@ -26,16 +26,6 @@ registerEnumType(ClaimOrigins, {
   name: 'ClaimOrigins',
 });
 
-export enum ClaimNFTStatuses {
-  NOTMINTED,
-  MINTING,
-  MINTED,
-}
-
-registerEnumType(ClaimNFTStatuses, {
-  name: 'ClaimNFTStatuses',
-});
-
 @Entity()
 @ObjectType()
 export class Claim extends BaseEntity {
@@ -118,41 +108,37 @@ export class Claim extends BaseEntity {
   })
   origin: ClaimOrigins;
 
-  @Field(() => ClaimNFTStatuses)
-  @Column({
-    type: 'enum',
-    enum: ClaimNFTStatuses,
-    default: ClaimNFTStatuses.NOTMINTED,
-  })
-  nftStatus: ClaimNFTStatuses;
+  @Field(() => String)
+  @Column()
+  nftTxHash: string;
 
-  @Field(() => String, { nullable: true })
-  @Column({ nullable: true })
-  nftTxId?: string;
+  @Field(() => String)
+  @Column()
+  nftTokenId: string;
 
-  @Field(() => String, {
-    nullable: true,
-  })
-  @Column({ nullable: true })
-  nftTokenId?: string;
+  @Field(() => String)
+  @Column()
+  nftFractionalizationContractAddress: string;
 
-  @Field(() => String, {
-    nullable: true,
-  })
-  @Column({ nullable: true })
-  nftFractionalizationContractAddress?: string;
+  @Field(() => String)
+  @Column()
+  nftMetadataURI: string;
 
-  @Field(() => String, {
-    nullable: true,
-  })
-  @Column({ nullable: true })
-  nftMetadataURI?: string;
+  @Field(() => String)
+  @Column()
+  oceanDid: string;
 
-  @Field(() => String, {
-    nullable: true,
-  })
+  @Column()
+  oceanFileURI: string;
+
+  @Column({ type: 'bytea' })
+  oceanIpnsKey: Buffer;
+
+  @Column()
+  oceanIpnsName: string;
+
   @Column({ type: 'timestamp', nullable: true })
-  nftMetadataURICreatedAt?: Date;
+  oceanIpnsNameUpdatedAt: Date;
 
   @Field(() => String, { nullable: true })
   @Column({ type: 'timestamp', nullable: true })

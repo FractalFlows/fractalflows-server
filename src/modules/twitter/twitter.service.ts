@@ -30,80 +30,69 @@ export class TwitterService {
   });
 
   async startStreamV1() {
-    const handleData = async (tweet) => {
-      const tweetId = tweet.in_reply_to_status_id_str;
-
-      // If the reply is dedicated to a user and not a status,
-      // go to next item of the loop
-      if (!tweetId) return;
-
-      const existingClaimForTweet = await this.claimsService.findOne({
-        where: { tweetId },
-      });
-
-      if (existingClaimForTweet) return;
-
-      // Create claim template and post link to tweet
-      this.twit.get(`statuses/show/${tweetId}`, async (error, tweet) => {
-        if (error) {
-          console.error(error);
-          return;
-        }
-
-        const tweetOwner = tweet.user.screen_name;
-
-        const user = await this.usersService.findOne({
-          where: { username: 'fractalflowsbot' },
-        });
-        const sources = await this.sourcesService.save([
-          {
-            origin: 'twitter',
-            url: `https://twitter.com/${tweetOwner}/status/${tweetId}`,
-          },
-          ...(tweet.entities.urls.map(({ expanded_url }) => ({
-            origin: 'other',
-            url: expanded_url,
-          })) || []),
-        ]);
-        const tags = await this.tagsService.save(
-          tweet.entities.hashtags
-            .slice(0, 4)
-            .map(({ text }) => ({ label: text })),
-        );
-        const claim = await this.claimsService.create({
-          title: tweet.text || 'No title in this tweet',
-          summary: `This claim was originally posted on Twitter by @${tweetOwner}. No further details are available as of yet.`,
-          user,
-          sources,
-          tags: tags.identifiers,
-          tweetId,
-          tweetOwner,
-          origin: ClaimOrigins.TWITTER,
-        });
-
-        const claimLink = `${process.env.FRONTEND_HOST}/claim/${claim.slug}`;
-        const hashtags = tweet.entities.hashtags
-          .map(({ text }) => `#${text}`)
-          .join(' ');
-        const status = `A new claim was just added: ${claimLink} ${hashtags}`;
-
-        if (process.env.APP_ENV === 'development') return;
-
-        // Reply back the claim link to the tweet
-        this.twit.post('statuses/update', {
-          status: `@${tweetOwner} ${claimLink}`,
-          in_reply_to_status_id: tweetId,
-        });
-
-        // Post the claim link to the app page
-        this.twit.post('statuses/update', {
-          status,
-        });
-      });
-    };
-
-    const stream = this.twit.stream('statuses/filter', { track: '#ffclaimit' });
-    stream.on('tweet', handleData);
+    // const handleData = async (tweet) => {
+    //   const tweetId = tweet.in_reply_to_status_id_str;
+    //   // If the reply is dedicated to a user and not a status,
+    //   // go to next item of the loop
+    //   if (!tweetId) return;
+    //   const existingClaimForTweet = await this.claimsService.findOne({
+    //     where: { tweetId },
+    //   });
+    //   if (existingClaimForTweet) return;
+    //   // Create claim template and post link to tweet
+    //   this.twit.get(`statuses/show/${tweetId}`, async (error, tweet) => {
+    //     if (error) {
+    //       console.error(error);
+    //       return;
+    //     }
+    //     const tweetOwner = tweet.user.screen_name;
+    //     const user = await this.usersService.findOne({
+    //       where: { username: 'fractalflowsbot' },
+    //     });
+    //     const sources = await this.sourcesService.save([
+    //       {
+    //         origin: 'twitter',
+    //         url: `https://twitter.com/${tweetOwner}/status/${tweetId}`,
+    //       },
+    //       ...(tweet.entities.urls.map(({ expanded_url }) => ({
+    //         origin: 'other',
+    //         url: expanded_url,
+    //       })) || []),
+    //     ]);
+    //     const tags = await this.tagsService.save(
+    //       tweet.entities.hashtags
+    //         .slice(0, 4)
+    //         .map(({ text }) => ({ label: text })),
+    //     );
+    //     const claim = await this.claimsService.create({
+    //       title: tweet.text || 'No title in this tweet',
+    //       summary: `This claim was originally posted on Twitter by @${tweetOwner}. No further details are available as of yet.`,
+    //       user,
+    //       sources,
+    //       tags: tags.identifiers,
+    //       tweetId,
+    //       tweetOwner,
+    //       origin: ClaimOrigins.TWITTER,
+    //     });
+    //     const claimLink = `${process.env.FRONTEND_HOST}/claim/${claim.slug}`;
+    //     const hashtags = tweet.entities.hashtags
+    //       .map(({ text }) => `#${text}`)
+    //       .join(' ');
+    //     const status = `A new claim was just added: ${claimLink} ${hashtags}`;
+    //     if (process.env.APP_ENV === 'development') return;
+    //     // Reply back the claim link to the tweet
+    //     this.twit.post('statuses/update', {
+    //       status: `@${tweetOwner} ${claimLink}`,
+    //       in_reply_to_status_id: tweetId,
+    //     });
+    //     // Post the claim link to the app page
+    //     this.twit.post('statuses/update', {
+    //       status,
+    //     });
+    //   });
+    // };
+    // const stream = this.twit.stream('statuses/filter', { track: '#ffclaimit' });
+    // stream.on('tweet', handleData);
   }
 
   async requestOAuthUrl({ callbackUrl }: { callbackUrl: string }) {

@@ -1,9 +1,10 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { In } from 'typeorm';
+import * as W3Name from 'w3name';
 
 import { ClaimsService, CLAIM_CORE_RELATIONS } from './claims.service';
-import { Claim, ClaimNFTStatuses } from './entities/claim.entity';
+import { Claim } from './entities/claim.entity';
 import { CreateClaimInput } from './dto/create-claim.input';
 import { UpdateClaimInput } from './dto/update-claim.input';
 import { SourcesService } from '../sources/sources.service';
@@ -17,6 +18,9 @@ import { InviteFriendsInput } from './dto/invite-friends.input';
 import { PaginatedClaims } from './dto/paginated-claims.output';
 import { getClaimURL } from 'src/common/utils/claim';
 import { IPFS } from 'src/common/services/ipfs';
+import { ClaimInput } from './dto/claim.input';
+import { getCIDAndPathfromIPFSURI } from 'src/common/utils/ipfs';
+import { SaveClaimOnIPFSOutput } from './dto/save-claim-on-ipfs.output';
 
 @Resolver(() => Claim)
 export class ClaimsResolver {
@@ -33,6 +37,7 @@ export class ClaimsResolver {
   async createClaim(
     @Args('createClaimInput') createClaimInput: CreateClaimInput,
     @CurrentUser() user: User,
+    @Context() context,
   ) {
     await this.sourcesService.save(createClaimInput.sources);
     await this.attributionsService.upsert(createClaimInput.attributions);
@@ -42,6 +47,9 @@ export class ClaimsResolver {
       ...createClaimInput,
       tags: upsertedTags.identifiers,
       user,
+      oceanFileURI: createClaimInput.nftMetadataURI,
+      oceanIpnsKey: Buffer.from(context.req.session.oceanIpnsKey.data),
+      oceanIpnsName: context.req.session.oceanIpnsName,
     });
 
     this.claimsService.notifyNewlyAddedAttributions({
@@ -53,39 +61,35 @@ export class ClaimsResolver {
     return claim;
   }
 
-  @Mutation(() => String)
+  @Mutation(() => SaveClaimOnIPFSOutput)
   @UseGuards(SessionGuard)
-  async saveClaimMetadataOnIPFS(
-    @Args('id') id: string,
-    @CurrentUser() user: User,
-  ) {
-    const claim = await this.claimsService.findOne({
-      where: { id },
-      relations: ['tags', 'sources', 'attributions'],
+  async saveClaimOnIPFS(@Args('claim') claim: ClaimInput, @Context() context) {
+    const metadataURI = await IPFS.uploadNFTMetadata({
+      name: claim.title,
+      description: claim.summary,
+      properties: {
+        tags: claim.tags,
+        sources: claim.sources,
+        attributions: claim.attributions,
+      },
     });
 
-    const url = await IPFS.uploadClaimMetadata(claim);
+    const ipnsName = await W3Name.create();
+    const ipnsRevision = await W3Name.v0(
+      ipnsName,
+      `/ipfs/${getCIDAndPathfromIPFSURI(metadataURI)}`,
+    );
 
-    await this.claimsService.update(id, {
-      nftMetadataURI: url,
-      nftMetadataURICreatedAt: new Date(),
-    });
+    await W3Name.publish(ipnsRevision, ipnsName.key);
 
-    return url;
-  }
+    const { session } = context.req;
+    session.oceanIpnsKey = ipnsName.key.bytes;
+    session.oceanIpnsName = ipnsName.toString();
 
-  @Mutation(() => Boolean)
-  @UseGuards(SessionGuard)
-  async saveClaimTxId(
-    @Args('id') id: string,
-    @Args('txId') txId: string,
-    @CurrentUser() user: User,
-  ) {
-    await this.claimsService.update(id, {
-      nftTxId: txId,
-      nftStatus: ClaimNFTStatuses.MINTING,
-    });
-    return true;
+    return {
+      metadataURI,
+      ipnsName: ipnsName.toString(),
+    };
   }
 
   @Query(() => Claim, { name: 'claim' })
@@ -211,7 +215,7 @@ export class ClaimsResolver {
   async findUserClaims(@Args('username') username: string) {
     const user = await this.usersService.findOne({ where: { username } });
     const userClaims = await this.claimsService.find({
-      where: { user },
+      where: { user: { id: user.id } },
       relations: CLAIM_CORE_RELATIONS,
       order: {
         createdAt: 'DESC',
