@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import TwitterApi from 'twitter-api-v2';
-import Twit from 'twit';
+import { HttpService } from '@nestjs/axios';
 
 import { ClaimsService } from '../claims/claims.service';
 import { UsersService } from '../users/users.service';
@@ -15,96 +15,94 @@ export class TwitterService {
     private readonly sourcesService: SourcesService,
     private readonly tagsService: TagsService,
     private readonly usersService: UsersService,
+    private httpService: HttpService
   ) {}
 
-  private readonly twitterClient = new TwitterApi({
-    clientId: process.env.TWITTER_API_KEY,
-    clientSecret: process.env.TWITTER_API_SECRET,
-    // process.env.TWITTER_BEARER_TOKEN,
-  });
-  private readonly twit = new Twit({
-    consumer_key: process.env.TWITTER_API_KEY,
-    consumer_secret: process.env.TWITTER_API_SECRET,
-    access_token: process.env.TWITTER_ACCESS_TOKEN,
-    access_token_secret: process.env.TWITTER_ACCESS_SECRET,
-  });
+  private readonly twitterClient = new TwitterApi(process.env.TWITTER_BEARER_TOKEN);
 
-  async startStreamV1() {
-    const handleData = async (tweet) => {
-      const tweetId = tweet.in_reply_to_status_id_str;
+  // private readonly twit = new Twit({
+  //   consumer_key: process.env.TWITTER_API_KEY,
+  //   consumer_secret: process.env.TWITTER_API_SECRET,
+  //   access_token: process.env.TWITTER_ACCESS_TOKEN,
+  //   access_token_secret: process.env.TWITTER_ACCESS_SECRET,
+  // });
 
-      // If the reply is dedicated to a user and not a status,
-      // go to next item of the loop
-      if (!tweetId) return;
+  // async startStreamV1() {
+  //   const handleData = async (tweet) => {
+  //     const tweetId = tweet.in_reply_to_status_id_str;
 
-      const existingClaimForTweet = await this.claimsService.findOne({
-        where: { tweetId },
-      });
+  //     // If the reply is dedicated to a user and not a status,
+  //     // go to next item of the loop
+  //     if (!tweetId) return;
 
-      if (existingClaimForTweet) return;
+  //     const existingClaimForTweet = await this.claimsService.findOne({
+  //       where: { tweetId },
+  //     });
 
-      // Create claim template and post link to tweet
-      this.twit.get(`statuses/show/${tweetId}`, async (error, tweet) => {
-        if (error) {
-          console.error(error);
-          return;
-        }
+  //     if (existingClaimForTweet) return;
 
-        const tweetOwner = tweet.user.screen_name;
+  //     // Create claim template and post link to tweet
+  //     this.twit.get(`statuses/show/${tweetId}`, async (error, tweet) => {
+  //       if (error) {
+  //         console.error(error);
+  //         return;
+  //       }
 
-        const user = await this.usersService.findOne({
-          where: { username: 'fractalflowsbot' },
-        });
-        const sources = await this.sourcesService.save([
-          {
-            origin: 'twitter',
-            url: `https://twitter.com/${tweetOwner}/status/${tweetId}`,
-          },
-          ...(tweet.entities.urls.map(({ expanded_url }) => ({
-            origin: 'other',
-            url: expanded_url,
-          })) || []),
-        ]);
-        const tags = await this.tagsService.save(
-          tweet.entities.hashtags
-            .slice(0, 4)
-            .map(({ text }) => ({ label: text })),
-        );
-        const claim = await this.claimsService.create({
-          title: tweet.text || 'No title in this tweet',
-          summary: `This claim was originally posted on Twitter by @${tweetOwner}. No further details are available as of yet.`,
-          user,
-          sources,
-          tags: tags.identifiers,
-          tweetId,
-          tweetOwner,
-          origin: ClaimOrigins.TWITTER,
-        });
+  //       const tweetOwner = tweet.user.screen_name;
 
-        const claimLink = `${process.env.FRONTEND_HOST}/claim/${claim.slug}`;
-        const hashtags = tweet.entities.hashtags
-          .map(({ text }) => `#${text}`)
-          .join(' ');
-        const status = `A new claim was just added: ${claimLink} ${hashtags}`;
+  //       const user = await this.usersService.findOne({
+  //         where: { username: 'fractalflowsbot' },
+  //       });
+  //       const sources = await this.sourcesService.save([
+  //         {
+  //           origin: 'twitter',
+  //           url: `https://twitter.com/${tweetOwner}/status/${tweetId}`,
+  //         },
+  //         ...(tweet.entities.urls.map(({ expanded_url }) => ({
+  //           origin: 'other',
+  //           url: expanded_url,
+  //         })) || []),
+  //       ]);
+  //       const tags = await this.tagsService.save(
+  //         tweet.entities.hashtags
+  //           .slice(0, 4)
+  //           .map(({ text }) => ({ label: text })),
+  //       );
+  //       const claim = await this.claimsService.create({
+  //         title: tweet.text || 'No title in this tweet',
+  //         summary: `This claim was originally posted on Twitter by @${tweetOwner}. No further details are available as of yet.`,
+  //         user,
+  //         sources,
+  //         tags: tags.identifiers,
+  //         tweetId,
+  //         tweetOwner,
+  //         origin: ClaimOrigins.TWITTER,
+  //       });
 
-        if (process.env.APP_ENV === 'development') return;
+  //       const claimLink = `${process.env.FRONTEND_HOST}/claim/${claim.slug}`;
+  //       const hashtags = tweet.entities.hashtags
+  //         .map(({ text }) => `#${text}`)
+  //         .join(' ');
+  //       const status = `A new claim was just added: ${claimLink} ${hashtags}`;
 
-        // Reply back the claim link to the tweet
-        this.twit.post('statuses/update', {
-          status: `@${tweetOwner} ${claimLink}`,
-          in_reply_to_status_id: tweetId,
-        });
+  //       if (process.env.APP_ENV === 'development') return;
 
-        // Post the claim link to the app page
-        this.twit.post('statuses/update', {
-          status,
-        });
-      });
-    };
+  //       // Reply back the claim link to the tweet
+  //       this.twit.post('statuses/update', {
+  //         status: `@${tweetOwner} ${claimLink}`,
+  //         in_reply_to_status_id: tweetId,
+  //       });
 
-    const stream = this.twit.stream('statuses/filter', { track: '#ffclaimit' });
-    stream.on('tweet', handleData);
-  }
+  //       // Post the claim link to the app page
+  //       this.twit.post('statuses/update', {
+  //         status,
+  //       });
+  //     });
+  //   };
+
+  //   const stream = this.twit.stream('statuses/filter', { track: '#ffclaimit' });
+  //   stream.on('tweet', handleData);
+  // }
 
   async requestOAuthUrl({ callbackUrl }: { callbackUrl: string }) {
     const twitterClient = new TwitterApi({
@@ -129,58 +127,79 @@ export class TwitterService {
     return loggedClient.currentUser();
   }
 
-  // async startStream() {
-  //   // is: reply;
-  //   const streamRule = { value: '#ffclaimit' };
-  //   const streamRules = await this.twitterClient.v2.streamRules();
+  async startStream(retryAttempt = 0) {
+    this.httpService.get('https://api.twitter.com/2/tweets/search/stream', {
+      headers: {Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}` },
+      responseType: 'stream',
+      timeout: 20000
+    }).subscribe(response => {
+      const stream = response.data;
+      
+      console.log('connecting stream', retryAttempt)
 
-  //   await this.twitterClient.v2.updateStreamRules({
-  //     delete: {
-  //       ids: ['1480631016544997377'],
-  //     },
-  //   });
-  //   await this.twitterClient.v2.updateStreamRules({
-  //     add: [{ value: 'euphoria' }],
-  //   });
-  //   // console.log(x);
-  //   // if (
-  //   //   streamRules.data.find(({ value }) => value === streamRule.value) ===
-  //   //   undefined
-  //   // ) {
-  //   //   await this.twitterClient.v2.updateStreamRules({
-  //   //     add: [streamRule],
-  //   //   });
-  //   // }
+      stream.on('data', data => {
+        console.log(data)
+          try {
+            const json = JSON.parse(data);
+            
+            console.log(json.data);
+            
+            const replied_to = json.data?.referenced_tweets?.findIndex(r_tweet => r_tweet.type === 'replied_to')
+            
+            console.log({ replied_to });
 
-  //   const stream = this.twitterClient.v2.searchStream({
-  //     autoConnect: false,
-  //   });
+            if (!replied_to) return
+            
+            this.httpService.get(`https://api.twitter.com/2/tweets/${replied_to.id}?tweet.fields=author_id&expansions=referenced_tweets.id`, {
+              headers: {Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}` },
+            }).subscribe(response => {
+              console.log(response.data)
+              const replied_to = response.data?.referenced_tweets.findIndex(r_tweet => r_tweet.type === 'replied_to')
+              console.log(replied_to)
+            })
 
-  //   stream.on(ETwitterStreamEvent.Data, (d, a, b) => {
-  //     console.log('new tweet');
-  //     console.log(d, a, b);
-  //   });
+            // A successful connection resets retry count.
+            retryAttempt = 0;
+        } catch (e) {
+            console.log('e', e, Object.getOwnPropertyNames(e))
+            if (data.detail === "This stream is currently at the maximum allowed connection limit.") {
+                console.log(data.detail)
+            } else {
+              console.log("keep alive")
+                // Keep alive signal received. Do nothing.
+            }
+        }
+      });
 
-  //   stream.on(ETwitterStreamEvent.Error, (d, a, b) => {
-  //     console.log('ERROR', d, a, b);
-  //   });
+      stream.on('error', (error) => {
+          console.log('error', Object.getOwnPropertyNames(error))
+          console.log(error)
+          console.log(error.stack)
+          console.log(error.message)
+          console.log(error.code)
 
-  //   stream.on(ETwitterStreamEvent.Connected, (d, a, b) => {
-  //     console.log('connected');
-  //   });
+          if (error.code !== 'ECONNRESET') {
+            console.log(error.code);
+            // process.exit(1);
+        } else {
+            // This reconnection logic will attempt to reconnect when a disconnection is detected.
+            // To avoid rate limits, this logic implements exponential backoff, so the wait time
+            // will increase if the client cannot reconnect to the stream. 
+            setTimeout(() => {
+                console.warn("A connection error occurred. Reconnecting...")
+                this.startStream(++retryAttempt);
+            }, 2 ** retryAttempt)
+        }
+      });
 
-  //   stream.on(
-  //     // Emitted when a Twitter sent a signal to maintain connection active
-  //     ETwitterStreamEvent.DataKeepAlive,
-  //     () => console.log('Twitter has a keep-alive packet.'),
-  //   );
+       stream.on('close', (error) => {
+        console.log('CLOSE', error)
+      });
 
-  //   console.log(stream);
-  //   console.log(streamRules);
+      stream.on('finish', (error) => {
+        console.log('FINISH', error)
+      });
 
-  //   // await stream.connect({
-  //   //   autoReconnect: true,
-  //   //   autoReconnectRetries: Infinity,
-  //   // });
-  // }
+    });
+  }
 }
